@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blogs on 過鹿人部落格</title>
-    <link>https://aiwlulu.github.io/blog/</link>
-    <description>Recent content in Blogs on 過鹿人部落格</description>
+    <title>工具 on 過鹿人部落格</title>
+    <link>https://aiwlulu.github.io/categories/%E5%B7%A5%E5%85%B7/</link>
+    <description>Recent content in 工具 on 過鹿人部落格</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
     <lastBuildDate>Mon, 31 Aug 2020 23:00:00 +0800</lastBuildDate>
     
-	<atom:link href="https://aiwlulu.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://aiwlulu.github.io/categories/%E5%B7%A5%E5%85%B7/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -22,16 +22,6 @@
 不看還好，一看驚為天人! (微浮誇)
 雖然已經有很多高手們推薦過，
 但因為實在太喜歡它，</description>
-    </item>
-    
-    <item>
-      <title>最艱難的一步，永遠是開始</title>
-      <link>https://aiwlulu.github.io/blog/the-beginning/</link>
-      <pubDate>Sun, 23 Aug 2020 21:00:00 +0800</pubDate>
-      
-      <guid>https://aiwlulu.github.io/blog/the-beginning/</guid>
-      <description>You don&amp;rsquo;t need to be confident to start.
-You need to start, and be confident.</description>
     </item>
     
   </channel>
