@@ -63,7 +63,8 @@ function hourNow(): number {
   if (resolveTheme() === 'dark') return isNight(h) && (h >= 20.2 || h < 4.6) ? h : 23;
   const hue = skyHue();
   if (hue !== 'auto') return { dawn: 6, day: 12, dusk: 18.2 }[hue];
-  return isNight(h) ? 12 : Math.min(Math.max(h, 5.6), 18.8);
+  // Stops at full dusk: blending on toward night would darken the sky under dark text.
+  return isNight(h) ? 12 : Math.min(Math.max(h, 5.6), 18.2);
 }
 
 export function currentPalette(): Palette {
