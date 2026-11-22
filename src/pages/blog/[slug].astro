@@ -77,8 +77,8 @@ const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear
             </div>
           </section>
           <nav class="pager" aria-label="上下篇">
-            {older && <a class="prev" href={`/blog/${older.id}/`}><Icon name="chevron-left" size={20} /><span><small>上一篇</small>{older.data.title}</span></a>}
-            {newer && <a class="next" href={`/blog/${newer.id}/`}><span><small>下一篇</small>{newer.data.title}</span><Icon name="chevron-right" size={20} /></a>}
+            {older && <a class="prev" href={`/blog/${older.id}/`}><Icon name="chevron-left" size={20} /><span><small>上一篇</small><b title={older.data.title}>{older.data.title}</b></span></a>}
+            {newer && <a class="next" href={`/blog/${newer.id}/`}><span><small>下一篇</small><b title={newer.data.title}>{newer.data.title}</b></span><Icon name="chevron-right" size={20} /></a>}
           </nav>
         </footer>
       </div>

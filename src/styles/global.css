@@ -10,7 +10,7 @@ img { max-width: 100%; height: auto; }
 a { color: var(--link); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
-::selection { background: var(--sun); color: var(--ink); }
+::selection { background: var(--sun); color: var(--on-accent); }
 
 .wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: 24px; }
 .narrow { max-width: calc(var(--prose) + 48px); }
@@ -19,7 +19,7 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .icon { flex: none; }
 
 /* Hand-drawn marker: a yellow stroke behind the lower half of the text. */
-.marker { background: linear-gradient(transparent 58%, var(--sun) 58%, var(--sun) 92%, transparent 92%); padding-inline: 3px; border-radius: 3px; }
+.marker { background: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%); padding-inline: 3px; border-radius: 3px; }
 
 /* ---------- Header ---------- */
 .top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
@@ -30,7 +30,7 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .brand:hover span { letter-spacing: 0.1em; }
 .nav { display: flex; align-items: center; gap: 2px; }
 .nav a { position: relative; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; color: var(--ink); font-weight: 700; font-size: 15.5px; text-decoration: none; border-radius: 999px; transition: transform 0.3s var(--ease); }
-.nav a::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 5px; height: 8px; border-radius: 4px; background: var(--sun); z-index: -1; transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease-out; }
+.nav a::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 5px; height: 8px; border-radius: 4px; background: var(--mark); z-index: -1; transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease-out; }
 .nav a:hover { transform: translateY(-2px); }
 .nav a:hover::after, .nav a[aria-current='page']::after { transform: scaleX(1); }
 .nav a .icon { opacity: 0.85; transition: transform 0.4s var(--ease); }
@@ -42,17 +42,25 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .sky-mode .icon { display: none; }
 [data-sky-mode='auto'] .sky-mode .m-auto, [data-sky-mode='day'] .sky-mode .m-day, [data-sky-mode='night'] .sky-mode .m-night { display: block; }
 .lang-switch { margin-top: 16px; }
+/* Appearance menu, opened by the sun and moon button. */
+.sky-menu { position: fixed; inset: 74px max(16px, calc(50vw - var(--wrap) / 2 + 24px)) auto auto; width: 232px; margin: 0; padding: 14px 14px 12px; border: 0; border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lift); }
+.sky-menu:popover-open { animation: menu-in 0.28s var(--ease); }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-8px) scale(0.96); } }
+.sky-menu fieldset { margin: 0 0 10px; padding: 0; border: 0; display: grid; gap: 2px; }
+.sky-menu legend { padding: 0 0 4px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); }
+.sky-menu label { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; transition: background 0.2s, transform 0.25s var(--ease); }
+.sky-menu label:hover { background: var(--surface-2); transform: translateX(3px); }
+.sky-menu label:has(input:checked) { background: var(--sun); color: var(--on-accent); }
+.sky-menu label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sky-menu input { position: absolute; opacity: 0; pointer-events: none; }
+.sky-menu p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+/* The sky choices only apply to the light theme. */
+[data-theme='dark'] .sky-menu .hues { opacity: 0.45; pointer-events: none; }
 @media (max-width: 560px) { .nav a:not(.nav-icon) .icon { display: none; } .nav a { padding: 8px 10px; } }
 @media (max-width: 430px) { .brand span { display: none; } }
 
-/* ---------- Night sky: text that sits directly on the sky turns light ---------- */
-.top, .hero, .head { transition: color 1s; }
-[data-tone='dark'] .brand, [data-tone='dark'] .nav a, [data-tone='dark'] .nav button, [data-tone='dark'] .section-title, [data-tone='dark'] .hero h1, [data-tone='dark'] .hero p,
-[data-tone='dark'] .head h1, [data-tone='dark'] .head .lede, [data-tone='dark'] .crumbs, [data-tone='dark'] .post-meta > .meta { color: #fff; }
-[data-tone='dark'] .nav a::after { background: var(--accent); }
-[data-tone='dark'] .section-title .marker { background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%); }
-[data-tone='dark'] .head .marker { background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%); }
-[data-tone='dark'] .hero h1 span:hover { color: var(--sun); }
+/* Colours ease between themes instead of snapping. */
+body, .prose, .card, .chip, .toc, .comments, .author, .pager a, .note, .btn.ghost { transition-property: background-color, color, box-shadow, transform, opacity; transition-duration: 0.5s; }
 
 /* ---------- Page heads ---------- */
 /* The hero fills exactly the tall sky, so the list below starts on plain paper. */
@@ -77,10 +85,10 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 18px; font-size: 14.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
 
 /* ---------- Buttons ---------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 9px 22px; border-radius: 999px; border: 0; background: var(--sun); color: var(--ink); font: inherit; font-size: 15.5px; font-weight: 900; line-height: 1.4; letter-spacing: 0.04em; text-decoration: none; cursor: pointer; box-shadow: 0 4px 0 var(--sun-deep); transition: transform 0.3s var(--ease), box-shadow 0.2s, background 0.2s; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 9px 22px; border-radius: 999px; border: 0; background: var(--sun); color: var(--on-accent); font: inherit; font-size: 15.5px; font-weight: 900; line-height: 1.4; letter-spacing: 0.04em; text-decoration: none; cursor: pointer; box-shadow: 0 4px 0 var(--sun-deep); transition: transform 0.3s var(--ease), box-shadow 0.2s, background 0.2s; }
 .btn:hover { transform: translateY(-3px) rotate(-1.5deg); box-shadow: 0 7px 0 var(--sun-deep); }
 .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--sun-deep); }
-.btn.ghost { background: var(--surface); box-shadow: 0 4px 0 var(--line-2); }
+.btn.ghost { background: var(--surface); color: var(--ink); box-shadow: 0 4px 0 var(--line-2); }
 .btn.ghost:hover { box-shadow: 0 7px 0 var(--line-2); transform: translateY(-3px) rotate(1.5deg); }
 .btn.ghost:active { box-shadow: 0 1px 0 var(--line-2); transform: translateY(3px); }
 .btn.small { min-height: 38px; padding: 5px 16px; font-size: 14px; }
@@ -94,9 +102,9 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 
 /* ---------- Pills ---------- */
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 12px; border-radius: 999px; background: var(--coral-tint); color: var(--ink); font-size: 13px; font-weight: 700; text-decoration: none; transition: transform 0.3s var(--ease), background 0.2s; }
-a.pill:hover { transform: translateY(-2px) rotate(-3deg); background: var(--coral); }
+a.pill:hover { transform: translateY(-2px) rotate(-3deg); background: var(--coral); color: var(--on-accent); }
 .pill.tag { background: var(--sage-tint); }
-a.pill.tag:hover { background: var(--sage); }
+a.pill.tag:hover { background: var(--sage); color: var(--on-accent); }
 .pill .n { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 
@@ -123,10 +131,10 @@ a.pill.tag:hover { background: var(--sage); }
 .toc ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
 .toc a { display: block; padding: 5px 10px; border-radius: 8px; color: var(--text); font-size: 14.5px; line-height: 1.5; text-decoration: none; border-left: 3px solid transparent; transition: background 0.2s, color 0.2s, border-color 0.2s, padding-left 0.3s var(--ease); }
 .toc a:hover { background: var(--surface-2); color: var(--ink); padding-left: 14px; }
-.toc a.is-active { color: var(--ink); font-weight: 700; border-left-color: var(--sun-deep); background: linear-gradient(90deg, rgb(255 203 61 / 0.28), transparent); }
+.toc a.is-active { color: var(--ink); font-weight: 700; border-left-color: var(--sun); background: linear-gradient(90deg, rgb(255 203 61 / 0.28), transparent); }
 @media (max-width: 1080px) { .toc { position: relative; top: 0; order: 0; transform: none; margin-top: 8px; } }
 
-.note { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 22px; padding: 10px 16px; border-radius: var(--radius-sm); background: rgb(255 253 248 / 0.8); font-size: 14.5px; color: var(--text); }
+.note { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 22px; padding: 10px 16px; border-radius: var(--radius-sm); background: var(--surface); font-size: 14.5px; color: var(--text); }
 .note .icon { margin-top: 5px; color: var(--accent); }
 
 /* Long-form reading: roomy lines, short paragraphs sit close like verses, sections breathe. */
@@ -135,7 +143,7 @@ a.pill.tag:hover { background: var(--sage); }
 .prose > :last-child { margin-bottom: 0; }
 .prose p { margin: 0 0 0.7em; }
 .prose h2 { position: relative; isolation: isolate; margin: 2.6em 0 1em; padding-left: 4px; font-size: 26px; letter-spacing: 0.02em; }
-.prose h2::before { content: ''; position: absolute; left: -10px; top: 0.05em; width: 1.25em; height: 1.25em; z-index: -1; background: var(--sun); border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; transition: transform 0.5s var(--ease); }
+.prose h2::before { content: ''; position: absolute; left: -10px; top: 0.05em; width: 1.25em; height: 1.25em; z-index: -1; background: var(--mark); border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; transition: transform 0.5s var(--ease); }
 .prose h2:hover::before { transform: rotate(40deg) scale(1.15); }
 .prose h3 { display: flex; align-items: baseline; gap: 10px; margin: 2em 0 0.8em; font-size: 20.5px; }
 .prose h3::before { content: ''; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); translate: 0 -1px; }
@@ -165,17 +173,18 @@ a.pill.tag:hover { background: var(--sage); }
 .prose pre { padding: 16px 20px; border-radius: var(--radius-sm); background: var(--surface-2) !important; overflow-x: auto; font-size: 14.5px; line-height: 1.7; }
 .prose code { font-family: var(--mono); }
 .prose a { color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--sun); text-decoration-thickness: 3px; text-underline-offset: 4px; overflow-wrap: anywhere; border-radius: 3px; transition: background 0.2s, text-decoration-color 0.2s; }
-.prose a:hover { background: var(--sun); text-decoration-color: var(--sun-deep); }
+.prose a:hover { background: var(--sun); color: var(--on-accent); text-decoration-color: var(--sun-deep); }
 /* A small arrow marks links that open in a new tab. */
 .prose a.external::after { content: '↗'; display: inline-block; margin-left: 2px; font-size: 0.8em; font-weight: 900; color: var(--accent); transition: transform 0.25s var(--ease); }
 .prose a.external:hover::after { transform: translate(2px, -2px); }
 .prose .about-line { font-size: 21px; line-height: 1.7; margin-bottom: 1em; }
-.prose strong { color: var(--ink); background: linear-gradient(transparent 58%, rgb(255 203 61 / 0.7) 58%, rgb(255 203 61 / 0.7) 92%, transparent 92%); padding-inline: 2px; border-radius: 2px; }
+.prose strong { color: var(--ink); background: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%); padding-inline: 2px; border-radius: 2px; }
 
 .post-foot { margin-top: 44px; display: grid; gap: 24px; }
 /* End of the post: a small thank-you with a party popper. */
 .finish { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; padding: 20px 24px; background: var(--coral-tint); border-radius: var(--radius); box-shadow: var(--shadow); }
 .finish p { margin: 0; line-height: 1.7; color: var(--ink); }
+.finish strong { color: var(--ink); }
 .finish .btn:hover .icon { animation: wiggle 0.5s ease-in-out infinite; }
 @keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg) scale(1.15); } }
 .author { display: flex; align-items: center; gap: 16px; padding: 18px 22px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -187,11 +196,13 @@ a.pill.tag:hover { background: var(--sage); }
 .comments h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 21px; }
 .comments-hint { margin: 6px 0 4px; font-size: 14.5px; color: var(--muted); }
 /* Space is reserved so the page does not jump when the comment box arrives. */
-.comments-box { min-height: 270px; border-radius: var(--radius-sm); background: linear-gradient(100deg, var(--surface-2) 30%, #fff 50%, var(--surface-2) 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
+.comments-box { min-height: 270px; border-radius: var(--radius-sm); background: linear-gradient(100deg, var(--surface-2) 30%, var(--surface) 50%, var(--surface-2) 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
 .comments-box.is-loaded { background: none; animation: none; }
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .pager a { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); text-decoration: none; color: var(--ink); font-weight: 700; line-height: 1.5; transition: transform 0.35s var(--ease), box-shadow 0.25s; }
 .pager a span { min-width: 0; }
+/* Long titles stay on one line and end with an ellipsis; the full title is in the tooltip. */
+.pager b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pager a:hover { box-shadow: var(--shadow-lift); }
 .pager .prev:hover { transform: translateY(-3px) rotate(-0.8deg); }
 .pager .next:hover { transform: translateY(-3px) rotate(0.8deg); }
@@ -228,7 +239,7 @@ main { view-transition-name: main; }
 .lightbox img { max-width: 100%; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); width: auto; height: auto; padding: 10px; background: #fff; border-radius: 6px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
 .lightbox figcaption { margin-top: 12px; color: #fff; font-size: 14.5px; text-align: center; max-width: 70ch; }
 .lightbox figure { margin: 0; display: grid; justify-items: center; }
-.lightbox-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--sun); color: var(--ink); box-shadow: 0 4px 0 var(--sun-deep); cursor: pointer; transition: transform 0.3s var(--ease); }
+.lightbox-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--sun); color: var(--on-accent); box-shadow: 0 4px 0 var(--sun-deep); cursor: pointer; transition: transform 0.3s var(--ease); }
 .lightbox-close:hover { transform: rotate(90deg) scale(1.1); }
 @keyframes zoom-in { from { opacity: 0; transform: scale(0.86) rotate(-2deg); } }
 

@@ -30,9 +30,9 @@ const items = [
   .chip:hover { transform: translateY(-3px) rotate(-2deg); box-shadow: 0 6px 0 var(--line-2); }
   .chip:nth-child(even):hover { transform: translateY(-3px) rotate(2deg); }
   .chip:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line-2); }
-  .chip[aria-current='page'] { background: var(--sun); box-shadow: 0 3px 0 var(--sun-deep); }
+  .chip[aria-current='page'] { background: var(--sun); color: var(--on-accent); box-shadow: 0 3px 0 var(--sun-deep); }
   .chip .n { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .chip[aria-current='page'] .n { color: var(--ink); }
+  .chip[aria-current='page'] .n { color: var(--on-accent); }
   .chip.more { background: transparent; box-shadow: none; outline: 2px dashed var(--line-2); outline-offset: -2px; color: var(--text); font-weight: 400; }
   .chip.more:hover { background: var(--surface); box-shadow: none; }
   .chip :global(.icon) { opacity: 0.8; transition: transform 0.4s var(--ease); }

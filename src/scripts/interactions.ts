@@ -11,16 +11,17 @@ document.addEventListener('astro:before-preparation', () => {
   document.documentElement.classList.add('is-loading');
 });
 // Navigation replaces the attributes on <html>, so the sky choice and tone are carried over.
-let carried: { skyMode?: string; tone?: string } = {};
+let carried: { skyMode?: string; skyHue?: string; theme?: string } = {};
 document.addEventListener('astro:before-swap', () => {
   const d = document.documentElement.dataset;
-  carried = { skyMode: d.skyMode, tone: d.tone };
+  carried = { skyMode: d.skyMode, skyHue: d.skyHue, theme: d.theme };
 });
 document.addEventListener('astro:after-swap', () => {
   document.documentElement.classList.remove('is-loading');
   document.documentElement.classList.add('js');
   if (carried.skyMode) document.documentElement.dataset.skyMode = carried.skyMode;
-  if (carried.tone) document.documentElement.dataset.tone = carried.tone;
+  if (carried.skyHue) document.documentElement.dataset.skyHue = carried.skyHue;
+  if (carried.theme) document.documentElement.dataset.theme = carried.theme;
   document.querySelector('.loadbar')?.classList.add('is-done');
   // The sky element is carried over between pages; only its height changes.
   document.querySelector('.sky')?.classList.toggle('is-tall', document.body.dataset.sky === 'tall');
@@ -53,23 +54,31 @@ if (!reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) {
   document.addEventListener('pointerleave', () => document.querySelector('.cursor')?.classList.remove('is-on'));
 }
 
-// Sky toggle: follow the clock (default), always day, or always night.
-function labelSkyToggle() {
-  const btn = document.querySelector<HTMLElement>('[data-sky-toggle]');
-  if (!btn) return;
-  const mode = (document.documentElement.dataset.skyMode ?? 'auto') as 'auto' | 'day' | 'night';
-  const en = document.documentElement.lang === 'en';
-  const names = en ? { auto: 'follows your local time', day: 'always day', night: 'always night' } : { auto: '依當地時間', day: '固定白天', night: '固定夜晚' };
-  const label = en ? `Sky: ${names[mode]}. Click to switch.` : `天色：${names[mode]}。點一下切換。`;
-  btn.setAttribute('aria-label', label);
-  btn.title = label;
+// The comment box is a frame from another site; it is told when the theme changes.
+const commentsTheme = () => (document.documentElement.dataset.theme === 'dark' ? 'photon-dark' : 'github-light');
+function syncCommentsTheme() {
+  document.querySelector<HTMLIFrameElement>('iframe.utterances-frame')?.contentWindow?.postMessage({ type: 'set-theme', theme: commentsTheme() }, 'https://utteranc.es');
 }
-document.addEventListener('click', async (e) => {
-  if (!(e.target as Element).closest?.('[data-sky-toggle]')) return;
-  const { nextSkyMode, palette } = await import('./palette');
-  nextSkyMode();
-  palette();
-  labelSkyToggle();
+// The device switching between light and dark also repaints, when the reader has not chosen.
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', async () => {
+  const { refreshPalette } = await import('./palette');
+  refreshPalette();
+  syncCommentsTheme();
+});
+
+// Appearance menu: theme (automatic, light, dark) and, for the light theme, the sky colour.
+function syncSkyMenu() {
+  const d = document.documentElement.dataset;
+  document.querySelectorAll<HTMLInputElement>('.sky-menu input').forEach((input) => {
+    input.checked = (input.name === 'sky-mode' ? d.skyMode ?? 'auto' : d.skyHue ?? 'auto') === input.value;
+  });
+}
+document.addEventListener('change', async (e) => {
+  const input = e.target as HTMLInputElement;
+  if (!input.closest?.('.sky-menu')) return;
+  const { setSky } = await import('./palette');
+  setSky(input.name as 'sky-mode' | 'sky-hue', input.value);
+  syncCommentsTheme();
 });
 
 // Celebrate button: the confetti code is fetched on first use.
@@ -113,7 +122,7 @@ function openZoom(img: HTMLImageElement) {
 // ---- on every page -------------------------------------------------------------------
 
 function setupPage() {
-  labelSkyToggle();
+  syncSkyMenu();
   // Rise-in on scroll.
   const items = document.querySelectorAll<HTMLElement>('.reveal:not(.in)');
   if (reduce || !('IntersectionObserver' in window)) items.forEach((el) => el.classList.add('in'));
@@ -178,7 +187,7 @@ function setupPage() {
       s.setAttribute('repo', comments.dataset.repo!);
       s.setAttribute('issue-term', 'pathname');
       s.setAttribute('label', comments.dataset.label!);
-      s.setAttribute('theme', 'github-light');
+      s.setAttribute('theme', commentsTheme());
       comments.append(s);
       // utterances replaces the script with its own frame once it is ready.
       new MutationObserver((_, mo) => {

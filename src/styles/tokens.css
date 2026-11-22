@@ -27,12 +27,20 @@
   --sky: #cfe6f5;
   --sky-2: #e4f1f8;
   --cloud: #fffdf6;
+  /* top of the sky; only used for the gradient shown before the canvas has drawn */
+  --sky-top: #86c5e2;
   --sea-1: #b5ddec;
   --sea-2: #86c5e2;
   --sea-3: #57a5d3;
   --sea-4: #2f7fbd;
   --sea-5: #1f5f96;
   --on-sea: #ffffff;
+
+  /* text on the solid accent colours (yellow, coral, green); the same in both themes */
+  --on-accent: #22313f;
+  /* marker stroke behind text, and the wash laid over the sky behind the content */
+  --mark: #ffcb3d;
+  --veil: rgb(238 246 252 / 0.82);
 
   --radius: 18px;
   --radius-sm: 10px;
@@ -48,4 +56,44 @@
   /* Fine paper grain, drawn once and tiled. */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .13 0 0 0 0 .19 0 0 0 0 .25 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   color-scheme: light;
+}
+
+/* Dark theme: used at night in auto mode, or when the reader picks it. Reading surfaces go
+   dark with light text; the accent colours stay, with dark text on them. */
+:root[data-theme='dark'] {
+  --page: #121b33;
+  --surface: #1c2843;
+  --surface-2: #263553;
+  --line: #2f3f60;
+  --line-2: #43557c;
+
+  --ink: #f3f6fb;
+  --text: #d5dcea;
+  --muted: #a3b0c6;
+
+  --brand: #6fb8e4;
+  --accent: #7cc0ea;
+  --link: #93cff3;
+
+  --sun-deep: #c9981a;
+  --coral-tint: #4b302b;
+  --sage-tint: #2c3f35;
+
+  --sky: #1a2748;
+  --sky-2: #22324f;
+  --cloud: #e9eef7;
+  /* the sea at night; also what shows before the canvas has drawn */
+  --sea-1: #3b5384;
+  --sea-2: #2a3f6e;
+  --sea-3: #1d2f58;
+  --sea-4: #142346;
+  --sea-5: #0c1731;
+  --sky-top: #101a3a;
+
+  --mark: rgb(255 203 61 / 0.34);
+  --veil: rgb(18 27 51 / 0.6);
+  --shadow: 0 1px 0 rgb(0 0 0 / 0.25), 0 8px 22px rgb(0 0 0 / 0.32);
+  --shadow-lift: 0 2px 0 rgb(0 0 0 / 0.3), 0 18px 36px rgb(0 0 0 / 0.45);
+  --cut: drop-shadow(0 3px 0 rgb(0 0 0 / 0.25));
+  color-scheme: dark;
 }

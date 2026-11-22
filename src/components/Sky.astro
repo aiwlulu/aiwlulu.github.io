@@ -1,7 +1,7 @@
 ---
 // The whole page sits on a live sky: one fixed canvas behind everything. A veil of page colour
 // starts below the page head, so clouds stay vivid at the top and faint behind the content.
-// Hand-drawn marks (sun, squiggles) are pasted on top, collage style.
+// A hand-drawn sun (a moon at night) is pasted on top, collage style.
 interface Props { tall?: boolean }
 const { tall = false } = Astro.props;
 ---
@@ -15,8 +15,6 @@ const { tall = false } = Astro.props;
     </g>
     <circle cx="70" cy="70" r="36" fill="var(--sun)" />
   </svg>
-  <svg class="mark squiggle" viewBox="0 0 120 30" fill="none" stroke="var(--coral)" stroke-width="6" stroke-linecap="round"><path d="M6 20q13-22 27 0t27 0 27 0 27 0" pathLength="1" /></svg>
-  <svg class="mark arc" viewBox="0 0 90 90" fill="none" stroke="var(--sun)" stroke-width="9" stroke-linecap="round"><path d="M10 80C14 40 42 14 80 10" pathLength="1" /></svg>
 </div>
 
 <script>
@@ -36,12 +34,8 @@ const { tall = false } = Astro.props;
 </script>
 
 <style>
-  .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -3; background: linear-gradient(to bottom, var(--sea-2), var(--sky-2) 55%, var(--page)); }
-  .veil { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: var(--grain), linear-gradient(to bottom, transparent calc(var(--veil-top) - 170px), rgb(238 246 252 / 0.82) var(--veil-top)); transition: opacity 1s; }
-  /* At night the veil is lifted to a thin dark wash, so the starry sky carries down the page. */
-  .veil::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent calc(var(--veil-top) - 170px), rgb(20 30 62 / 0.45) var(--veil-top)); opacity: 0; transition: opacity 1s; }
-  :global([data-tone='dark']) .veil { background: none; }
-  :global([data-tone='dark']) .veil::after { opacity: 1; }
+  .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -3; background: linear-gradient(to bottom, var(--sky-top), var(--sky-2) 55%, var(--page)); }
+  .veil { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: var(--grain), linear-gradient(to bottom, transparent calc(var(--veil-top) - 170px), var(--veil) var(--veil-top)); }
 
   .sky { position: absolute; inset: 0 0 auto 0; height: 360px; z-index: -1; overflow: hidden; pointer-events: none; transform: translate3d(calc(var(--mx, 0) * 14px), calc(var(--my, 0) * 7px), 0); transition: transform 0.6s ease-out, height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .sky.is-tall { height: var(--sky-tall); }
@@ -49,21 +43,13 @@ const { tall = false } = Astro.props;
   .sun { position: absolute; top: 9%; right: max(7%, calc(50% - 480px)); width: clamp(92px, 11vw, 132px); filter: var(--cut); }
   .rays { transform-origin: 70px 70px; animation: spin 80s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .mark { position: absolute; }
-  .mark path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.4s 0.5s ease-out forwards; }
-  @keyframes draw { to { stroke-dashoffset: 0; } }
-  .squiggle { width: 110px; left: max(5%, calc(50% - 560px)); top: 62%; transform: rotate(-8deg); }
-  .arc { width: 70px; right: max(20%, calc(50% - 320px)); top: 66%; }
 
-  .sky:not(.is-tall) .squiggle, .sky:not(.is-tall) .arc { display: none; }
   .sky:not(.is-tall) .sun { width: 84px; top: 14%; }
   /* At night the sun doodle becomes a moon. */
   .sun circle { transition: fill 1s; }
-  :global([data-tone='dark']) .sun circle { fill: var(--cloud); }
-  :global([data-tone='dark']) .rays { display: none; }
+  :global([data-theme='dark']) .sun circle { fill: var(--cloud); }
+  :global([data-theme='dark']) .rays { display: none; }
   @media (max-width: 640px) {
     .sun { top: 15%; right: 6%; }
-    .squiggle { width: 76px; top: 72%; }
-    .arc { width: 50px; top: 76%; right: 10%; }
   }
 </style>

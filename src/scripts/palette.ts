@@ -1,5 +1,5 @@
-// Sky and sea colours follow the visitor's local time. Each key time has a palette; the
-// colours in between are blended. Add ?hour=18.5 to any URL to preview a time of day.
+// Sky and sea colours follow the theme and the visitor's local time. Each key time has a
+// palette; the colours in between are blended. Add ?hour=18.5 to any URL to preview a time of day.
 type RGB = [number, number, number];
 interface Palette {
   zenith: RGB; mid: RGB; horizon: RGB; cloud: RGB; shade: RGB; glow: RGB;
@@ -19,24 +19,51 @@ let stamp = 0;
 export type SkyMode = 'auto' | 'day' | 'night';
 export const skyMode = (): SkyMode => (document.documentElement.dataset.skyMode as SkyMode) || 'auto';
 
-/** Switches auto -> day -> night -> auto, remembers the choice and repaints at once. */
-export function nextSkyMode(): SkyMode {
-  const order: SkyMode[] = ['auto', 'day', 'night'];
-  const next = order[(order.indexOf(skyMode()) + 1) % order.length];
-  document.documentElement.dataset.skyMode = next;
-  try { localStorage.setItem('sky-mode', next); } catch { /* private window: the choice lasts for this page only */ }
-  cached = null;
-  return next;
+export type SkyHue = 'auto' | 'dawn' | 'day' | 'dusk';
+export const skyHue = (): SkyHue => (document.documentElement.dataset.skyHue as SkyHue) || 'auto';
+
+/** Saves a choice from the appearance menu and repaints at once. */
+export function setSky(key: 'sky-mode' | 'sky-hue', value: string) {
+  document.documentElement.dataset[key === 'sky-mode' ? 'skyMode' : 'skyHue'] = value;
+  try { localStorage.setItem(key, value); } catch { /* private window: the choice lasts for this page only */ }
+  refreshPalette();
 }
 
-function hourNow(): number {
+const clock = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
+// Night, as far as the theme is concerned: the halfway points of the dusk and dawn blends.
+const isNight = (h: number) => h >= 19.2 || h < 5.3;
+const forcedHour = (): number | null => {
+  if (!location.search.includes('hour=')) return null;
+  const h = Number(new URLSearchParams(location.search).get('hour'));
+  return h >= 0 && h <= 24 ? h : null;
+};
+
+/**
+ * Light or dark, with reading comfort first:
+ *   1. a choice the reader made on this site always wins and never changes with the clock
+ *   2. otherwise the device's own dark setting
+ *   3. otherwise the local time: dark at night
+ * (The same rule runs inline in <head> so the first paint is already right.)
+ */
+export function resolveTheme(): 'light' | 'dark' {
+  const preview = forcedHour();
+  if (preview !== null) return isNight(preview) ? 'dark' : 'light';
   const mode = skyMode();
-  if (mode === 'day') return 12;
-  if (mode === 'night') return 23;
-  const forced = Number(new URLSearchParams(location.search).get('hour'));
-  if (location.search.includes('hour=') && forced >= 0 && forced <= 24) return forced;
-  const d = new Date();
-  return d.getHours() + d.getMinutes() / 60;
+  if (mode !== 'auto') return mode === 'night' ? 'dark' : 'light';
+  return matchMedia('(prefers-color-scheme: dark)').matches || isNight(clock()) ? 'dark' : 'light';
+}
+
+// The hour the sky is painted for. In the light theme it follows the clock through dawn, day
+// and dusk (or the hue the reader picked), but never turns to night by itself; the dark theme
+// is always the night sky.
+function hourNow(): number {
+  const preview = forcedHour();
+  if (preview !== null) return preview;
+  const h = clock();
+  if (resolveTheme() === 'dark') return isNight(h) && (h >= 20.2 || h < 4.6) ? h : 23;
+  const hue = skyHue();
+  if (hue !== 'auto') return { dawn: 6, day: 12, dusk: 18.2 }[hue];
+  return isNight(h) ? 12 : Math.min(Math.max(h, 5.6), 18.8);
 }
 
 export function currentPalette(): Palette {
@@ -57,12 +84,18 @@ export function currentPalette(): Palette {
 
 // Shared by both canvases; recomputed twice a minute. Also tells the page whether the sky is
 // dark, so text placed on it can switch to a light colour.
+/** Drops the cached colours so the next frame recomputes them and the theme. */
+export function refreshPalette() {
+  cached = null;
+  palette();
+}
+
 export function palette(): Palette {
   const now = performance.now();
   if (!cached || now - stamp > 30_000) {
     cached = currentPalette();
     stamp = now;
-    document.documentElement.dataset.tone = cached.night > 0.5 ? 'dark' : 'light';
+    document.documentElement.dataset.theme = resolveTheme();
   }
   return cached;
 }

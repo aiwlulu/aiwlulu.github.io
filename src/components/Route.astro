@@ -33,9 +33,9 @@ const icons = ['calculator', 'database', 'code-xml', 'blocks'] as const;
   .route li { position: relative; display: grid; justify-items: center; gap: 2px; margin: 0; padding: 0; text-align: center; line-height: 1.5; }
   /* A dotted line runs from each stop to the next. */
   .route li + li::before { content: ''; position: absolute; top: 28px; right: calc(50% + 36px); width: calc(100% - 72px); border-top: 4px dotted var(--coral); border-radius: 4px; }
-  .stop { display: grid; place-items: center; width: 60px; height: 60px; margin-bottom: 8px; border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; color: var(--ink); filter: var(--cut); transition: transform 0.4s var(--ease); }
+  .stop { display: grid; place-items: center; width: 60px; height: 60px; margin-bottom: 8px; border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; color: var(--on-accent); filter: var(--cut); transition: transform 0.4s var(--ease); }
   .route li:hover .stop { transform: translateY(-6px) rotate(-8deg) scale(1.08); }
-  .s1 { background: var(--cloud); }
+  .s1 { background: #fffdf6; }
   .s2 { background: var(--sage); }
   .s3 { background: var(--coral); }
   .s4 { background: var(--sun); }
