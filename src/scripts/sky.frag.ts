@@ -1,6 +1,5 @@
-// A watercolour sky. The clouds are the same fbm field as a realistic sky would use, but they
-// are painted in a few flat washes with wobbly, slightly darker "wet" edges, on an uneven
-// pigment wash with paper granulation. Colours come from the time-of-day palette.
+// A painterly sky. Clouds have feathered, fraying edges and continuous light and shade for
+// volume, with a thin high layer behind them, on an uneven pigment wash with paper granulation. Colours come from the time-of-day palette.
 export default /* glsl */ `
 precision highp float;
 uniform vec2 uRes;
@@ -83,20 +82,30 @@ void main() {
 
   vec2 q = rd.xz / e * mix(2.7, 1.55, wide);
   float far = smoothstep(0.10, 0.34, e);
-  // Wobble the outline so the edge looks brushed, not computed.
-  float d = cumulus(q, uTime) + (fbm3(q * 4.2 + 5.0) - 0.5) * 0.07;
-  float body = smoothstep(0.462, 0.478, d);
-  float lit = smoothstep(-0.02, 0.03, d - cumulus(q + sunDir.xz * 0.30, uTime));
-  float core = smoothstep(0.535, 0.552, d);
-  // Three washes: shadow side, body, and a lighter core.
-  vec3 cloud = mix(uShade, mix(uShade, uCloud, 0.72), lit);
-  cloud = mix(cloud, uCloud, core * (0.5 + 0.5 * lit));
+
+  // A thin, high layer far away: gives the sky depth behind the main clouds.
+  float high = fbm(q * 0.33 + vec2(uTime * 0.008, 4.0)) * fbm3(q * 0.9 + 13.0) * 2.0;
+  col = mix(col, mix(uCloud, uHorizon, 0.4), smoothstep(0.42, 0.78, high) * 0.30 * far);
+
+  // Main clouds. The outline is feathered and broken up by fine noise so it frays into wisps
+  // instead of ending in a drawn line.
+  float d = cumulus(q, uTime);
+  float fray = (fbm(q * 5.5 + 5.0) - 0.5) * 0.085;
+  float body = smoothstep(0.435, 0.530, d + fray);
+  // Volume: light falls from the sun side, the thick middle and the underside sit in shade.
+  float lit = smoothstep(-0.07, 0.09, d - cumulus(q + sunDir.xz * 0.34, uTime));
+  float thick = smoothstep(0.50, 0.70, d);
+  float under = smoothstep(-0.05, 0.08, d - cumulus(q + vec2(0.0, 0.22), uTime));
+  float light = clamp(0.30 + 0.70 * lit - thick * 0.22 * (1.0 - lit) - under * 0.10, 0.0, 1.0);
+  vec3 cloud = mix(uShade, uCloud, light);
+  // Edges take a little of the sky colour, as thin cloud does.
+  cloud = mix(cloud, col, (1.0 - smoothstep(0.435, 0.60, d + fray)) * 0.25);
   cloud = mix(cloud, uHorizon, (1.0 - far) * 0.55);
-  float alpha = body * mix(0.5, 0.95, far) * smoothstep(0.04, 0.14, e);
+  float alpha = body * mix(0.5, 0.96, far) * smoothstep(0.04, 0.14, e);
   col = mix(col, cloud, alpha);
-  // Wet edge: pigment gathers in a thin darker line just inside the outline.
-  float rim = body * (1.0 - smoothstep(0.478, 0.502, d));
-  col = mix(col, uShade * 0.92, rim * 0.30 * far);
+  // A faint trace of the watercolour edge is kept, so the clouds still belong with the sea.
+  float rim = body * (1.0 - smoothstep(0.530, 0.56, d + fray));
+  col = mix(col, uShade * 0.95, rim * 0.07 * far);
 
   // Paper granulation.
   col *= 0.965 + 0.07 * noise(gl_FragCoord.xy * 0.9);
