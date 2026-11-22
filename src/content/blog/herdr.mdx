@@ -117,7 +117,7 @@ herdr --session review agent read reviewer
 
 ## 我還會用哪些功能？
 
-- **用 Inbox 找到需要回應的工作。** 像會議室門口的狀態牌，你從走廊就能看到哪間還在開會。<dfn>OSC 7501</dfn> 是一種開放規格，讓支援它的 Agent 透過終端送一小段訊號，像是把門牌換成「工作中」「等待你」或「已完成」。Herdr App 收到訊號後，在側欄和 Inbox 更新狀態。未回報狀態的工具仍可在終端執行。TUI 則有自己的 Agent 偵測和整合方式。[herdr-core 官方說明](https://herdr.dev/core/) · [TUI 支援的 Agent](https://herdr.dev/tui/docs/agents/)
+- **用 Inbox 找到需要回應的工作。** 像會議室門口的狀態牌，你從走廊就能看到哪間還在開會。<dfn>OSC 7501</dfn> 是一種開放規格，讓支援它的 Agent 透過終端送一小段訊號，像是把門牌換成「工作中」、「等待你」或「已完成」。Herdr App 收到訊號後，在側欄和 Inbox 更新狀態。未回報狀態的工具仍可在終端執行。TUI 則有自己的 Agent 偵測和整合方式。[herdr-core 官方說明](https://herdr.dev/core/) · [TUI 支援的 Agent](https://herdr.dev/tui/docs/agents/)
 - **把長任務留在遠端。** 有一台常開的機器時，可以把長時間測試放到那裡，用桌面或手機透過 SSH 連回去。跨裝置能查看同一份終端畫面，需要回覆時再接手。[Herdr Mobile](https://herdr.dev/mobile/) · [Core 遠端機器文件](https://github.com/herdrdev/herdr-core/blob/master/docs/machines.md)
 - **讓兩個助手各改各的副本。** 就像兩個人分別拿一份草稿修改，最後再核對要合併哪些改動。<dfn>Git worktree</dfn> 讓同一個專案有多個獨立的工作目錄。TUI 可以用 `herdr worktree create` 和 `herdr worktree open` 管理它們。[TUI Worktree 指令](https://herdr.dev/tui/docs/cli-reference/#worktrees)
 
