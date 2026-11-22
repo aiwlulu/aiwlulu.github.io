@@ -52,6 +52,7 @@ tags: ['學習']
 - 圖片放 `src/assets/posts/`，建構時會自動轉成 WebP 並補上寬高。
 - 檔名就是網址：`snipaste.mdx` 會變成 `/blog/snipaste/`。
 - 改了舊文章的內容，加上 `updatedDate`。
+- 用 `mermaid` 標記程式碼區塊，網站會依閱讀外觀渲染圖表。可用 `accTitle` 和 `accDescr` 補上圖表的文字說明。
 
 ## 結構
 

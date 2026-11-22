@@ -22,7 +22,8 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.6",
     "@fontsource-variable/chiron-goround-tc": "^5.3.1",
-    "astro": "^7.4.13"
+    "astro": "^7.4.13",
+    "mermaid": "12.3.0"
   },
   "devDependencies": {
     "lucide-static": "^1.77.0",

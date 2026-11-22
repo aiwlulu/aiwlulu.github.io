@@ -172,6 +172,15 @@ a.pill.tag:hover { background: var(--sage); color: var(--on-accent); }
 .prose ol > li::marker { color: var(--accent); font-weight: 900; }
 .prose pre { padding: 16px 20px; border-radius: var(--radius-sm); background: var(--surface-2) !important; overflow-x: auto; font-size: 14.5px; line-height: 1.7; }
 .prose code { font-family: var(--mono); }
+.prose .post-diagram { margin: 1.4em 0; padding: 12px; border-radius: var(--radius-sm); background: var(--surface-2); overflow-x: auto; }
+.post-diagram svg { display: block; width: 100%; height: auto; margin: 0 auto; }
+.prose .post-figure { margin: 2em auto; text-align: center; }
+.prose .post-figure img { margin: 0 auto 0.85em; }
+.prose figcaption { font-size: 14.5px; color: var(--muted); }
+.prose table { width: 100%; margin: 1.4em 0; border-collapse: collapse; font-size: 0.9em; line-height: 1.6; }
+.prose th, .prose td { padding: 0.6em; border-bottom: 1px solid var(--line-2); vertical-align: top; text-align: left; }
+.prose th { background: var(--surface-2); color: var(--ink); }
+.prose th:first-child { min-width: 6em; }
 .prose a { color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--sun); text-decoration-thickness: 3px; text-underline-offset: 4px; overflow-wrap: anywhere; border-radius: 3px; transition: background 0.2s, text-decoration-color 0.2s; }
 .prose a:hover { background: var(--sun); color: var(--on-accent); text-decoration-color: var(--sun-deep); }
 /* A small arrow marks links that open in a new tab. */
