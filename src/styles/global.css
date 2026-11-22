@@ -4,6 +4,19 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 24px; }
+/* Scrollbars: thin, with a clear track so the sky shows through. Still visible and draggable:
+   it tells the reader how long the page is and where they are. */
+html { scrollbar-width: thin; scrollbar-color: rgb(34 49 63 / 0.38) transparent; }
+:root[data-theme='dark'] { scrollbar-color: rgb(233 238 247 / 0.42) transparent; }
+/* Older Safari does not know the standard properties. */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgb(34 49 63 / 0.38); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background-color: rgb(34 49 63 / 0.6); }
+  :root[data-theme='dark'] ::-webkit-scrollbar-thumb { background-color: rgb(233 238 247 / 0.42); }
+  :root[data-theme='dark'] ::-webkit-scrollbar-thumb:hover { background-color: rgb(233 238 247 / 0.65); }
+}
 body[data-sky='tall'] { --veil-top: var(--sky-tall); }
 body { position: relative; min-height: 100vh; --veil-top: 360px; margin: 0; background: var(--page); color: var(--text); font-family: var(--font); font-size: 16.5px; line-height: 1.8; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 img { max-width: 100%; height: auto; }
