@@ -2,7 +2,7 @@
 // Shared page for one category or one tag.
 import Base from '../layouts/Base.astro';
 import PostCard from './PostCard.astro';
-import Sidebar from './Sidebar.astro';
+import Topics from './Topics.astro';
 import Crumbs from './Crumbs.astro';
 import type { Post } from '../site';
 import { breadcrumbs, collectionPage } from '../schema';
@@ -18,10 +18,10 @@ const titles = posts.slice(0, 3).map((p) => `〈${p.data.title}〉`).join('、')
     <h1>{name}</h1>
     <p class="lede">{kind}「{name}」共 {posts.length} 篇文章。</p>
   </div>
-  <div class="wrap cols">
-    <div class="stack">
+  <div class="wrap">
+    <Topics current={path} />
+    <div class="grid">
       {posts.map((post) => <PostCard post={post} />)}
     </div>
-    <Sidebar />
   </div>
 </Base>

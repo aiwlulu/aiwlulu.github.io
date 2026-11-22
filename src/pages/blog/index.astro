@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PostCard from '../../components/PostCard.astro';
-import Sidebar from '../../components/Sidebar.astro';
+import Topics from '../../components/Topics.astro';
 import Crumbs from '../../components/Crumbs.astro';
 import { getPosts } from '../../site';
 import { breadcrumbs, collectionPage } from '../../schema';
@@ -15,10 +15,10 @@ const crumbs = [{ name: '首頁', href: '/' }, { name: '文章' }];
     <h1>文章</h1>
     <p class="lede">共 {posts.length} 篇，依發表時間由新到舊。</p>
   </div>
-  <div class="wrap cols">
-    <div class="stack">
+  <div class="wrap">
+    <Topics current="/blog/" />
+    <div class="grid">
       {posts.map((post) => <PostCard post={post} />)}
     </div>
-    <Sidebar />
   </div>
 </Base>

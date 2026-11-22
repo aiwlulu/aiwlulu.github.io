@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import PostCard from '../components/PostCard.astro';
-import Sidebar from '../components/Sidebar.astro';
+import Topics from '../components/Topics.astro';
 import Icon from '../components/Icon.astro';
 import { SITE, getPosts } from '../site';
 import { website } from '../schema';
@@ -17,13 +17,11 @@ const posts = await getPosts();
       <a class="btn ghost" href="/about/"><Icon name="user-round" size={17} />關於我</a>
     </div>
   </section>
-  <div class="wrap cols">
-    <section aria-labelledby="latest">
-      <h2 id="latest" class="section-title">最新文章</h2>
-      <div class="stack">
-        {posts.map((post) => <PostCard post={post} heading="h3" />)}
-      </div>
-    </section>
-    <Sidebar />
-  </div>
+  <section class="wrap" aria-labelledby="latest">
+    <h2 id="latest" class="section-title">最新文章</h2>
+    <Topics current="" />
+    <div class="grid">
+      {posts.map((post, i) => <PostCard post={post} heading="h3" featured={i === 0} />)}
+    </div>
+  </section>
 </Base>

@@ -35,10 +35,11 @@ a.pill:hover { border-color: var(--line-2); background: var(--surface); }
 @media (max-width: 480px) { .brand { padding: 4px; } .brand span { display: none; } .nav a { padding: 8px 11px; } }
 
 /* Page heads */
-.hero { padding: clamp(56px, 13vh, 132px) 0 clamp(72px, 15vh, 150px); text-align: center; }
+.hero { padding-block: clamp(56px, 13vh, 132px) clamp(72px, 15vh, 150px); text-align: center; }
 .hero h1 { margin: 0; font-size: clamp(38px, 7.5vw, 72px); font-weight: 900; letter-spacing: 0.04em; text-shadow: 0 0 28px rgb(255 255 255 / 0.85), 0 0 8px rgb(255 255 255 / 0.5); }
 .hero p { margin: 14px 0 0; font-size: clamp(17px, 2.2vw, 21px); font-weight: 700; color: var(--ink); letter-spacing: 0.14em; text-shadow: 0 0 16px rgb(255 255 255 / 0.9); }
-.head { padding: 56px 0 72px; }
+/* padding-block only: these also carry .wrap, whose side padding must survive. */
+.head { padding-block: 56px 72px; }
 .head h1 { margin: 0; font-size: clamp(28px, 4.6vw, 42px); font-weight: 900; text-shadow: 0 0 24px rgb(255 255 255 / 0.85); }
 .head .crumbs, .head .post-meta { width: fit-content; padding: 4px 14px; border-radius: 999px; background: rgb(255 255 255 / 0.62); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .head .post-meta { padding: 6px 14px 6px 6px; }
@@ -46,15 +47,10 @@ a.pill:hover { border-color: var(--line-2); background: var(--surface); }
 .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
 .crumbs, .crumbs a { color: var(--text); }
 
-/* Home layout */
-.cols { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 40px; align-items: start; }
-.stack { display: grid; gap: 20px; }
-.side { display: grid; gap: 20px; position: sticky; top: 24px; }
-.panel { background: rgb(255 255 255 / 0.7); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; }
-.panel h2 { margin: 0 0 12px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.panel p { margin: 0; }
-.section-title { margin: 0 0 20px; font-size: 22px; }
-@media (max-width: 860px) { .cols { grid-template-columns: 1fr; } .side { position: static; } }
+/* Post lists */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.section-title { margin: 0 0 16px; font-size: 22px; }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
 
 /* Article */
 .prose { max-width: var(--prose); margin-inline: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(24px, 5vw, 56px); box-shadow: var(--shadow); }
@@ -74,6 +70,8 @@ a.pill:hover { border-color: var(--line-2); background: var(--surface); }
 .prose pre { padding: 16px 20px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface-2) !important; overflow-x: auto; font-size: 14.5px; line-height: 1.7; }
 .prose code { font-family: var(--mono); }
 .prose a { text-underline-offset: 3px; overflow-wrap: anywhere; }
+/* Bold reads as a highlighter stroke, so key points stand out without shouting. */
+.prose strong { color: var(--ink); background: linear-gradient(transparent 62%, rgb(80 158 227 / 0.28) 62%); padding-inline: 2px; border-radius: 2px; }
 .note { max-width: var(--prose); margin: 0 auto 16px; padding: 10px 18px; border-radius: var(--radius-sm); background: rgb(255 255 255 / 0.7); border: 1px solid var(--line); font-size: 14.5px; color: var(--text); }
 .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 16px; font-size: 14.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
 .post-foot { max-width: var(--prose); margin: 28px auto 0; display: grid; gap: 20px; }
@@ -93,8 +91,7 @@ a.pill:hover { border-color: var(--line-2); background: var(--surface); }
 /* Icons sit on the text baseline without stretching the line. */
 .icon { flex: none; }
 .meta { display: inline-flex; align-items: center; gap: 6px; }
-.meta .icon, .panel h2 .icon { opacity: 0.8; }
-.panel h2 { display: flex; align-items: center; gap: 8px; }
+.meta .icon { opacity: 0.8; }
 .nav a { gap: 7px; }
 .nav a .icon { opacity: 0.85; }
 .nav .nav-icon { padding: 8px 10px; }

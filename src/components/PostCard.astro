@@ -1,12 +1,12 @@
 ---
 import { formatDate, readingMinutes, type Post } from '../site';
 import Icon from './Icon.astro';
-interface Props { post: Post; heading?: 'h2' | 'h3' }
-const { post, heading: H = 'h2' } = Astro.props;
-const { title, subtitle, pubDate, category } = post.data;
+interface Props { post: Post; heading?: 'h2' | 'h3'; featured?: boolean }
+const { post, heading: H = 'h2', featured = false } = Astro.props;
+const { title, subtitle, description, pubDate, category } = post.data;
 ---
 
-<article class="card">
+<article class:list={['card', { featured }]}>
   <div class="card-meta">
     <a class="pill" href={`/categories/${category}/`}><Icon name="folder" size={13} />{category}</a>
     <span class="meta"><Icon name="calendar" size={14} /><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></span>
@@ -14,20 +14,25 @@ const { title, subtitle, pubDate, category } = post.data;
   </div>
   <H class="card-title"><a href={`/blog/${post.id}/`}>{title}</a></H>
   {subtitle && <p class="card-sub">{subtitle}</p>}
+  <p class="card-desc">{description}</p>
   <span class="card-more" aria-hidden="true">閱讀全文<Icon name="arrow-right" size={16} /></span>
 </article>
 
 <style>
-  .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow); transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; }
+  .card { position: relative; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow); transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; }
   .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); border-color: var(--line-2); }
-  .card-meta { display: flex; align-items: center; gap: 12px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .card-meta .pill { position: relative; z-index: 1; }
   .card-title { margin: 12px 0 6px; font-size: 21px; line-height: 1.4; color: var(--ink); }
   .card-title a { color: inherit; text-decoration: none; }
   /* Whole card is clickable through the title link. */
   .card-title a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
-  .card-sub { margin: 0; color: var(--text); }
-  .card-more { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 14px; font-weight: 700; color: var(--link); }
+  .card-sub { margin: 0; color: var(--ink); font-weight: 700; }
+  .card-desc { margin: 8px 0 0; font-size: 15px; line-height: 1.75; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card.featured { grid-column: 1 / -1; padding: 32px 36px; }
+  .card.featured .card-title { font-size: clamp(23px, 3vw, 29px); }
+  .card.featured .card-desc { font-size: 16px; max-width: 70ch; }
+  .card-more { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 16px; font-size: 14px; font-weight: 700; color: var(--link); }
   .card-more :global(svg) { transition: transform 0.25s; }
   .card:hover .card-more :global(svg) { transform: translateX(4px); }
 </style>
