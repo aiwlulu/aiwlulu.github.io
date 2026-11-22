@@ -36,14 +36,21 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .nav a .icon { opacity: 0.85; transition: transform 0.4s var(--ease); }
 .nav a:hover .icon { transform: rotate(-10deg) scale(1.15); }
 .nav .nav-icon::after { display: none; }
+.nav button { border: 0; background: none; font: inherit; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; padding: 8px 10px; border-radius: 999px; transition: transform 0.4s var(--ease); }
+.nav button:hover { transform: rotate(40deg) scale(1.15); }
+/* The sky toggle shows one icon: sun-moon for auto, sun for day, moon for night. */
+.sky-mode .icon { display: none; }
+[data-sky-mode='auto'] .sky-mode .m-auto, [data-sky-mode='day'] .sky-mode .m-day, [data-sky-mode='night'] .sky-mode .m-night { display: block; }
+.lang-switch { margin-top: 16px; }
 @media (max-width: 560px) { .nav a:not(.nav-icon) .icon { display: none; } .nav a { padding: 8px 10px; } }
 @media (max-width: 430px) { .brand span { display: none; } }
 
 /* ---------- Night sky: text that sits directly on the sky turns light ---------- */
 .top, .hero, .head { transition: color 1s; }
-[data-tone='dark'] .brand, [data-tone='dark'] .nav a, [data-tone='dark'] .hero h1, [data-tone='dark'] .hero p,
+[data-tone='dark'] .brand, [data-tone='dark'] .nav a, [data-tone='dark'] .nav button, [data-tone='dark'] .section-title, [data-tone='dark'] .hero h1, [data-tone='dark'] .hero p,
 [data-tone='dark'] .head h1, [data-tone='dark'] .head .lede, [data-tone='dark'] .crumbs, [data-tone='dark'] .post-meta > .meta { color: #fff; }
 [data-tone='dark'] .nav a::after { background: var(--accent); }
+[data-tone='dark'] .section-title .marker { background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%); }
 [data-tone='dark'] .head .marker { background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%); }
 [data-tone='dark'] .hero h1 span:hover { color: var(--sun); }
 

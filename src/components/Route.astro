@@ -1,0 +1,49 @@
+---
+// The "escape route" figure on the About pages.
+import Icon from './Icon.astro';
+interface Props { lang?: 'zh' | 'en' }
+const { lang = 'zh' } = Astro.props;
+const copy = {
+  zh: {
+    label: '我的路線：會計、財務系統、寫程式、系統整合',
+    stops: [['會計', '大學念的'], ['財務系統', '幫企業導入'], ['寫程式', '從前端開始'], ['系統整合', '現在在這裡']],
+    caption: '一條離會計越來越遠，卻又一直繞回數字的路。',
+  },
+  en: {
+    label: 'My route: accounting, finance systems, coding, systems integration',
+    stops: [['Accounting', 'what I studied'], ['Finance systems', 'rolling them out'], ['Coding', 'front end first'], ['Integration', 'where I am now']],
+    caption: 'A road that keeps leaving accounting and keeps circling back to numbers.',
+  },
+}[lang];
+const icons = ['calculator', 'database', 'code-xml', 'blocks'] as const;
+---
+
+<figure class="route" aria-label={copy.label}>
+  <ol>
+    {copy.stops.map(([name, note], i) => (
+      <li><span class:list={['stop', `s${i + 1}`]}><Icon name={icons[i]} size={26} /></span><b>{name}</b><small>{note}</small></li>
+    ))}
+  </ol>
+  <figcaption>{copy.caption}</figcaption>
+</figure>
+
+<style>
+  .route { margin: 1.6em 0 2em; padding: 26px 18px 18px; background: var(--sky-2); border-radius: var(--radius); }
+  .route ol { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .route li { position: relative; display: grid; justify-items: center; gap: 2px; margin: 0; padding: 0; text-align: center; line-height: 1.5; }
+  /* A dotted line runs from each stop to the next. */
+  .route li + li::before { content: ''; position: absolute; top: 28px; right: calc(50% + 36px); width: calc(100% - 72px); border-top: 4px dotted var(--coral); border-radius: 4px; }
+  .stop { display: grid; place-items: center; width: 60px; height: 60px; margin-bottom: 8px; border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; color: var(--ink); filter: var(--cut); transition: transform 0.4s var(--ease); }
+  .route li:hover .stop { transform: translateY(-6px) rotate(-8deg) scale(1.08); }
+  .s1 { background: var(--cloud); }
+  .s2 { background: var(--sage); }
+  .s3 { background: var(--coral); }
+  .s4 { background: var(--sun); }
+  .route b { color: var(--ink); font-size: 16.5px; }
+  .route small { color: var(--text); font-size: 13.5px; }
+  .route figcaption { margin-top: 18px; text-align: center; font-size: 14.5px; color: var(--text); }
+  @media (max-width: 560px) {
+    .route ol { grid-template-columns: 1fr 1fr; gap: 22px 8px; }
+    .route li:nth-child(3)::before { display: none; }
+  }
+</style>

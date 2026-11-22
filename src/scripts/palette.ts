@@ -13,8 +13,26 @@ const dusk: Palette = { zenith: [0.6, 0.6, 0.86], mid: [0.97, 0.7, 0.58], horizo
 
 const KEYS: [number, Palette][] = [[0, night], [4.6, night], [6, dawn], [8.5, day], [16, day], [18.2, dusk], [20.2, night], [24, night]];
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+let cached: Palette | null = null;
+let stamp = 0;
+
+export type SkyMode = 'auto' | 'day' | 'night';
+export const skyMode = (): SkyMode => (document.documentElement.dataset.skyMode as SkyMode) || 'auto';
+
+/** Switches auto -> day -> night -> auto, remembers the choice and repaints at once. */
+export function nextSkyMode(): SkyMode {
+  const order: SkyMode[] = ['auto', 'day', 'night'];
+  const next = order[(order.indexOf(skyMode()) + 1) % order.length];
+  document.documentElement.dataset.skyMode = next;
+  try { localStorage.setItem('sky-mode', next); } catch { /* private window: the choice lasts for this page only */ }
+  cached = null;
+  return next;
+}
 
 function hourNow(): number {
+  const mode = skyMode();
+  if (mode === 'day') return 12;
+  if (mode === 'night') return 23;
   const forced = Number(new URLSearchParams(location.search).get('hour'));
   if (location.search.includes('hour=') && forced >= 0 && forced <= 24) return forced;
   const d = new Date();
@@ -39,8 +57,6 @@ export function currentPalette(): Palette {
 
 // Shared by both canvases; recomputed twice a minute. Also tells the page whether the sky is
 // dark, so text placed on it can switch to a light colour.
-let cached: Palette | null = null;
-let stamp = 0;
 export function palette(): Palette {
   const now = performance.now();
   if (!cached || now - stamp > 30_000) {

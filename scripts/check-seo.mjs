@@ -36,7 +36,15 @@ for (const file of pages) {
   const desc = attr(html, /name="description" content="([^"]*)"/);
   const canonical = attr(html, /rel="canonical" href="([^"]*)"/);
 
-  if (!/<html lang="zh-Hant-TW"/.test(html)) fail(page, 'html lang is not zh-Hant-TW');
+  const wantLang = page.startsWith('/en/') ? 'en' : 'zh-Hant-TW';
+  if (!html.includes(`<html lang="${wantLang}"`)) fail(page, `html lang is not ${wantLang}`);
+  // hreflang: every alternate must exist and point back at this page.
+  for (const m of html.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"/g)) {
+    const target = decodeURI(m[2].replace(SITE, ''));
+    const file = path.join(DIST, target, 'index.html');
+    if (!fs.existsSync(file)) { fail(page, `hreflang ${m[1]} points at a missing page ${target}`); continue; }
+    if (m[1] !== 'x-default' && !fs.readFileSync(file, 'utf8').includes(`href="${SITE}${page}"`)) fail(page, `hreflang ${m[1]} target ${target} does not link back`);
+  }
   if (!title) fail(page, 'no <title>');
   else if (width(title) > 70) fail(page, `title is ${width(title)} wide, keep it within 70`);
   if (!desc) fail(page, 'no meta description');

@@ -8,6 +8,7 @@ export const person = {
   '@type': 'Person',
   '@id': abs('/about/#person'),
   name: SITE.author,
+  alternateName: 'Lulu',
   url: abs('/about/'),
   description: '讀會計，但一路逃避做會計的軟體人。喜歡閱讀和學習。',
   image: abs('/favicon.png'),

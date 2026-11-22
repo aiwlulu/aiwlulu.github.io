@@ -1,0 +1,36 @@
+---
+// English About page. The posts themselves are in Traditional Chinese.
+import Base from '../../layouts/Base.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import Icon from '../../components/Icon.astro';
+import Route from '../../components/Route.astro';
+import { SITE } from '../../site';
+import { breadcrumbs, person } from '../../schema';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'About' }];
+const profile = { '@context': 'https://schema.org', '@type': 'ProfilePage', inLanguage: 'en', mainEntity: person };
+const alternates = { 'zh-Hant-TW': '/about/', en: '/en/about/' };
+---
+
+<Base lang="en" title="About Lulu" description="Lulu (過鹿人) studied accounting, then spent a career running away from doing it and ended up in software: finance systems, front-end work, and now systems integration. This blog keeps notes on books, talks and useful tools." alternates={alternates} jsonLd={[profile, breadcrumbs(crumbs)]}>
+  <div class="head wrap narrow">
+    <Crumbs items={crumbs} />
+    <h1>About</h1>
+    <a class="btn ghost small lang-switch" href="/about/" hreflang="zh-Hant-TW" lang="zh-Hant-TW"><Icon name="languages" size={15} />中文</a>
+  </div>
+  <div class="wrap">
+    <div class="prose narrow" style="margin-inline:auto">
+      <p class="about-line"><strong>I studied accounting, then spent my career running away from doing it. I ended up in software.</strong></p>
+      <p>I'm Lulu. I write here as <span lang="zh-Hant-TW">過鹿人</span>, and I like reading and learning.</p>
+      <Route lang="en" />
+      <p>I majored in accounting information. After graduating I didn't go and keep the books; I helped companies roll out their finance systems instead. Later I learned to code properly, starting with front-end work and moving on to data and systems integration.</p>
+      <p>These days most of my work is listening to how people actually do their jobs, then turning that process into a tool they like using.</p>
+      <p>I say I ran away from accounting, but I never got far. The code I write still deals with ledgers, reports and numbers. I just get the computer to do it.</p>
+      <h2>What's here</h2>
+      <p>Notes on books I read, talks I watch and tools I find useful, plus thoughts from the road of learning. The posts are written in Traditional Chinese.</p>
+      <div class="actions">
+        <a class="btn" href="/blog/" hreflang="zh-Hant-TW"><Icon name="book-open" size={17} />Read the posts (in Chinese)</a>
+        <a class="btn ghost" href={SITE.github} target="_blank" rel="me noopener noreferrer"><Icon name="github" size={17} />GitHub</a>
+      </div>
+    </div>
+  </div>
+</Base>

@@ -65,6 +65,19 @@ void main() {
   float star = step(0.9965, hash(cell)) * (0.6 + 0.4 * sin(uTime * 1.7 + hash(cell + 3.0) * 40.0));
   col += uNight * star * smoothstep(0.12, 0.5, e) * vec3(0.9, 0.95, 1.0);
 
+  // A shooting star crosses now and then (night only).
+  float cycle = floor(uTime / 11.0);
+  float run = fract(uTime / 11.0) / 0.09;
+  if (uNight > 0.01 && run < 1.0) {
+    vec2 from = vec2(mix(-0.5, 0.9, hash(vec2(cycle, 1.0))), mix(0.18, 0.46, hash(vec2(cycle, 2.0))));
+    vec2 dir = normalize(vec2(-0.86, -0.42));
+    vec2 rel = p - (from + dir * run * 0.9);
+    float along = dot(rel, -dir);
+    float across = length(rel + dir * along);
+    float tail = smoothstep(0.26, 0.0, along) * step(0.0, along);
+    col += uNight * tail * smoothstep(0.004, 0.0, across) * sin(run * 3.1416) * vec3(1.0, 0.98, 0.9);
+  }
+
   vec3 sunDir = normalize(vec3(0.55, 0.62, 0.56));
   col = mix(col, uGlow, 0.30 * pow(max(dot(rd, sunDir), 0.0), 5.0));
 

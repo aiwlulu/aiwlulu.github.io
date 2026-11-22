@@ -3,26 +3,31 @@
 // Two hand-drawn gulls are pasted on top, collage style.
 import { SITE } from '../site';
 import Icon from './Icon.astro';
+interface Props { lang?: string }
+const en = Astro.props.lang === 'en';
+const t = en
+  ? { footer: 'Footer', posts: 'Posts', about: 'About', party: 'Celebrate yourself', top: 'Back to top' }
+  : { footer: '頁尾', posts: '文章', about: '關於', party: '為自己慶祝', top: '回到頂端' };
 const year = new Date().getFullYear();
 ---
 
-<footer class="sea" transition:persist="sea">
-  <canvas class="sea-canvas" aria-hidden="true"></canvas>
+<footer class="sea">
+  <canvas class="sea-canvas" transition:persist="sea-canvas" aria-hidden="true"></canvas>
   <div class="sea-scene" aria-hidden="true">
     <svg class="gull g1" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
     <svg class="gull g2" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
   </div>
   <div class="sea-content wrap">
     <p class="sea-name">{SITE.name}</p>
-    <nav class="sea-links" aria-label="頁尾">
-      <a href="/blog/"><Icon name="book-open" size={15} />文章</a>
-      <a href="/about/"><Icon name="user-round" size={15} />關於</a>
+    <nav class="sea-links" aria-label={t.footer}>
+      <a href="/blog/"><Icon name="book-open" size={15} />{t.posts}</a>
+      <a href={en ? '/en/about/' : '/about/'}><Icon name="user-round" size={15} />{t.about}</a>
       <a href="/rss.xml" data-astro-reload><Icon name="rss" size={15} />RSS</a>
       <a href={SITE.github} target="_blank" rel="me noopener noreferrer"><Icon name="github" size={15} />GitHub</a>
     </nav>
     <p class="sea-copy">© {SITE.since}-{year} {SITE.author}</p>
-    <button class="sea-party" type="button" data-celebrate><Icon name="party-popper" size={18} />為自己慶祝</button>
-    <a class="sea-top" href="#main" aria-label="回到頂端"><Icon name="arrow-up" size={18} /></a>
+    <button class="sea-party" type="button" data-celebrate><Icon name="party-popper" size={18} />{t.party}</button>
+    <a class="sea-top" href="#main" aria-label={t.top}><Icon name="arrow-up" size={18} /></a>
   </div>
 </footer>
 

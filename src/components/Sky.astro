@@ -37,7 +37,11 @@ const { tall = false } = Astro.props;
 
 <style>
   .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -3; background: linear-gradient(to bottom, var(--sea-2), var(--sky-2) 55%, var(--page)); }
-  .veil { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: var(--grain), linear-gradient(to bottom, transparent calc(var(--veil-top) - 170px), rgb(238 246 252 / 0.82) var(--veil-top)); }
+  .veil { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: var(--grain), linear-gradient(to bottom, transparent calc(var(--veil-top) - 170px), rgb(238 246 252 / 0.82) var(--veil-top)); transition: opacity 1s; }
+  /* At night the veil is lifted to a thin dark wash, so the starry sky carries down the page. */
+  .veil::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent calc(var(--veil-top) - 170px), rgb(20 30 62 / 0.45) var(--veil-top)); opacity: 0; transition: opacity 1s; }
+  :global([data-tone='dark']) .veil { background: none; }
+  :global([data-tone='dark']) .veil::after { opacity: 1; }
 
   .sky { position: absolute; inset: 0 0 auto 0; height: 360px; z-index: -1; overflow: hidden; pointer-events: none; transform: translate3d(calc(var(--mx, 0) * 14px), calc(var(--my, 0) * 7px), 0); transition: transform 0.6s ease-out, height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .sky.is-tall { height: var(--sky-tall); }

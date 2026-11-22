@@ -10,9 +10,17 @@ document.addEventListener('astro:before-preparation', () => {
   document.querySelector('.loadbar')?.classList.remove('is-done');
   document.documentElement.classList.add('is-loading');
 });
+// Navigation replaces the attributes on <html>, so the sky choice and tone are carried over.
+let carried: { skyMode?: string; tone?: string } = {};
+document.addEventListener('astro:before-swap', () => {
+  const d = document.documentElement.dataset;
+  carried = { skyMode: d.skyMode, tone: d.tone };
+});
 document.addEventListener('astro:after-swap', () => {
   document.documentElement.classList.remove('is-loading');
   document.documentElement.classList.add('js');
+  if (carried.skyMode) document.documentElement.dataset.skyMode = carried.skyMode;
+  if (carried.tone) document.documentElement.dataset.tone = carried.tone;
   document.querySelector('.loadbar')?.classList.add('is-done');
   // The sky element is carried over between pages; only its height changes.
   document.querySelector('.sky')?.classList.toggle('is-tall', document.body.dataset.sky === 'tall');
@@ -45,6 +53,25 @@ if (!reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) {
   document.addEventListener('pointerleave', () => document.querySelector('.cursor')?.classList.remove('is-on'));
 }
 
+// Sky toggle: follow the clock (default), always day, or always night.
+function labelSkyToggle() {
+  const btn = document.querySelector<HTMLElement>('[data-sky-toggle]');
+  if (!btn) return;
+  const mode = (document.documentElement.dataset.skyMode ?? 'auto') as 'auto' | 'day' | 'night';
+  const en = document.documentElement.lang === 'en';
+  const names = en ? { auto: 'follows your local time', day: 'always day', night: 'always night' } : { auto: '依當地時間', day: '固定白天', night: '固定夜晚' };
+  const label = en ? `Sky: ${names[mode]}. Click to switch.` : `天色：${names[mode]}。點一下切換。`;
+  btn.setAttribute('aria-label', label);
+  btn.title = label;
+}
+document.addEventListener('click', async (e) => {
+  if (!(e.target as Element).closest?.('[data-sky-toggle]')) return;
+  const { nextSkyMode, palette } = await import('./palette');
+  nextSkyMode();
+  palette();
+  labelSkyToggle();
+});
+
 // Celebrate button: the confetti code is fetched on first use.
 document.addEventListener('click', async (e) => {
   const btn = (e.target as Element).closest?.('[data-celebrate]');
@@ -53,7 +80,7 @@ document.addEventListener('click', async (e) => {
   if (reduce) {
     // No flying confetti for people who asked for less motion: the label cheers instead.
     const old = btn.lastChild!.textContent;
-    btn.lastChild!.textContent = '太棒了，恭喜！';
+    btn.lastChild!.textContent = document.documentElement.lang === 'en' ? 'Well done!' : '太棒了，恭喜！';
     setTimeout(() => { btn.lastChild!.textContent = old; }, 2200);
     return;
   }
@@ -86,6 +113,7 @@ function openZoom(img: HTMLImageElement) {
 // ---- on every page -------------------------------------------------------------------
 
 function setupPage() {
+  labelSkyToggle();
   // Rise-in on scroll.
   const items = document.querySelectorAll<HTMLElement>('.reveal:not(.in)');
   if (reduce || !('IntersectionObserver' in window)) items.forEach((el) => el.classList.add('in'));

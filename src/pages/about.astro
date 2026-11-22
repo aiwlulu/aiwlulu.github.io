@@ -2,30 +2,25 @@
 import Base from '../layouts/Base.astro';
 import Crumbs from '../components/Crumbs.astro';
 import Icon from '../components/Icon.astro';
+import Route from '../components/Route.astro';
 import { SITE } from '../site';
 import { breadcrumbs, person } from '../schema';
 const crumbs = [{ name: '首頁', href: '/' }, { name: '關於' }];
-const profile = { '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: person };
+const profile = { '@context': 'https://schema.org', '@type': 'ProfilePage', inLanguage: SITE.lang, mainEntity: person };
+const alternates = { 'zh-Hant-TW': '/about/', en: '/en/about/' };
 ---
 
-<Base title="關於過鹿人" description="過鹿人：讀會計，但一路逃避做會計的軟體人。從財務系統顧問轉去寫程式，現在做軟體開發與系統整合。這裡記錄讀的書、聽的演講和好用的工具。" jsonLd={[profile, breadcrumbs(crumbs)]}>
+<Base title="關於過鹿人" description="過鹿人：讀會計，但一路逃避做會計的軟體人。從財務系統顧問轉去寫程式，現在做軟體開發與系統整合。這裡記錄讀的書、聽的演講和好用的工具。" alternates={alternates} jsonLd={[profile, breadcrumbs(crumbs)]}>
   <div class="head wrap narrow">
     <Crumbs items={crumbs} />
     <h1>About Me</h1>
+    <a class="btn ghost small lang-switch" href="/en/about/" hreflang="en" lang="en"><Icon name="languages" size={15} />English</a>
   </div>
   <div class="wrap">
     <div class="prose narrow" style="margin-inline:auto">
       <p class="about-line"><strong>讀會計，但一路逃避做會計的軟體人。</strong></p>
       <p>我是{SITE.author}，{SITE.tagline}。</p>
-      <figure class="route" aria-label="我的路線：會計、財務系統、寫程式、系統整合">
-        <ol>
-          <li><span class="stop s1"><Icon name="calculator" size={26} /></span><b>會計</b><small>大學念的</small></li>
-          <li><span class="stop s2"><Icon name="database" size={26} /></span><b>財務系統</b><small>幫企業導入</small></li>
-          <li><span class="stop s3"><Icon name="code-xml" size={26} /></span><b>寫程式</b><small>從前端開始</small></li>
-          <li><span class="stop s4"><Icon name="blocks" size={26} /></span><b>系統整合</b><small>現在在這裡</small></li>
-        </ol>
-        <figcaption>一條離會計越來越遠，卻又一直繞回數字的路。</figcaption>
-      </figure>
+      <Route lang="zh" />
       <p>大學念的是會計資訊，畢業後沒有去記帳，而是去幫企業導入財務系統；後來乾脆學寫程式，從前端一路做到資料與系統整合。</p>
       <p>現在的工作，大多是先聽懂使用者怎麼做事，再把流程變成好用的工具。</p>
       <p>說是逃避會計，其實沒有逃太遠：寫的程式常常還是在處理帳、報表和數字，只是換成讓電腦來做。</p>
@@ -39,24 +34,3 @@ const profile = { '@context': 'https://schema.org', '@type': 'ProfilePage', main
     </div>
   </div>
 </Base>
-
-<style>
-  .route { margin: 1.6em 0 2em; padding: 26px 18px 18px; background: var(--sky-2); border-radius: var(--radius); }
-  .route ol { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; padding: 0; list-style: none; }
-  .route li { position: relative; display: grid; justify-items: center; gap: 2px; margin: 0; padding: 0; text-align: center; line-height: 1.5; }
-  /* A hand-drawn dashed line runs from each stop to the next. */
-  .route li + li::before { content: ''; position: absolute; top: 28px; right: calc(50% + 36px); width: calc(100% - 72px); border-top: 4px dotted var(--coral); border-radius: 4px; }
-  .stop { display: grid; place-items: center; width: 60px; height: 60px; margin-bottom: 8px; border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; color: var(--ink); filter: var(--cut); transition: transform 0.4s var(--ease); }
-  .route li:hover .stop { transform: translateY(-6px) rotate(-8deg) scale(1.08); }
-  .s1 { background: var(--cloud); }
-  .s2 { background: var(--sage); }
-  .s3 { background: var(--coral); }
-  .s4 { background: var(--sun); }
-  .route b { color: var(--ink); font-size: 16.5px; }
-  .route small { color: var(--text); font-size: 13.5px; }
-  .route figcaption { margin-top: 18px; text-align: center; font-size: 14.5px; color: var(--text); }
-  @media (max-width: 560px) {
-    .route ol { grid-template-columns: 1fr 1fr; gap: 22px 8px; }
-    .route li:nth-child(3)::before { display: none; }
-  }
-</style>

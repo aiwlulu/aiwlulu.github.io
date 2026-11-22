@@ -17,6 +17,7 @@ export async function GET({ site }: APIContext) {
     '## 其他',
     '',
     `- [關於](${url('/about/')})：作者介紹`,
+    `- [About (English)](${url('/en/about/')}): who writes this blog`,
     `- [RSS](${url('/rss.xml')})：文章更新`,
     '',
   ].join('\n');

@@ -10,15 +10,20 @@ import { SITE } from '../site';
 type Props = Parameters<typeof Seo>[0] & { tallSky?: boolean; progress?: boolean };
 const { tallSky = false, progress = false, ...seo } = Astro.props;
 const path = Astro.url.pathname;
+const lang = seo.lang ?? SITE.lang;
+const en = lang === 'en';
+const t = en
+  ? { skip: 'Skip to content', home: 'Home', posts: 'Posts', about: 'About', main: 'Main', brand: `${SITE.name} home`, sky: 'Sky: follows your local time. Click to switch.' }
+  : { skip: '跳到主要內容', home: '首頁', posts: '文章', about: '關於', main: '主要', brand: `${SITE.name}首頁`, sky: '天色：依當地時間。點一下切換。' };
 const nav = [
-  { href: '/', label: '首頁', icon: 'house' as const, on: path === '/' },
-  { href: '/blog/', label: '文章', icon: 'book-open' as const, on: path.startsWith('/blog') || path.startsWith('/categories') || path.startsWith('/tags') },
-  { href: '/about/', label: '關於', icon: 'user-round' as const, on: path.startsWith('/about') },
+  { href: '/', label: t.home, icon: 'house' as const, on: path === '/' },
+  { href: '/blog/', label: t.posts, icon: 'book-open' as const, on: path.startsWith('/blog') || path.startsWith('/categories') || path.startsWith('/tags') },
+  { href: en ? '/en/about/' : '/about/', label: t.about, icon: 'user-round' as const, on: path.includes('/about') },
 ];
 ---
 
 <!doctype html>
-<html lang={SITE.lang}>
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -30,27 +35,34 @@ const nav = [
     <meta name="generator" content={Astro.generator} />
     <Seo {...seo} />
     <ClientRouter />
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      // Saved sky choice (auto, day or night); read early so the toggle shows the right icon.
+      try { document.documentElement.dataset.skyMode = localStorage.getItem('sky-mode') || 'auto'; } catch { document.documentElement.dataset.skyMode = 'auto'; }
+    </script>
   </head>
   <body data-sky={tallSky ? 'tall' : 'short'}>
-    <a class="skip" href="#main">跳到主要內容</a>
+    <a class="skip" href="#main">{t.skip}</a>
     <div class="loadbar" transition:persist="loadbar" aria-hidden="true"></div>
     {progress && <div class="progress" aria-hidden="true"></div>}
     <Sky tall={tallSky} />
     <header class="top wrap" transition:name="top">
-      <a class="brand" href="/" aria-label={`${SITE.name}首頁`}>
+      <a class="brand" href="/" aria-label={t.brand}>
         <img src="/favicon.svg" alt="" width="46" height="46" />
         <span>{SITE.name}</span>
       </a>
-      <nav class="nav" aria-label="主要">
+      <nav class="nav" aria-label={t.main}>
         {nav.map((n) => <a href={n.href} aria-current={n.on ? 'page' : undefined}><Icon name={n.icon} size={16} />{n.label}</a>)}
+        <button class="nav-icon sky-mode" type="button" data-sky-toggle aria-label={t.sky} title={t.sky}>
+          <Icon name="sun-moon" class="m-auto" /><Icon name="sun" class="m-day" /><Icon name="moon" class="m-night" />
+        </button>
         <a href={SITE.github} target="_blank" rel="me noopener noreferrer" class="nav-icon" aria-label="GitHub（另開視窗）"><Icon name="github" /></a>
       </nav>
     </header>
     <main id="main">
       <slot />
     </main>
-    <Sea />
+    <Sea lang={lang} />
     <dialog class="lightbox" transition:persist="lightbox" aria-label="放大的圖片">
       <button class="lightbox-close" type="button" aria-label="關閉"><Icon name="x" size={20} /></button>
       <figure><figcaption></figcaption></figure>
