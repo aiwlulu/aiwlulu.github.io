@@ -1,6 +1,6 @@
 ---
 // A live sea closes every page. The shader draws its own horizon and fades into the page sky.
-// Two gulls and a small paper boat are pasted on top, collage style.
+// Two hand-drawn gulls are pasted on top, collage style.
 import { SITE } from '../site';
 import Icon from './Icon.astro';
 const year = new Date().getFullYear();
@@ -11,15 +11,6 @@ const year = new Date().getFullYear();
   <div class="sea-scene" aria-hidden="true">
     <svg class="gull g1" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
     <svg class="gull g2" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
-    <div class="boat-track">
-      <svg class="boat" viewBox="0 0 120 88">
-        <path d="M60 16V2l16 6-16 6z" fill="var(--coral)" />
-        <path d="M60 14 92 54H28z" fill="var(--cloud)" />
-        <path d="M60 14 92 54H60z" fill="var(--surface-2)" />
-        <path d="M6 56h108L90 84H30z" fill="var(--cloud)" />
-        <path d="M60 56h54L90 84H60z" fill="var(--surface-2)" />
-      </svg>
-    </div>
   </div>
   <div class="sea-content wrap">
     <p class="sea-name">{SITE.name}</p>
@@ -38,8 +29,16 @@ const year = new Date().getFullYear();
 <script>
   import { mountScene } from '../scripts/scene';
   import frag from '../scripts/sea.frag';
+  import { palette } from '../scripts/palette';
   const canvas = document.querySelector<HTMLCanvasElement>('canvas.sea-canvas');
-  if (canvas) mountScene(canvas, frag, { maxDpr: 1.25 });
+  if (canvas) mountScene(canvas, frag, {
+    maxDpr: 1.25,
+    fps: 30,
+    uniforms: () => {
+      const p = palette();
+      return { uHorizon: p.horizon, uGlow: p.glow, uSeaFar: p.seaFar, uSeaMid: p.seaMid, uSeaNear: p.seaNear, uSeaLight: p.seaLight };
+    },
+  });
 </script>
 
 <style>
@@ -49,12 +48,8 @@ const year = new Date().getFullYear();
   /* Darkens the near water so the footer text stays readable. */
   .sea::after { content: ''; position: absolute; inset: auto 0 0 0; height: 42%; z-index: -1; background: linear-gradient(to bottom, transparent, rgb(13 62 110 / 0.7)); pointer-events: none; }
 
-  /* The boat crosses slowly just under the horizon while it rocks. */
-  .boat-track { position: absolute; top: calc(33% - 22px); left: 0; width: 100%; animation: sail 120s linear infinite; animation-delay: -50s; }
-  .boat { width: 46px; filter: var(--cut); transform-origin: 50% 90%; animation: rock 4.5s ease-in-out infinite; }
-  @keyframes sail { from { transform: translateX(-80px); } to { transform: translateX(100vw); } }
-  @keyframes rock { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(3px) rotate(4deg); } }
-  .gull { position: absolute; width: 38px; animation: glide 14s ease-in-out infinite; }
+  .gull { position: absolute; width: 38px; transition: stroke 1s; animation: glide 14s ease-in-out infinite; }
+  :global([data-tone='dark']) .gull { stroke: var(--cloud); }
   .g1 { top: 8%; left: 16%; }
   .g2 { top: 15%; left: 24%; width: 26px; animation-delay: -5s; }
   @keyframes glide { 50% { transform: translate(26px, -10px) rotate(4deg); } }

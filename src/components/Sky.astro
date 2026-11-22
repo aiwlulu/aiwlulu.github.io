@@ -9,7 +9,6 @@ const { tall = false } = Astro.props;
 <canvas class="sky-canvas" transition:persist="sky-canvas" aria-hidden="true"></canvas>
 <div class="veil" aria-hidden="true"></div>
 <div class:list={['sky', { 'is-tall': tall }]} transition:persist="sky" aria-hidden="true">
-  <span class="dots"></span>
   <svg class="sun" viewBox="0 0 140 140">
     <g class="rays" stroke="var(--sun)" stroke-width="5" stroke-linecap="round">
       {Array.from({ length: 12 }, (_, i) => <line x1="70" y1="8" x2="70" y2="20" transform={`rotate(${i * 30} 70 70)`} />)}
@@ -23,9 +22,17 @@ const { tall = false } = Astro.props;
 <script>
   import { mountScene } from '../scripts/scene';
   import frag from '../scripts/sky.frag';
+  import { palette } from '../scripts/palette';
   // Soft clouds upscale well, so the full-page sky renders at half resolution and 30fps.
   const canvas = document.querySelector<HTMLCanvasElement>('canvas.sky-canvas');
-  if (canvas) mountScene(canvas, frag, { scale: 0.5, fps: 30 });
+  if (canvas) mountScene(canvas, frag, {
+    scale: 0.6,
+    fps: 30,
+    uniforms: () => {
+      const p = palette();
+      return { uZenith: p.zenith, uMid: p.mid, uHorizon: p.horizon, uCloud: p.cloud, uShade: p.shade, uGlow: p.glow, uNight: p.night };
+    },
+  });
 </script>
 
 <style>
@@ -43,12 +50,14 @@ const { tall = false } = Astro.props;
   @keyframes draw { to { stroke-dashoffset: 0; } }
   .squiggle { width: 110px; left: max(5%, calc(50% - 560px)); top: 62%; transform: rotate(-8deg); }
   .arc { width: 70px; right: max(20%, calc(50% - 320px)); top: 66%; }
-  .dots { position: absolute; width: 150px; height: 110px; right: 3%; top: 50%; background-image: radial-gradient(rgb(34 49 63 / 0.25) 1.6px, transparent 1.7px); background-size: 12px 12px; border-radius: 40% 60% 50% 50%; }
 
   .sky:not(.is-tall) .squiggle, .sky:not(.is-tall) .arc { display: none; }
   .sky:not(.is-tall) .sun { width: 84px; top: 14%; }
+  /* At night the sun doodle becomes a moon. */
+  .sun circle { transition: fill 1s; }
+  :global([data-tone='dark']) .sun circle { fill: var(--cloud); }
+  :global([data-tone='dark']) .rays { display: none; }
   @media (max-width: 640px) {
-    .dots { display: none; }
     .sun { top: 15%; right: 6%; }
     .squiggle { width: 76px; top: 72%; }
     .arc { width: 50px; top: 76%; right: 10%; }

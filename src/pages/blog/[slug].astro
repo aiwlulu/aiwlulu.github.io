@@ -51,6 +51,10 @@ const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear
           <Content components={{ YT: YouTube }} />
         </div>
         <footer class="post-foot">
+          <div class="finish reveal">
+            <p><strong>讀完了，謝謝你讀到這裡。</strong><br />恭喜又多讀完一篇，為自己慶祝一下吧。</p>
+            <button class="btn" type="button" data-celebrate><Icon name="party-popper" size={18} />拉個彩炮</button>
+          </div>
           {tags.length > 0 && (
             <ul class="pills" aria-label="標籤">
               {tags.map((t) => <li><a class="pill tag" href={`/tags/${tagSlug(t)}/`}><Icon name={topicIcon(t, 'tag')} size={13} />{t}</a></li>)}

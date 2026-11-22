@@ -9,7 +9,7 @@ export const person = {
   '@id': abs('/about/#person'),
   name: SITE.author,
   url: abs('/about/'),
-  description: SITE.tagline,
+  description: '讀會計，但一路逃避做會計的軟體人。喜歡閱讀和學習。',
   image: abs('/favicon.png'),
   sameAs: [SITE.github],
 };

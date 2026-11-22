@@ -1,11 +1,13 @@
-// A soft blue sky with cumulus clouds receding toward the horizon, plus thin cirrus streaks.
-// Clouds are fbm noise on a plane overhead, seen through a real perspective camera, so they are
-// large at the top of the canvas and small and dense near the horizon at the bottom.
+// A watercolour sky. The clouds are the same fbm field as a realistic sky would use, but they
+// are painted in a few flat washes with wobbly, slightly darker "wet" edges, on an uneven
+// pigment wash with paper granulation. Colours come from the time-of-day palette.
 export default /* glsl */ `
 precision highp float;
 uniform vec2 uRes;
 uniform float uTime;
 uniform vec2 uMouse;
+uniform vec3 uZenith, uMid, uHorizon, uCloud, uShade, uGlow;
+uniform float uNight;
 
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -21,7 +23,7 @@ float noise(vec2 p) {
 const mat2 ROT = mat2(0.8, -0.6, 0.6, 0.8);
 float fbm(vec2 p) {
   float a = 0.5, v = 0.0;
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 5; i++) {
     v += a * noise(p);
     p = ROT * p * 2.04 + 7.1;
     a *= 0.5;
@@ -37,59 +39,54 @@ float fbm3(vec2 p) {
   }
   return v;
 }
-
-// Cumulus density: large shapes, then finer noise eats into the edges to make them billowy.
 float cumulus(vec2 q, float t) {
   vec2 w = vec2(t * 0.020, t * 0.006);
   float base = fbm(q * 0.72 + w + 0.30 * vec2(fbm3(q * 0.5 + 2.0), fbm3(q * 0.5 + 9.0)));
-  float detail = fbm(q * 3.1 + w * 2.2);
-  // A slow, very large mask leaves open patches of blue between cloud fields.
   float field = fbm3(q * 0.16 + w * 0.5 + 21.0);
-  return base + (detail - 0.5) * 0.26 + (field - 0.5) * 0.30;
+  return base + (field - 0.5) * 0.30;
 }
 
 void main() {
   vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
   vec2 m = uMouse - 0.5;
-  // Camera looks slightly up; the horizon sits just below the bottom edge of the canvas.
-  // Portrait canvases get a wider lens so phones also see the cloud field, not only the zenith.
-  float lens = mix(0.62, 0.95, clamp(uRes.x / uRes.y - 0.5, 0.0, 1.0));
-  vec3 rd = normalize(vec3(p.x + m.x * 0.04, p.y + 0.66 - m.y * 0.03, lens));
+  // Portrait canvases get a wider lens so phones also see the cloud field.
+  float wide = clamp(uRes.x / uRes.y - 0.5, 0.0, 1.0);
+  vec3 rd = normalize(vec3(p.x + m.x * 0.04, p.y + 0.66 - m.y * 0.03, mix(0.62, 0.95, wide)));
   float e = rd.y;
 
-  vec3 horizon = vec3(0.86, 0.94, 0.995);
-  vec3 mid = vec3(0.56, 0.80, 0.985);
-  vec3 zenith = vec3(0.34, 0.66, 0.96);
-  vec3 col = mix(horizon, mid, smoothstep(0.02, 0.38, e));
-  col = mix(col, zenith, smoothstep(0.30, 0.85, e));
+  // The wash: pigment is never even, so the gradient is nudged by slow noise.
+  float wash = fbm3(p * 1.4 + 3.0) - 0.5;
+  vec3 col = mix(uHorizon, uMid, smoothstep(0.02, 0.40, e + wash * 0.12));
+  col = mix(col, uZenith, smoothstep(0.30, 0.88, e + wash * 0.18));
+  col *= 1.0 - 0.06 * smoothstep(0.45, 0.80, fbm3(p * 2.9 + 11.0));
+
+  // Stars come out at night.
+  vec2 cell = floor(gl_FragCoord.xy / 2.0);
+  float star = step(0.9965, hash(cell)) * (0.6 + 0.4 * sin(uTime * 1.7 + hash(cell + 3.0) * 40.0));
+  col += uNight * star * smoothstep(0.12, 0.5, e) * vec3(0.9, 0.95, 1.0);
 
   vec3 sunDir = normalize(vec3(0.55, 0.62, 0.56));
-  float s = max(dot(rd, sunDir), 0.0);
-  col += vec3(0.35, 0.30, 0.20) * pow(s, 6.0) * 0.5;
+  col = mix(col, uGlow, 0.30 * pow(max(dot(rd, sunDir), 0.0), 5.0));
 
-  // Smaller clouds on portrait canvases, so a phone still shows several of them.
-  vec2 q = rd.xz / e * mix(2.7, 1.55, clamp(uRes.x / uRes.y - 0.5, 0.0, 1.0));
+  vec2 q = rd.xz / e * mix(2.7, 1.55, wide);
   float far = smoothstep(0.10, 0.34, e);
+  // Wobble the outline so the edge looks brushed, not computed.
+  float d = cumulus(q, uTime) + (fbm3(q * 4.2 + 5.0) - 0.5) * 0.07;
+  float body = smoothstep(0.462, 0.478, d);
+  float lit = smoothstep(-0.02, 0.03, d - cumulus(q + sunDir.xz * 0.30, uTime));
+  float core = smoothstep(0.535, 0.552, d);
+  // Three washes: shadow side, body, and a lighter core.
+  vec3 cloud = mix(uShade, mix(uShade, uCloud, 0.72), lit);
+  cloud = mix(cloud, uCloud, core * (0.5 + 0.5 * lit));
+  cloud = mix(cloud, uHorizon, (1.0 - far) * 0.55);
+  float alpha = body * mix(0.5, 0.95, far) * smoothstep(0.04, 0.14, e);
+  col = mix(col, cloud, alpha);
+  // Wet edge: pigment gathers in a thin darker line just inside the outline.
+  float rim = body * (1.0 - smoothstep(0.478, 0.502, d));
+  col = mix(col, uShade * 0.92, rim * 0.30 * far);
 
-  // Cirrus: noise stretched along one direction, very thin.
-  vec2 c = ROT * q;
-  float cir = fbm(vec2(c.x * 0.22, c.y * 1.5) + vec2(uTime * 0.012, 0.0));
-  cir *= fbm3(c * 0.35 + 5.0) * 1.6;
-  col = mix(col, vec3(1.0), smoothstep(0.30, 0.62, cir) * 0.50 * far);
-
-  float d = cumulus(q, uTime);
-  float cover = smoothstep(0.455, 0.545, d);
-  // Light comes from the sun side: thinner toward the sun means brighter.
-  float toward = cumulus(q + sunDir.xz * 0.30, uTime);
-  float lit = smoothstep(-0.10, 0.12, d - toward);
-  float core = smoothstep(0.52, 0.74, d);
-  vec3 shade = mix(vec3(0.74, 0.84, 0.95), vec3(0.88, 0.93, 0.985), far);
-  vec3 cloud = mix(shade, vec3(1.0), clamp(lit * 0.75 + 0.35 - core * 0.18, 0.0, 1.0));
-  cloud = mix(cloud, horizon, (1.0 - far) * 0.6);
-  col = mix(col, cloud, cover * mix(0.55, 1.0, far) * smoothstep(0.04, 0.14, e));
-
-  col = min(col, vec3(1.0));
-  col += (hash(gl_FragCoord.xy + uTime) - 0.5) / 255.0;
-  gl_FragColor = vec4(col, 1.0);
+  // Paper granulation.
+  col *= 0.965 + 0.07 * noise(gl_FragCoord.xy * 0.9);
+  gl_FragColor = vec4(min(col, vec3(1.0)), 1.0);
 }
 `;

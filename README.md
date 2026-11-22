@@ -2,7 +2,7 @@
 
 <https://aiwlulu.github.io>
 
-用 [Astro](https://astro.build) 建構的靜態部落格，圖示用 [Lucide](https://lucide.dev)。紙張拼貼風格的介面，放在即時運算的天空上：整頁背景是淡淡飄動的雲，頁尾是有波光的海（WebGL shader），上面貼著手繪的太陽、海鷗和小紙船。
+用 [Astro](https://astro.build) 建構的靜態部落格，圖示用 [Lucide](https://lucide.dev)。紙張拼貼風格的介面，放在一片會動的水彩天空上：整頁背景是淡淡飄動的雲，頁尾是水彩筆觸的海（WebGL shader），天色會隨訪客當地時間變成清晨、白天、黃昏或夜晚。網址加 `?hour=18.2` 可以預覽任何時間。
 
 ## 常用指令
 
@@ -64,6 +64,7 @@ tags: ['學習']
 | `src/components/Seo.astro` | 每頁的 title、description、canonical、Open Graph |
 | `src/components/Sky.astro`、`Sea.astro` | 天空與海的畫布，加上手繪裝飾 |
 | `src/scripts/scene.ts`、`*.frag.ts` | 天空與海的 shader 與執行器 |
+| `src/scripts/palette.ts` | 依當地時間決定天空與海的顏色 |
 | `src/scripts/celebrate.ts` | 頁尾「為自己慶祝」的彩帶與煙火 |
 | `src/scripts/interactions.ts` | 換頁載入條、捲動進場、目錄標示、游標小夥伴等行為 |
 | `src/styles/tokens.css` | 色彩與尺度變數，和 design-library 的 `paper-sea` 同一份 |

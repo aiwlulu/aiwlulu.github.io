@@ -8,9 +8,11 @@ export interface SceneOptions {
   scale?: number;
   /** Frames per second cap. */
   fps?: number;
+  /** Extra uniforms, read on every frame: a number, or a vec3 as [r, g, b]. */
+  uniforms?: () => Record<string, number | number[]>;
 }
 
-export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1.5, scale = 1, fps = 60 }: SceneOptions = {}) {
+export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1.5, scale = 1, fps = 60, uniforms }: SceneOptions = {}) {
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
   if (!gl) return;
 
@@ -42,6 +44,7 @@ export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1
   const uRes = gl.getUniformLocation(prog, 'uRes');
   const uTime = gl.getUniformLocation(prog, 'uTime');
   const uMouse = gl.getUniformLocation(prog, 'uMouse');
+  const locs: Record<string, WebGLUniformLocation | null> = {};
 
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
@@ -68,6 +71,13 @@ export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1
     gl.uniform2f(uRes, canvas.width, canvas.height);
     gl.uniform1f(uTime, still ? 40 : (now - t0) / 1000);
     gl.uniform2f(uMouse, mouse.x, mouse.y);
+    if (uniforms) {
+      for (const [name, value] of Object.entries(uniforms())) {
+        const at = (locs[name] ??= gl.getUniformLocation(prog, name));
+        if (typeof value === 'number') gl.uniform1f(at, value);
+        else gl.uniform3f(at, value[0], value[1], value[2]);
+      }
+    }
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (!drawn) {
       drawn = true;

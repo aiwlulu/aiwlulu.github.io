@@ -39,6 +39,14 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 @media (max-width: 560px) { .nav a:not(.nav-icon) .icon { display: none; } .nav a { padding: 8px 10px; } }
 @media (max-width: 430px) { .brand span { display: none; } }
 
+/* ---------- Night sky: text that sits directly on the sky turns light ---------- */
+.top, .hero, .head { transition: color 1s; }
+[data-tone='dark'] .brand, [data-tone='dark'] .nav a, [data-tone='dark'] .hero h1, [data-tone='dark'] .hero p,
+[data-tone='dark'] .head h1, [data-tone='dark'] .head .lede, [data-tone='dark'] .crumbs, [data-tone='dark'] .post-meta > .meta { color: #fff; }
+[data-tone='dark'] .nav a::after { background: var(--accent); }
+[data-tone='dark'] .head .marker { background: linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%); }
+[data-tone='dark'] .hero h1 span:hover { color: var(--sun); }
+
 /* ---------- Page heads ---------- */
 /* The hero fills exactly the tall sky, so the list below starts on plain paper. */
 .hero { min-height: calc(var(--sky-tall) - 90px); display: grid; align-content: center; justify-items: center; padding-block: 12px 84px; text-align: center; }
@@ -154,9 +162,15 @@ a.pill.tag:hover { background: var(--sage); }
 /* A small arrow marks links that open in a new tab. */
 .prose a.external::after { content: '↗'; display: inline-block; margin-left: 2px; font-size: 0.8em; font-weight: 900; color: var(--accent); transition: transform 0.25s var(--ease); }
 .prose a.external:hover::after { transform: translate(2px, -2px); }
+.prose .about-line { font-size: 21px; line-height: 1.7; margin-bottom: 1em; }
 .prose strong { color: var(--ink); background: linear-gradient(transparent 58%, rgb(255 203 61 / 0.7) 58%, rgb(255 203 61 / 0.7) 92%, transparent 92%); padding-inline: 2px; border-radius: 2px; }
 
 .post-foot { margin-top: 44px; display: grid; gap: 24px; }
+/* End of the post: a small thank-you with a party popper. */
+.finish { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; padding: 20px 24px; background: var(--coral-tint); border-radius: var(--radius); box-shadow: var(--shadow); }
+.finish p { margin: 0; line-height: 1.7; color: var(--ink); }
+.finish .btn:hover .icon { animation: wiggle 0.5s ease-in-out infinite; }
+@keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg) scale(1.15); } }
 .author { display: flex; align-items: center; gap: 16px; padding: 18px 22px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
 .author img { width: 56px; height: 56px; border-radius: 50%; transition: transform 0.5s var(--ease); }
 .author:hover img { transform: rotate(-14deg) scale(1.08); }
@@ -212,16 +226,15 @@ main { view-transition-name: main; }
 @keyframes zoom-in { from { opacity: 0; transform: scale(0.86) rotate(-2deg); } }
 
 /* ---------- Cursor companion (mouse only) ---------- */
-.cursor { position: fixed; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; z-index: 50; border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; background: var(--sun); mix-blend-mode: multiply; pointer-events: none; opacity: 0; transition: width 0.3s var(--ease), height 0.3s var(--ease), margin 0.3s var(--ease), opacity 0.3s, background 0.2s; will-change: transform; }
+.cursor { position: fixed; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; z-index: 50; border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; background: var(--sun); pointer-events: none; opacity: 0; transition: width 0.3s var(--ease), height 0.3s var(--ease), margin 0.3s var(--ease), opacity 0.3s, background 0.2s; will-change: transform; }
 .cursor.is-on { opacity: 0.9; }
-.cursor.is-hover { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: var(--coral); opacity: 0.55; }
+.cursor.is-hover { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: var(--coral); opacity: 0.4; }
 .cursor.is-down { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
 @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; }
-  .boat-track { animation: none !important; transform: translateX(62vw); }
   .cursor { display: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
