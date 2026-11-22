@@ -1,4 +1,4 @@
-// A deep blue sky with cumulus clouds receding toward the horizon, plus thin cirrus streaks.
+// A soft blue sky with cumulus clouds receding toward the horizon, plus thin cirrus streaks.
 // Clouds are fbm noise on a plane overhead, seen through a real perspective camera, so they are
 // large at the top of the canvas and small and dense near the horizon at the bottom.
 export default /* glsl */ `
@@ -58,8 +58,8 @@ void main() {
   float e = rd.y;
 
   vec3 horizon = vec3(0.86, 0.94, 0.995);
-  vec3 mid = vec3(0.36, 0.69, 0.97);
-  vec3 zenith = vec3(0.11, 0.47, 0.90);
+  vec3 mid = vec3(0.56, 0.80, 0.985);
+  vec3 zenith = vec3(0.34, 0.66, 0.96);
   vec3 col = mix(horizon, mid, smoothstep(0.02, 0.38, e));
   col = mix(col, zenith, smoothstep(0.30, 0.85, e));
 
@@ -83,7 +83,7 @@ void main() {
   float toward = cumulus(q + sunDir.xz * 0.30, uTime);
   float lit = smoothstep(-0.10, 0.12, d - toward);
   float core = smoothstep(0.52, 0.74, d);
-  vec3 shade = mix(vec3(0.66, 0.78, 0.93), vec3(0.86, 0.92, 0.985), far);
+  vec3 shade = mix(vec3(0.74, 0.84, 0.95), vec3(0.88, 0.93, 0.985), far);
   vec3 cloud = mix(shade, vec3(1.0), clamp(lit * 0.75 + 0.35 - core * 0.18, 0.0, 1.0));
   cloud = mix(cloud, horizon, (1.0 - far) * 0.6);
   col = mix(col, cloud, cover * mix(0.55, 1.0, far) * smoothstep(0.04, 0.14, e));

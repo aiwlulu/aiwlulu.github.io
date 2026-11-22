@@ -35,7 +35,7 @@ fs.writeFileSync('public/favicon.ico', Buffer.concat([header, ...images]));
 // Share image, 1200x630.
 const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f86e8"/><stop offset="0.55" stop-color="#8cc6f7"/><stop offset="0.75" stop-color="#e3f1fd"/></linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6aaef3"/><stop offset="0.55" stop-color="#a9d4f8"/><stop offset="0.75" stop-color="#e3f1fd"/></linearGradient>
     <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8e8"/><stop offset="0.45" stop-color="#3a94d6"/><stop offset="1" stop-color="#164f86"/></linearGradient>
     <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
     <filter id="halo"><feGaussianBlur stdDeviation="18"/></filter>
