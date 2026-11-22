@@ -1,0 +1,35 @@
+/* Sea Breeze: pale sky blue pages with a live sky on top and a live sea at the bottom.
+   Semantic names only; components never use raw hex. Light only. */
+:root {
+  --page: #f3f9fe;
+  --surface: #ffffff;
+  --surface-2: #e9f3fc;
+  --line: #dbe8f4;
+  --line-2: #bfd4e8;
+
+  --ink: #20344b;
+  --text: #40516a;
+  --muted: #5c6d84;
+
+  --brand: #509ee3;
+  --accent: #2f80d0;
+  --link: #1f6cb8;
+
+  --sky-top: #a9d4f7;
+  --sky-low: #e3f1fd;
+  --sun: #fff3d4;
+  --sea-light: #7cc8e8;
+  --sea: #3a94d6;
+  --sea-deep: #164f86;
+  --on-sea: #ffffff;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgb(32 52 75 / 0.04), 0 8px 24px rgb(47 128 208 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(32 52 75 / 0.05), 0 16px 40px rgb(47 128 208 / 0.16);
+  --wrap: 1040px;
+  --prose: 720px;
+  --font: 'Lato', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color-scheme: light;
+}

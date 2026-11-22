@@ -1,0 +1,55 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import YouTube from '../../components/YouTube.astro';
+import Icon from '../../components/Icon.astro';
+import { SITE, getPosts, formatDate, tagSlug, type Post } from '../../site';
+import { breadcrumbs, blogPosting } from '../../schema';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+interface Props { post: Post; newer?: Post; older?: Post }
+const { post, newer, older } = Astro.props;
+const { title, subtitle, description, pubDate, updatedDate, category, tags } = post.data;
+const { Content } = await render(post);
+const crumbs = [{ name: '首頁', href: '/' }, { name: '文章', href: '/blog/' }, { name: title }];
+const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear();
+---
+
+<Base title={title} description={description} type="article" published={pubDate} modified={updatedDate} tags={tags} jsonLd={[blogPosting(post, '/og.png'), breadcrumbs(crumbs)]}>
+  <article>
+    <header class="head wrap narrow">
+      <Crumbs items={crumbs} />
+      <h1>{title}</h1>
+      {subtitle && <p class="lede">{subtitle}</p>}
+      <div class="post-meta">
+        <a class="pill" href={`/categories/${category}/`}>{category}</a>
+        <span>By {SITE.author}</span>
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      </div>
+    </header>
+    <div class="wrap">
+      {ageYears >= 2 && <p class="note">這篇文章寫於 {pubDate.getFullYear()} 年，保留當時的觀點與紀錄，部分資訊可能已隨時間改變。</p>}
+      <div class="prose">
+        <Content components={{ YT: YouTube }} />
+      </div>
+      <footer class="post-foot">
+        {tags.length > 0 && (
+          <ul class="pills" aria-label="標籤">
+            {tags.map((t) => <li><a class="pill" href={`/tags/${tagSlug(t)}/`}><Icon name="tag" size={13} />{t}</a></li>)}
+          </ul>
+        )}
+        <nav class="pager" aria-label="上下篇">
+          {older && <a class="prev" href={`/blog/${older.id}/`}><small>上一篇</small>{older.data.title}</a>}
+          {newer && <a class="next" href={`/blog/${newer.id}/`}><small>下一篇</small>{newer.data.title}</a>}
+        </nav>
+      </footer>
+    </div>
+  </article>
+</Base>

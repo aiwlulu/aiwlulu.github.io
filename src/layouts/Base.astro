@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+import { Image } from 'astro:assets';
+import deer from '../assets/deer.png';
+import Seo from '../components/Seo.astro';
+import Sky from '../components/Sky.astro';
+import Sea from '../components/Sea.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../site';
+
+type Props = astroHTML.JSX.IntrinsicAttributes & Parameters<typeof Seo>[0] & { tallSky?: boolean };
+const { tallSky = false, ...seo } = Astro.props;
+const path = Astro.url.pathname;
+const nav = [
+  { href: '/', label: '首頁', on: path === '/' },
+  { href: '/blog/', label: '文章', on: path.startsWith('/blog') || path.startsWith('/categories') || path.startsWith('/tags') },
+  { href: '/about/', label: '關於', on: path.startsWith('/about') },
+];
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#a9d4f7" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <Seo {...seo} />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到主要內容</a>
+    <Sky tall={tallSky} />
+    <header class="top wrap">
+      <a class="brand" href="/" aria-label={`${SITE.name}首頁`}>
+        <Image src={deer} alt="" width={40} height={40} densities={[1, 2]} loading="eager" />
+        <span>{SITE.name}</span>
+      </a>
+      <nav class="nav" aria-label="主要">
+        {nav.map((n) => <a href={n.href} aria-current={n.on ? 'page' : undefined}>{n.label}</a>)}
+        <a href={SITE.github} rel="me noopener" aria-label="GitHub"><Icon name="github" /></a>
+      </nav>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <Sea />
+  </body>
+</html>

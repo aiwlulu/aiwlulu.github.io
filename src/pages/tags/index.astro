@@ -1,0 +1,7 @@
+---
+import Index from '../../components/Index.astro';
+import { getPosts, countBy, tagSlug } from '../../site';
+const items = countBy(await getPosts(), (p) => p.data.tags).map(([name, count]) => ({ name, count, href: `/tags/${tagSlug(name)}/` }));
+---
+
+<Index title="標籤" description={`過鹿人部落格的文章標籤：${items.map((i) => i.name).join('、')}。點選標籤可以看到相關文章。`} items={items} />

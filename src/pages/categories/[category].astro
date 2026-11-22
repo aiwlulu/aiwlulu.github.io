@@ -1,0 +1,15 @@
+---
+import Listing from '../../components/Listing.astro';
+import { getPosts, type Post } from '../../site';
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return [...new Set(posts.map((p) => p.data.category))].map((category) => ({
+    params: { category },
+    props: { posts: posts.filter((p) => p.data.category === category) },
+  }));
+}
+interface Props { posts: Post[] }
+const { category } = Astro.params;
+---
+
+<Listing kind="分類" name={category} path={`/categories/${category}/`} posts={Astro.props.posts} />

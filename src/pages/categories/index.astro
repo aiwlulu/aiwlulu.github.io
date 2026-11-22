@@ -1,0 +1,7 @@
+---
+import Index from '../../components/Index.astro';
+import { getPosts, countBy } from '../../site';
+const items = countBy(await getPosts(), (p) => [p.data.category]).map(([name, count]) => ({ name, count, href: `/categories/${name}/` }));
+---
+
+<Index title="分類" description={`過鹿人部落格的文章分類：${items.map((i) => `${i.name}（${i.count} 篇）`).join('、')}。點選分類可以看到該分類下的所有文章。`} items={items} />

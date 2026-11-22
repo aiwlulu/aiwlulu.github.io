@@ -1,0 +1,27 @@
+---
+import { SITE, getPosts, countBy, tagSlug } from '../site';
+const posts = await getPosts();
+const categories = countBy(posts, (p) => [p.data.category]);
+const tags = countBy(posts, (p) => p.data.tags);
+---
+
+<aside class="side">
+  <section class="panel">
+    <h2>About Me</h2>
+    <p><strong>{SITE.author}</strong></p>
+    <p>{SITE.tagline}</p>
+    <p style="margin-top:10px"><a href="/about/">Know More</a></p>
+  </section>
+  <section class="panel">
+    <h2>Category</h2>
+    <ul class="pills">
+      {categories.map(([c, n]) => <li><a class="pill" href={`/categories/${c}/`}>{c}<span class="n">{n}</span></a></li>)}
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Tag</h2>
+    <ul class="pills">
+      {tags.map(([t, n]) => <li><a class="pill" href={`/tags/${tagSlug(t)}/`}>{t}<span class="n">{n}</span></a></li>)}
+    </ul>
+  </section>
+</aside>

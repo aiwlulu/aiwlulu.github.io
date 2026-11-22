@@ -1,0 +1,10 @@
+---
+interface Props { items: { name: string; href?: string }[] }
+const { items } = Astro.props;
+---
+
+<nav aria-label="麵包屑">
+  <ol class="crumbs">
+    {items.map((i) => <li>{i.href ? <a href={i.href}>{i.name}</a> : <span aria-current="page">{i.name}</span>}</li>)}
+  </ol>
+</nav>

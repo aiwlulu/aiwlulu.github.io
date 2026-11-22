@@ -1,0 +1,32 @@
+---
+import { formatDate, type Post } from '../site';
+import Icon from './Icon.astro';
+interface Props { post: Post; heading?: 'h2' | 'h3' }
+const { post, heading: H = 'h2' } = Astro.props;
+const { title, subtitle, pubDate, category } = post.data;
+---
+
+<article class="card">
+  <div class="card-meta">
+    <a class="pill" href={`/categories/${category}/`}>{category}</a>
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+  </div>
+  <H class="card-title"><a href={`/blog/${post.id}/`}>{title}</a></H>
+  {subtitle && <p class="card-sub">{subtitle}</p>}
+  <span class="card-more" aria-hidden="true">閱讀全文<Icon name="arrow" size={16} /></span>
+</article>
+
+<style>
+  .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow); transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); border-color: var(--line-2); }
+  .card-meta { display: flex; align-items: center; gap: 12px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .card-meta .pill { position: relative; z-index: 1; }
+  .card-title { margin: 12px 0 6px; font-size: 21px; line-height: 1.4; color: var(--ink); }
+  .card-title a { color: inherit; text-decoration: none; }
+  /* Whole card is clickable through the title link. */
+  .card-title a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
+  .card-sub { margin: 0; color: var(--text); }
+  .card-more { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 14px; font-weight: 700; color: var(--link); }
+  .card-more :global(svg) { transition: transform 0.25s; }
+  .card:hover .card-more :global(svg) { transform: translateX(4px); }
+</style>

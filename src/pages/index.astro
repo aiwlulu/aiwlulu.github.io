@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import PostCard from '../components/PostCard.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { SITE, getPosts } from '../site';
+import { website } from '../schema';
+const posts = await getPosts();
+---
+
+<Base tallSky jsonLd={[website]}>
+  <section class="hero wrap">
+    <h1>{SITE.name}</h1>
+    <p>{SITE.tagline}</p>
+  </section>
+  <div class="wrap cols">
+    <section aria-labelledby="latest">
+      <h2 id="latest" class="section-title">最新文章</h2>
+      <div class="stack">
+        {posts.map((post) => <PostCard post={post} heading="h3" />)}
+      </div>
+    </section>
+    <Sidebar />
+  </div>
+</Base>

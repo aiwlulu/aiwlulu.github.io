@@ -1,0 +1,15 @@
+---
+import Listing from '../../components/Listing.astro';
+import { getPosts, tagSlug, type Post } from '../../site';
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return [...new Set(posts.flatMap((p) => p.data.tags))].map((name) => ({
+    params: { tag: tagSlug(name) },
+    props: { name, posts: posts.filter((p) => p.data.tags.includes(name)) },
+  }));
+}
+interface Props { name: string; posts: Post[] }
+const { name, posts } = Astro.props;
+---
+
+<Listing kind="標籤" name={name} path={`/tags/${Astro.params.tag}/`} posts={posts} />

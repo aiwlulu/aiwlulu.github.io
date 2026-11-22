@@ -1,0 +1,27 @@
+---
+// Shared page for one category or one tag.
+import Base from '../layouts/Base.astro';
+import PostCard from './PostCard.astro';
+import Sidebar from './Sidebar.astro';
+import Crumbs from './Crumbs.astro';
+import type { Post } from '../site';
+import { breadcrumbs, collectionPage } from '../schema';
+interface Props { kind: '分類' | '標籤'; name: string; path: string; posts: Post[] }
+const { kind, name, path, posts } = Astro.props;
+const crumbs = [{ name: '首頁', href: '/' }, { name: '文章', href: '/blog/' }, { name: `${kind}：${name}` }];
+const titles = posts.slice(0, 3).map((p) => `〈${p.data.title}〉`).join('、');
+---
+
+<Base title={`${name}（${kind}）`} description={`${kind}「${name}」下的 ${posts.length} 篇文章，包含${titles}${posts.length > 3 ? '等' : ''}。這是過鹿人部落格依${kind}整理的文章列表。`} jsonLd={[breadcrumbs(crumbs), collectionPage(`${kind}：${name}`, path, posts)]}>
+  <div class="head wrap">
+    <Crumbs items={crumbs} />
+    <h1>{name}</h1>
+    <p class="lede">{kind}「{name}」共 {posts.length} 篇文章。</p>
+  </div>
+  <div class="wrap cols">
+    <div class="stack">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+    <Sidebar />
+  </div>
+</Base>
