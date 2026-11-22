@@ -16,35 +16,45 @@ export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
   if (!gl) return;
 
-  const compile = (type: number, src: string) => {
-    const s = gl.createShader(type)!;
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? 'shader error');
-    return s;
-  };
+  let uRes: WebGLUniformLocation | null, uTime: WebGLUniformLocation | null, uMouse: WebGLUniformLocation | null;
   let prog: WebGLProgram;
-  try {
-    prog = gl.createProgram()!;
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? 'link error');
-  } catch (e) {
-    console.warn('[scene]', e);
-    return;
-  }
-  gl.useProgram(prog);
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(prog, 'p');
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  let locs: Record<string, WebGLUniformLocation | null> = {};
+  let ready = false;
 
-  const uRes = gl.getUniformLocation(prog, 'uRes');
-  const uTime = gl.getUniformLocation(prog, 'uTime');
-  const uMouse = gl.getUniformLocation(prog, 'uMouse');
-  const locs: Record<string, WebGLUniformLocation | null> = {};
+  // Builds the program. Called at start and again whenever the browser restores a lost context.
+  const setup = () => {
+    const compile = (type: number, src: string) => {
+      const s = gl.createShader(type)!;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? 'shader error');
+      return s;
+    };
+    try {
+      prog = gl.createProgram()!;
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? 'link error');
+    } catch (e) {
+      console.warn('[scene]', e);
+      return false;
+    }
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    uRes = gl.getUniformLocation(prog, 'uRes');
+    uTime = gl.getUniformLocation(prog, 'uTime');
+    uMouse = gl.getUniformLocation(prog, 'uMouse');
+    locs = {};
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    return true;
+  };
+  ready = setup();
+  if (!ready) return;
 
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
@@ -66,6 +76,7 @@ export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1
   };
 
   const draw = (now: number) => {
+    if (!ready || gl.isContextLost()) return;
     mouse.x += (mouse.tx - mouse.x) * 0.04;
     mouse.y += (mouse.ty - mouse.y) * 0.04;
     gl.uniform2f(uRes, canvas.width, canvas.height);
@@ -117,5 +128,22 @@ export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1
     },
     { passive: true },
   );
+  // Browsers may drop a WebGL context (many tabs, GPU pressure, a long sleep). The canvas then
+  // goes blank and the CSS fallback shows through; rebuild as soon as the context comes back.
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    ready = false;
+    drawn = false;
+    cancelAnimationFrame(raf);
+    raf = 0;
+    canvas.classList.remove('is-live');
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    ready = setup();
+    if (!ready) return;
+    resize();
+    draw(performance.now());
+    kick();
+  });
   resize();
 }

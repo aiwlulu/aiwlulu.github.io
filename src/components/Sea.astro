@@ -9,10 +9,28 @@ const t = en
   ? { footer: 'Footer', posts: 'Posts', about: 'About', party: 'Celebrate yourself', top: 'Back to top' }
   : { footer: '頁尾', posts: '文章', about: '關於', party: '為自己慶祝', top: '回到頂端' };
 const year = new Date().getFullYear();
+// Fallback waves, shown only while the canvas is not drawing. Each strip repeats every half of
+// its width, so sliding it by 50% loops.
+const wave = (half: number, amp: number) => {
+  let d = `M0 30Q${half / 2} ${30 - amp} ${half} 30`;
+  for (let x = half * 2; x <= 2400; x += half) d += `T${x} 30`;
+  return `${d}V240H0z`;
+};
+const fallback = [
+  { cls: 'f1', d: wave(150, 14), dur: 44 },
+  { cls: 'f2', d: wave(200, 18), dur: 32 },
+  { cls: 'f3', d: wave(120, 14), dur: 24 },
+  { cls: 'f4', d: wave(150, 18), dur: 18 },
+];
 ---
 
 <footer class="sea">
   <canvas class="sea-canvas" transition:persist="sea-canvas" aria-hidden="true"></canvas>
+  <div class="sea-fallback" aria-hidden="true">
+    {fallback.map((l) => (
+      <svg class:list={['fwave', l.cls]} viewBox="0 0 2400 240" preserveAspectRatio="none" style={`animation-duration:${l.dur}s`}><path d={l.d} /></svg>
+    ))}
+  </div>
   <div class="sea-scene" aria-hidden="true">
     <svg class="gull g1" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
     <svg class="gull g2" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
@@ -25,7 +43,7 @@ const year = new Date().getFullYear();
       <a href="/rss.xml" data-astro-reload><Icon name="rss" size={15} />RSS</a>
       <a href={SITE.github} target="_blank" rel="me noopener noreferrer"><Icon name="github" size={15} />GitHub</a>
     </nav>
-    <p class="sea-copy">© {SITE.since}-{year} {SITE.author}</p>
+    <p class="sea-copy">© {year} {SITE.author}</p>
     <button class="sea-party" type="button" data-celebrate><Icon name="party-popper" size={18} />{t.party}</button>
     <a class="sea-top" href="#main" aria-label={t.top}><Icon name="arrow-up" size={18} /></a>
   </div>
@@ -41,15 +59,25 @@ const year = new Date().getFullYear();
     fps: 30,
     uniforms: () => {
       const p = palette();
-      return { uHorizon: p.horizon, uGlow: p.glow, uSeaFar: p.seaFar, uSeaMid: p.seaMid, uSeaNear: p.seaNear, uSeaLight: p.seaLight };
+      return { uHorizon: p.horizon, uGlow: p.glow, uSeaFar: p.seaFar, uSeaMid: p.seaMid, uSeaNear: p.seaNear, uSeaLight: p.seaLight, uNight: p.night };
     },
   });
 </script>
 
 <style>
-  .sea { position: relative; height: clamp(400px, 58vh, 560px); margin-top: 72px; display: flex; align-items: flex-end; color: var(--on-sea); isolation: isolate; overflow: hidden; }
-  .sea-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -3; background: linear-gradient(to bottom, transparent 30%, var(--sea-1) 34%, var(--sea-3) 62%, var(--sea-5) 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 4%, #000 30%); mask-image: linear-gradient(to bottom, transparent 4%, #000 30%); }
+  .sea { position: relative; background: linear-gradient(to bottom, transparent 62%, var(--sea-5) 100%); height: clamp(400px, 58vh, 560px); margin-top: 72px; display: flex; align-items: flex-end; color: var(--on-sea); isolation: isolate; overflow: hidden; }
+  .sea-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -3; -webkit-mask-image: linear-gradient(to bottom, transparent 4%, #000 30%); mask-image: linear-gradient(to bottom, transparent 4%, #000 30%); }
   .sea-scene { position: absolute; inset: 0; z-index: -2; }
+  /* Moving paper waves stand in whenever WebGL is unavailable or the context has been lost. */
+  .sea-fallback { position: absolute; inset: 0; z-index: -3; overflow: hidden; }
+  .sea-canvas.is-live + .sea-fallback { display: none; }
+  .fwave { position: absolute; left: 0; width: 200%; height: 100%; animation: slide linear infinite; }
+  .fwave path { stroke: rgb(255 255 255 / 0.45); stroke-width: 3; vector-effect: non-scaling-stroke; }
+  .f1 { top: 30%; fill: var(--sea-1); }
+  .f2 { top: 44%; fill: var(--sea-2); animation-direction: reverse; }
+  .f3 { top: 58%; fill: var(--sea-3); }
+  .f4 { top: 72%; fill: var(--sea-4); animation-direction: reverse; }
+  @keyframes slide { to { transform: translateX(-50%); } }
   /* Darkens the near water so the footer text stays readable. */
   .sea::after { content: ''; position: absolute; inset: auto 0 0 0; height: 42%; z-index: -1; background: linear-gradient(to bottom, transparent, rgb(13 62 110 / 0.7)); pointer-events: none; }
 
