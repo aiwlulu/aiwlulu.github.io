@@ -1,0 +1,26 @@
+---
+// Herdr: which actions leave the work running, which stop it, and the one that depends.
+// A summary of the table that follows it in the post.
+import Diagram from './Diagram.astro';
+import Box from './parts/Box.astro';
+import Room from './parts/Room.astro';
+---
+
+<Diagram
+  title="哪些動作之後，工作還在跑？"
+  description="工作會繼續的動作：關掉 App 視窗、離開 TUI 畫面。工作會停止的動作：關閉窗格或分頁、重開機或停止 Core。要看情況的動作：重啟 TUI 服務，可找回窗格和資料夾，部分 Agent 能重開原對話，但測試和開發伺服器需要重跑。"
+  height={262}
+>
+  <Room x={20} y={30} w={172} h={124} plate="工作繼續" tone="good" />
+  <Box x={34} y={58} w={144} h={38} label="關掉 App 視窗" small />
+  <Box x={34} y={104} w={144} h={38} label="離開 TUI 畫面" small />
+
+  <Room x={208} y={30} w={172} h={124} plate="工作停止" tone="bad" />
+  <Box x={222} y={58} w={144} h={38} label="關閉窗格或分頁" small />
+  <Box x={222} y={104} w={144} h={38} label="重開機或停止 Core" small />
+
+  <Room x={20} y={184} w={360} h={62} plate="看情況" tone="sun" />
+  <Box x={34} y={204} w={128} h={32} label="重啟 TUI 服務" small />
+  <text class="dg-sub" x="270" y="212">部分 Agent 能重開原對話</text>
+  <text class="dg-sub" x="270" y="230">測試和開發伺服器要重跑</text>
+</Diagram>

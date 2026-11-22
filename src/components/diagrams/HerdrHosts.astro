@@ -1,6 +1,9 @@
 ---
 // Herdr: where you look (the apps) and where the work runs (herdr-core on each machine).
 import Diagram from './Diagram.astro';
+import Box from './parts/Box.astro';
+import Arrow from './parts/Arrow.astro';
+import Chip from './parts/Chip.astro';
 ---
 
 <Diagram
@@ -12,27 +15,18 @@ import Diagram from './Diagram.astro';
   <text class="dg-caption" x="24" y="282">工作實際執行的地方</text>
 
   <!-- Each line leaves and arrives straight; only the desktop-to-remote link needs one step. -->
-  <path class="dg-line" d="M100 84V192" />
-  <path class="dg-line" d="M168 84V122Q168 134 180 134H238Q250 134 250 146V192" />
-  <path class="dg-line" d="M319 84V192" />
+  <Arrow d="M100 84V192" flow />
+  <Arrow d="M168 84V122Q168 134 180 134H238Q250 134 250 146V192" flow />
+  <Arrow d="M319 84V192" flow />
 
-  <rect class="dg-box" x="24" y="32" width="166" height="52" rx="14" />
-  <text x="107" y="58">桌面 App</text>
-  <rect class="dg-box" x="262" y="32" width="114" height="52" rx="14" />
-  <text x="319" y="58">手機 App</text>
+  <Box x={24} y={32} w={166} h={52} label="桌面 App" />
+  <Box x={262} y={32} w={114} h={52} label="手機 App" />
 
-  <!-- Labels sit beside their lines on a small chip, never on top of the stroke. -->
-  <rect class="dg-chip" x="110" y="140" width="46" height="24" rx="12" />
-  <text class="dg-label" x="133" y="152">本機</text>
-  <rect class="dg-chip" x="187" y="104" width="44" height="24" rx="12" />
-  <text class="dg-label" x="209" y="116">SSH</text>
-  <rect class="dg-chip" x="329" y="126" width="44" height="24" rx="12" />
-  <text class="dg-label" x="351" y="138">SSH</text>
+  <!-- Labels sit beside their lines, never on top of the stroke. -->
+  <Chip x={133} y={152} text="本機" />
+  <Chip x={209} y={116} text="SSH" />
+  <Chip x={351} y={138} text="SSH" />
 
-  <rect class="dg-box is-strong" x="24" y="196" width="152" height="68" rx="14" />
-  <text x="100" y="220">本機 <tspan class="dg-code">herdr-core</tspan></text>
-  <text class="dg-sub" x="100" y="243">終端、Agent</text>
-  <rect class="dg-box is-strong" x="208" y="196" width="168" height="68" rx="14" />
-  <text x="292" y="220">遠端 <tspan class="dg-code">herdr-core</tspan></text>
-  <text class="dg-sub" x="292" y="243">Agent、測試</text>
+  <Box x={24} y={196} w={152} h={68} label="本機" code="herdr-core" sub="終端、Agent" strong />
+  <Box x={208} y={196} w={168} h={68} label="遠端" code="herdr-core" sub="Agent、測試" strong />
 </Diagram>

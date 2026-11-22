@@ -1,6 +1,10 @@
 ---
 // Herdr TUI: named sessions are separate rooms, each with its own door plate.
 import Diagram from './Diagram.astro';
+import Box from './parts/Box.astro';
+import Arrow from './parts/Arrow.astro';
+import Chip from './parts/Chip.astro';
+import Room from './parts/Room.astro';
 ---
 
 <Diagram
@@ -8,27 +12,18 @@ import Diagram from './Diagram.astro';
   description="左邊是你所在的工作階段，右邊是名叫 review 的工作階段，裡面有一個叫 reviewer 的 Agent。兩個工作階段各有自己的終端和背景服務。從左邊送訊息給 reviewer 時，要加上 --session review 指定門牌。"
   height={262}
 >
-  <!-- Two rooms. The door plate sits on the top edge of each. -->
-  <rect class="dg-room" x="20" y="34" width="160" height="180" rx="18" />
-  <rect class="dg-room" x="220" y="34" width="160" height="180" rx="18" />
-  <rect class="dg-chip" x="36" y="21" width="128" height="26" rx="13" />
-  <text class="dg-label" x="100" y="34">你所在的工作階段</text>
-  <rect class="dg-plate" x="262" y="21" width="76" height="26" rx="13" />
-  <text class="dg-label dg-on-plate" x="300" y="34"><tspan class="dg-code">review</tspan></text>
-
-  <rect class="dg-box" x="36" y="84" width="128" height="50" rx="14" />
-  <text x="100" y="109">你的終端</text>
-  <rect class="dg-box is-strong" x="236" y="84" width="128" height="50" rx="14" />
-  <text x="300" y="109">Agent <tspan class="dg-code">reviewer</tspan></text>
+  <Room x={20} y={34} w={160} h={180} plate="你所在的工作階段" />
+  <Room x={220} y={34} w={160} h={180} plateCode="review" tone="sun" />
 
   <!-- The message has to name the room it is going to. -->
-  <path class="dg-line" d="M166 109H228" />
+  <Arrow d="M166 109H228" flow />
+  <Box x={36} y={84} w={128} label="你的終端" />
+  <Box x={236} y={84} w={128} label="Agent" code="reviewer" strong />
 
   <text class="dg-sub" x="100" y="176">自己的終端</text>
   <text class="dg-sub" x="100" y="195">與背景服務</text>
   <text class="dg-sub" x="300" y="176">自己的終端</text>
   <text class="dg-sub" x="300" y="195">與背景服務</text>
 
-  <rect class="dg-chip" x="84" y="228" width="232" height="26" rx="13" />
-  <text class="dg-label" x="200" y="241">送訊息時加上 <tspan class="dg-code">--session review</tspan></text>
+  <Chip x={200} y={241} text="送訊息時加上" code="--session review" />
 </Diagram>

@@ -69,7 +69,8 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .head { padding-block: 40px 76px; }
 .head h1 { margin: 0; font-size: clamp(28px, 4.6vw, 44px); font-weight: 900; letter-spacing: 0.02em; }
 .head .lede { margin: 12px 0 0; font-size: 18.5px; font-weight: 700; color: var(--ink); }
-.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0 0 16px; padding: 0; list-style: none; font-size: 14px; color: var(--text); }
+/* Small text straight on the sky is hard to read over clouds, so the trail sits on a soft pill. */
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; width: fit-content; max-width: 100%; margin: 0 0 16px; padding: 5px 14px; list-style: none; border-radius: 999px; background: color-mix(in srgb, var(--surface) 78%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); font-size: 14px; font-weight: 700; color: var(--ink); }
 .crumbs li { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
 .crumbs a { display: inline-flex; align-items: center; gap: 5px; color: inherit; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s; }
 .crumbs a:hover { border-color: var(--sun-deep); }
@@ -350,14 +351,18 @@ main { view-transition-name: main; }
 @keyframes vt-in { from { opacity: 0; transform: translateY(18px); } }
 
 /* ---------- Image lightbox ---------- */
-.lightbox { position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: clamp(16px, 4vw, 48px); border: 0; background: rgb(22 34 46 / 0.93); display: grid; place-items: center; cursor: zoom-out; overscroll-behavior: contain; }
+.lightbox { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: clamp(16px, 4vw, 48px); border: 0; background: rgb(22 34 46 / 0.93); display: grid; place-items: center; cursor: zoom-out; overscroll-behavior: contain; }
 .lightbox:not([open]) { display: none; }
 .lightbox::backdrop { background: transparent; }
 .lightbox img { max-width: 100%; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); width: auto; height: auto; padding: 10px; background: #fff; border-radius: 6px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
-.lightbox svg { width: min(100%, 1100px); max-width: 100%; height: auto; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); padding: clamp(12px, 3vw, 28px); background: var(--sky-2); border-radius: 10px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
+/* An enlarged diagram fills the width (up to 1100px); it is drawn from a 400-wide canvas, so
+   without an explicit width it would open no bigger than it was. Only the figure's own drawing
+   is styled: the close button has an icon that is also an svg. */
+.lightbox figure { width: 100%; }
+.lightbox figure > svg { width: min(100%, 1100px); max-width: 100%; height: auto; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); padding: clamp(12px, 3vw, 28px); background: var(--sky-2); border-radius: 10px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
 .lightbox figcaption { margin-top: 12px; color: #fff; font-size: 14.5px; text-align: center; max-width: 70ch; }
 .lightbox figure { margin: 0; display: grid; justify-items: center; }
-.lightbox-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--sun); color: var(--on-accent); box-shadow: 0 4px 0 var(--sun-deep); cursor: pointer; transition: transform 0.3s var(--ease); }
+.lightbox-close { position: fixed; top: 16px; right: 20px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--sun); color: var(--on-accent); box-shadow: 0 4px 0 var(--sun-deep); cursor: pointer; transition: transform 0.3s var(--ease); }
 .lightbox-close:hover { transform: rotate(90deg) scale(1.1); }
 @keyframes zoom-in { from { opacity: 0; transform: scale(0.86) rotate(-2deg); } }
 

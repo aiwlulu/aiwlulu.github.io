@@ -1,0 +1,13 @@
+---
+// A connector with an arrowhead, given as an SVG path (`d`).
+//   dashed   a reply or a weaker link
+//   flow     dashes that keep moving along the line, the way draw.io animates a connector
+//   travel   a dot that runs along the line once per cycle: { at: seconds into the cycle, cycle: seconds }
+// Motion stops when the reader asks for reduced motion.
+interface Props { d: string; dashed?: boolean; flow?: boolean; travel?: { at: number; cycle: number } }
+const { d, dashed = false, flow = false, travel } = Astro.props;
+---
+
+<path class:list={['dg-line', { 'is-dashed': dashed }]} d={d} />
+{flow && <path class="dg-flow" d={d} />}
+{travel && <circle class="dg-dot" r="5.5" style={`offset-path:path('${d}');animation-duration:${travel.cycle}s;animation-delay:${travel.at}s`} />}

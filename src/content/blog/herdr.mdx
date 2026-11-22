@@ -12,6 +12,8 @@ import inbox from '../../assets/posts/herdr-inbox.webp';
 import HerdrHosts from '../../components/diagrams/HerdrHosts.astro';
 import HerdrHandoff from '../../components/diagrams/HerdrHandoff.astro';
 import HerdrSessions from '../../components/diagrams/HerdrSessions.astro';
+import HerdrWhatSurvives from '../../components/diagrams/HerdrWhatSurvives.astro';
+import HerdrAlternatives from '../../components/diagrams/HerdrAlternatives.astro';
 
 Herdr 讓我關掉視窗後，還能回到原本的工作。
 
@@ -38,6 +40,8 @@ Herdr 讓我關掉視窗後，還能回到原本的工作。
 工作可以在自己的電腦跑，也可以放到另一台常開的電腦。圖上的 <dfn>SSH</dfn> 是一種加密的遠端連線方式。透過它，桌面或手機都能連回那台機器，查看同一個終端。工作在遠端執行時，你的筆電睡眠，遠端仍可繼續跑。
 
 <HerdrHosts />
+
+<HerdrWhatSurvives />
 
 | 你做了什麼 | 工作會怎樣？|
 | --- | --- |
@@ -88,6 +92,8 @@ herdr --session review agent read reviewer
 ## 優缺點與競品怎麼看？
 
 Herdr 的優點是把背景終端、agent 狀態和交接放在同一套操作裡。你可以從 Inbox 找到待處理的工作，再回到原終端回答，或直接把另一件事交給不同的 agent。取捨是使用前要先認清 App／Core 和 TUI 的分工，狀態提示也會受 agent 整合影響。跨裝置使用需要先打通 SSH，能持續跑多久則取決於執行主機。[Herdr App](https://herdr.dev/) · [Herdr TUI](https://herdr.dev/tui/)
+
+<HerdrAlternatives />
 
 | 工具 | 適合的工作方式 |
 | --- | --- |

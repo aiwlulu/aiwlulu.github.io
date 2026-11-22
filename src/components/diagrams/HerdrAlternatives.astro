@@ -1,0 +1,53 @@
+---
+// Herdr and the tools next to it, grouped by where you operate them.
+// A summary of the comparison table that follows it in the post.
+import Diagram from './Diagram.astro';
+import Room from './parts/Room.astro';
+
+const groups = [
+  {
+    plate: '在終端裡操作',
+    rows: [
+      { name: 'tmux', note: '已有 session、腳本和按鍵習慣' },
+      { name: 'Herdr TUI', note: 'detach、Agent 狀態與指令', strong: true },
+      { name: 'Zellij', note: '導覽提示、可還原的佈局' },
+    ],
+  },
+  {
+    plate: '桌面或手機介面',
+    rows: [
+      { name: 'Herdr App／Core', note: '多台主機，用 hc send 交接', strong: true },
+      { name: 'cmux（macOS）', note: '瀏覽器、終端、通知同一介面' },
+    ],
+  },
+];
+// Lay the groups out top to bottom: 44px per row, 8px between rows, 28px between groups.
+let y = 30;
+const laid = groups.map((g) => {
+  const top = y;
+  const rows = g.rows.map((r, i) => ({ ...r, y: top + 22 + i * 52 }));
+  const height = 22 + g.rows.length * 52 + 4;
+  y += height + 28;
+  return { ...g, top, height, rows };
+});
+const total = y - 28 + 16;
+---
+
+<Diagram
+  title="Herdr 與相近工具：在哪裡操作"
+  description="在終端裡操作的工具：tmux，適合已有 session、腳本和按鍵習慣的人；Herdr TUI，提供 detach、Agent 狀態與指令；Zellij，有導覽提示和可還原的佈局。提供桌面或手機介面的工具：Herdr App 與 Core，可查看多台主機並用 hc send 交接；cmux 是 macOS App，把瀏覽器、終端和通知放在同一個介面。"
+  height={total}
+>
+  {laid.map((g) => (
+    <>
+      <Room x={20} y={g.top} w={360} h={g.height} plate={g.plate} tone="sun" />
+      {g.rows.map((r) => (
+        <>
+          <rect class:list={['dg-box', { 'is-strong': r.strong }]} x="34" y={r.y} width="332" height="44" rx="12" />
+          <text class="dg-label dg-start" x="48" y={r.y + 22}>{r.name}</text>
+          <text class="dg-sub dg-end" x="352" y={r.y + 22}>{r.note}</text>
+        </>
+      ))}
+    </>
+  ))}
+</Diagram>

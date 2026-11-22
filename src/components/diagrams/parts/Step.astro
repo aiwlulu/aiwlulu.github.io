@@ -1,0 +1,9 @@
+---
+// A numbered dot. With `pulse` it pops once per cycle, at `at` seconds, to show the order.
+interface Props { x: number; y: number; n: number; pulse?: { at: number; cycle: number } }
+const { x, y, n, pulse } = Astro.props;
+---
+
+<g class:list={['dg-step', { 'is-pulse': !!pulse }]} style={pulse ? `animation-duration:${pulse.cycle}s;animation-delay:${pulse.at}s` : undefined}>
+  <circle cx={x} cy={y} r="11" /><text x={x} y={y}>{n}</text>
+</g>

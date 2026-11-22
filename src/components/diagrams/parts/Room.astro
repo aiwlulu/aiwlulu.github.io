@@ -1,0 +1,9 @@
+---
+// A dashed outline that groups things, with an optional name plate on its top edge.
+import Chip from './Chip.astro';
+interface Props { x: number; y: number; w: number; h: number; plate?: string; plateCode?: string; tone?: 'plain' | 'sun' | 'good' | 'bad' }
+const { x, y, w, h, plate, plateCode, tone = 'plain' } = Astro.props;
+---
+
+<rect class="dg-room" x={x} y={y} width={w} height={h} rx="18" />
+{(plate || plateCode) && <Chip x={x + w / 2} y={y} text={plate} code={plateCode} tone={tone} />}

@@ -1,0 +1,12 @@
+---
+// A small rounded label, centred on (x, y). Put one beside a line instead of writing on the line.
+// `tone` turns it into a name plate: 'sun' (yellow), 'good' (green) or 'bad' (coral).
+import { textWidth } from './measure';
+interface Props { x: number; y: number; text?: string; code?: string; tone?: 'plain' | 'sun' | 'good' | 'bad'; w?: number }
+const { x, y, text = '', code, tone = 'plain', w } = Astro.props;
+const width = w ?? Math.ceil(textWidth(text, 13) + (code ? textWidth(code, 11.2, true) + (text ? 5 : 0) : 0) + 26);
+const plate = tone !== 'plain';
+---
+
+<rect class:list={[plate ? 'dg-plate' : 'dg-chip', { 'is-good': tone === 'good', 'is-bad': tone === 'bad' }]} x={x - width / 2} y={y - 13} width={width} height="26" rx="13" />
+<text class:list={['dg-label', { 'dg-on-plate': plate }]} x={x} y={y}>{text}{code && <>{text && ' '}<tspan class="dg-code">{code}</tspan></>}</text>

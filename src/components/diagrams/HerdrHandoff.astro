@@ -1,6 +1,11 @@
 ---
 // Herdr: one agent hands a review to another terminal and gets the result back.
+// The three steps play in order, on a loop.
 import Diagram from './Diagram.astro';
+import Box from './parts/Box.astro';
+import Arrow from './parts/Arrow.astro';
+import Step from './parts/Step.astro';
+const cycle = 7;
 ---
 
 <Diagram
@@ -11,23 +16,21 @@ import Diagram from './Diagram.astro';
   <line class="dg-life" x1="84" y1="68" x2="84" y2="268" />
   <line class="dg-life" x1="316" y1="68" x2="316" y2="268" />
 
-  <rect class="dg-box is-strong" x="24" y="18" width="120" height="50" rx="14" />
-  <text x="84" y="43">實作者 <tspan class="dg-code">t1</tspan></text>
-  <rect class="dg-box is-strong" x="256" y="18" width="120" height="50" rx="14" />
-  <text x="316" y="43">審查者 <tspan class="dg-code">t7</tspan></text>
+  <Box x={24} y={18} w={120} label="實作者" code="t1" strong />
+  <Box x={256} y={18} w={120} label="審查者" code="t7" strong />
 
   <!-- 1: the request goes across. Each numbered dot sits where that step starts. -->
   <text class="dg-label" x="200" y="100"><tspan class="dg-code">hc send t7</tspan>　送出審查需求</text>
-  <path class="dg-line" d="M98 122H308" />
-  <g class="dg-step"><circle cx="84" cy="122" r="11" /><text x="84" y="122">1</text></g>
+  <Arrow d="M98 122H308" travel={{ at: 0.4, cycle }} />
+  <Step x={84} y={122} n={1} pulse={{ at: 0.2, cycle }} />
 
   <!-- 2: the reviewer reads -->
   <rect class="dg-note" x="262" y="148" width="108" height="40" rx="14" />
   <text class="dg-label" x="324" y="168">讀取 <tspan class="dg-code">diff</tspan></text>
-  <g class="dg-step"><circle cx="262" cy="168" r="11" /><text x="262" y="168">2</text></g>
+  <Step x={262} y={168} n={2} pulse={{ at: 2.4, cycle }} />
 
   <!-- 3: the result comes back, dashed because it is a reply -->
   <text class="dg-label" x="200" y="218"><tspan class="dg-code">hc send t1</tspan>　回傳審查結果</text>
-  <path class="dg-line is-dashed" d="M302 240H92" />
-  <g class="dg-step"><circle cx="316" cy="240" r="11" /><text x="316" y="240">3</text></g>
+  <Arrow d="M302 240H92" dashed travel={{ at: 4.2, cycle }} />
+  <Step x={316} y={240} n={3} pulse={{ at: 4, cycle }} />
 </Diagram>
