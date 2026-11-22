@@ -1,20 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86c5e2"/><stop offset="1" stop-color="#57a5d3"/></linearGradient>
-    <clipPath id="c"><circle cx="32" cy="32" r="32"/></clipPath>
-  </defs>
+  <defs><clipPath id="c"><circle cx="32" cy="32" r="32"/></clipPath></defs>
   <g clip-path="url(#c)">
-    <rect width="64" height="64" fill="url(#bg)"/>
-    <circle cx="32" cy="24" r="8.5" fill="#ffcb3d"/>
-    <g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M28 43C22 38.5 17.5 31 17 17"/>
-      <path d="M20 32 11.5 28.5"/>
-      <path d="M17.6 23.5 11 18"/>
-      <path d="M36 43C42 38.5 46.5 31 47 17"/>
-      <path d="M44 32 52.5 28.5"/>
-      <path d="M46.4 23.5 53 18"/>
+    <rect width="64" height="64" fill="#57a5d3"/>
+    <g fill="none" stroke="#fff" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M27.5 47C21 41 17 32 16.5 17"/>
+      <path d="M19.5 33.5 10.5 29"/>
+      <path d="M36.5 47C43 41 47 32 47.5 17"/>
+      <path d="M44.5 33.5 53.5 29"/>
     </g>
-    <path d="M0 53q5.33-4.5 10.67 0t10.67 0 10.67 0 10.67 0 10.67 0 10.67 0V64H0z" fill="#1f5f96"/>
-    <path d="M0 53q5.33-4.5 10.67 0t10.67 0 10.67 0 10.67 0 10.67 0 10.67 0" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
   </g>
 </svg>

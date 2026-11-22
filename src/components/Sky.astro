@@ -1,7 +1,7 @@
 ---
 // The whole page sits on a live sky: one fixed canvas behind everything. A veil of page colour
 // starts below the page head, so clouds stay vivid at the top and faint behind the content.
-// The sun and moon are painted by the shader itself.
+// The sky is a soft blue with realistic clouds and no sun; at night it shows stars.
 interface Props { tall?: boolean }
 const { tall = false } = Astro.props;
 ---

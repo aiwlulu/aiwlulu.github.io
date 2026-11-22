@@ -8,7 +8,7 @@ interface Palette {
 
 const night: Palette = { zenith: [0.07, 0.11, 0.26], mid: [0.13, 0.2, 0.4], horizon: [0.27, 0.36, 0.56], cloud: [0.46, 0.54, 0.72], shade: [0.16, 0.22, 0.4], glow: [0.86, 0.91, 1], seaFar: [0.28, 0.38, 0.58], seaMid: [0.11, 0.19, 0.38], seaNear: [0.04, 0.08, 0.21], seaLight: [0.82, 0.89, 1], night: 1 };
 const dawn: Palette = { zenith: [0.6, 0.7, 0.92], mid: [0.95, 0.78, 0.8], horizon: [1, 0.9, 0.78], cloud: [1, 0.96, 0.92], shade: [0.88, 0.72, 0.8], glow: [1, 0.84, 0.64], seaFar: [0.98, 0.86, 0.8], seaMid: [0.62, 0.68, 0.86], seaNear: [0.24, 0.38, 0.64], seaLight: [1, 0.96, 0.9], night: 0 };
-const day: Palette = { zenith: [0.4, 0.69, 0.95], mid: [0.6, 0.81, 0.97], horizon: [0.88, 0.94, 0.99], cloud: [1, 1, 1], shade: [0.74, 0.83, 0.94], glow: [1, 0.96, 0.82], seaFar: [0.72, 0.87, 0.94], seaMid: [0.36, 0.67, 0.85], seaNear: [0.11, 0.4, 0.67], seaLight: [1, 1, 1], night: 0 };
+const day: Palette = { zenith: [0.34, 0.66, 0.96], mid: [0.56, 0.8, 0.985], horizon: [0.86, 0.94, 0.995], cloud: [1, 1, 1], shade: [0.74, 0.84, 0.95], glow: [1, 0.96, 0.82], seaFar: [0.72, 0.87, 0.94], seaMid: [0.36, 0.67, 0.85], seaNear: [0.11, 0.4, 0.67], seaLight: [1, 1, 1], night: 0 };
 const dusk: Palette = { zenith: [0.6, 0.6, 0.86], mid: [0.97, 0.7, 0.58], horizon: [1, 0.85, 0.58], cloud: [1, 0.9, 0.76], shade: [0.76, 0.54, 0.66], glow: [1, 0.78, 0.46], seaFar: [1, 0.8, 0.6], seaMid: [0.58, 0.5, 0.7], seaNear: [0.2, 0.25, 0.5], seaLight: [1, 0.93, 0.78], night: 0 };
 
 const KEYS: [number, Palette][] = [[0, night], [4.6, night], [6, dawn], [8.5, day], [16, day], [18.2, dusk], [20.2, night], [24, night]];
