@@ -14,7 +14,7 @@ npm run check:seo  # 檢查 dist/ 每一頁的 SEO 基本項目
 npm run preview    # 預覽建構結果
 ```
 
-推送到 `master` 後，GitHub Actions 會建構、跑 SEO 檢查，通過才部署到 GitHub Pages。
+推送到 `main` 後，GitHub Actions 會建構、跑 SEO 檢查，通過才部署到 GitHub Pages。
 
 ## 寫一篇新文章
 
