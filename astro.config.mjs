@@ -31,5 +31,5 @@ export default defineConfig({
   redirects,
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   integrations: [mdx(), sitemap({ filter: (page) => !Object.keys(redirects).some((r) => decodeURI(page).endsWith(r + '/')) })],
-  markdown: { shikiConfig: { theme: 'github-light' } },
+  markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false } },
 });

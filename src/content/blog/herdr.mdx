@@ -10,16 +10,18 @@ tags: ['效率', 'AI']
 import { Image } from 'astro:assets';
 import inbox from '../../assets/posts/herdr-inbox.webp';
 
-一邊讓 Codex 寫功能，一邊請 Claude Code 做 code review，再開一個終端跑測試。工作一多，我最想知道兩件事：現在誰在等我？我關掉視窗之後，正在跑的工作還會繼續嗎？
+Herdr 讓我關掉視窗後，還能回到原本的工作。
 
-我最喜歡 Herdr 的兩點，就是可以關掉視窗、晚點回來接著做，以及讓不同終端裡的 agent 直接交接。這篇以官網的 **Herdr App** 為主，也會說明原版 **Herdr TUI** 怎麼做同樣的事。
+想像你一邊請同事寫稿，一邊請另一位同事校對。你離開座位，兩位同事可以繼續做手上的事。稿子寫完，也可以直接交給校對的人，省去你來回轉傳。Herdr 幫我用類似的方式管理 Codex、Claude Code 這些 <dfn>AI Agent</dfn>（可以接任務、操作工具的 AI 助手）。
+
+這些助手跑在<dfn>終端機</dfn>，也就是用文字輸入指令、看結果的視窗。**Herdr App** 提供桌面和手機介面，**Herdr TUI** 則是直接在終端機裡操作的版本。
 
 ## TL;DR
 
-- **關掉視窗可以繼續跑。** App 把終端交給 `herdr-core`，TUI 則有自己的 server。執行工作那台機器要保持運作。
-- **Agent 可以直接交接。** App／Core 用 `hc send` 把訊息送進另一個終端。TUI 可用 `herdr --session <名稱> agent prompt` 指定另一個本機 session。
-- **可以先看誰需要你。** 支援狀態回報的 agent 會出現在側欄或 Inbox。透過 SSH 連到遠端主機後，也能在手機查看並回覆。
-- **選哪一套看你平常在哪工作。** 想從桌面或手機管理多台機器，可以先看 App。偏好 SSH 和純終端操作，可以先看 TUI。
+- **關掉視窗可以繼續跑。** 只要執行工作的電腦和背景服務還在運作，重新開啟視窗就能接回去。
+- **Agent 可以直接交接。** 一個助手把審查需求送給另一個，對方看完再把結果送回來。
+- **可以先看誰需要你。** 側欄和 Inbox（待處理清單）會顯示支援回報狀態的 Agent。工作放在另一台電腦時，也能用手機連回去查看或回覆。
+- **看你習慣在哪裡操作。** 喜歡桌面或手機介面，可以先看 App。習慣用文字指令操作，可以先看 TUI。
 
 <figure class="post-figure">
   <Image src={inbox} width={310} alt="Herdr 手機版 Inbox，按需要回應、已完成、工作中與閒置顯示各終端的 agent" />
@@ -28,45 +30,72 @@ import inbox from '../../assets/posts/herdr-inbox.webp';
 
 ## 關掉視窗之後，工作留在哪裡？
 
-Herdr App 的視窗負責顯示終端，**背景服務 `herdr-core` 負責維持終端與行程**。本機有自己的 Core，遠端機器也可以有自己的 Core。從桌面切到手機，等於換一個地方看同一個終端。工作如果在遠端主機執行，你的筆電睡眠時，遠端仍可繼續跑。
+就像關掉廚房的監看畫面，廚房裡的電鍋還會繼續煮。Herdr App 的視窗是你看工作進度的地方，**背景服務 `herdr-core` 負責讓終端和裡面的程式繼續運作**。執行工作的電腦如果重開機，原本正在跑的程式就會停下來。
+
+工作可以在自己的電腦跑，也可以放到另一台常開的電腦。圖上的 <dfn>SSH</dfn> 是一種加密的遠端連線方式。透過它，桌面或手機都能連回那台機器，查看同一個終端。工作在遠端執行時，你的筆電睡眠，遠端仍可繼續跑。
 
 ```mermaid
+---
+config:
+  flowchart:
+    nodeSpacing: 22
+    rankSpacing: 42
+    curve: linear
+---
 flowchart TB
   accTitle: Herdr App 的終端與執行主機
   accDescr: 桌面可連到本機或遠端 Herdr Core，手機透過 SSH 連到遠端。終端行程由各機的 Core 持有。
-  desktop["桌面 App"] --> local["本機 herdr-core"]
-  desktop -->|SSH| remote["遠端 herdr-core"]
-  mobile["手機 App"] -->|SSH| remote
-  local --> shell["本機 shell / agent"]
-  remote --> job["遠端 agent / 測試"]
+  desktop("桌面 App")
+  mobile("手機 App")
+  local("本機 herdr-core<br/>終端、Agent")
+  remote("遠端 herdr-core<br/>Agent、測試")
+  desktop -->|本機| local
+  desktop -->|SSH| remote
+  mobile -->|SSH| remote
+  classDef runtime stroke-width:1.5px
+  class local,remote runtime
 ```
 
 | 你做了什麼 | 工作會怎樣？|
 | --- | --- |
-| 關掉 Herdr App 視窗 | 原本的終端和工作繼續執行，重新開啟 App 就能接回去。|
-| 在 App 裡關閉某個 pane 或 tab | 該窗格或分頁底下的終端會被結束。|
-| 執行工作的主機重啟，或 Core 真正停止 | 原行程會結束。App 可還原窗格和工作目錄，並開啟新的 shell。|
-| Herdr TUI 按 `Ctrl+B` 再按 `q` | 離開前端，TUI server 保持運作。預設 session 可再輸入 `herdr` 接回去。|
-| TUI server 停止後重新啟動 | 可還原佈局與工作目錄。部分 agent 在整合提供有效會話資料時，還能重新開啟原對話。原本的測試或開發伺服器要重新啟動。|
+| 關掉 App 視窗 | 終端與工作繼續執行，重開 App 就能接回去。|
+| 關閉窗格或分頁 | 裡面的工作會停止。|
+| 重開機或停止 Core | 工作會停止。App 可找回原本的窗格和資料夾，再開一個新的終端。|
+| 離開 TUI 畫面 | 按 `Ctrl+B` 再按 `q` 離開，工作仍會繼續。輸入 `herdr` 就能接回預設工作階段。|
+| 重啟 TUI 服務 | 可找回窗格和資料夾，部分 Agent 能重開原對話。測試和開發伺服器需要重跑。|
 
-App 和 TUI 各有自己的背景服務，**兩邊的工作階段互不相通**。TUI 另外有盡力而為的 live handoff，可在支援的更新流程中嘗試移交仍活著的終端。下班前最簡單的判斷是：我現在關的是視窗、窗格，還是執行工作的主機？[Herdr App 說明](https://github.com/herdrdev/herdr-app#find-your-work) · [TUI 的工作階段保存與還原](https://herdr.dev/tui/docs/session-state/)
+App 和 TUI 各有自己的背景服務，**兩邊的工作階段互不相通**。TUI 在支援的更新流程中，也可嘗試把執行中的終端移交給新版服務，這叫 <dfn>live handoff</dfn>。下班前可以先問自己，我關的是整個視窗、某個工作的窗格，還是執行工作的電腦？[Herdr App 說明](https://github.com/herdrdev/herdr-app#find-your-work) · [TUI 的工作階段保存與還原](https://herdr.dev/tui/docs/session-state/)
 
 ## 跨 Session 交接，可以少做哪些事？
 
-假設 Codex 在 `t1` 改功能，Claude Code 在 `t7` 做審查。用 App／Core 時，我可以請一個 agent 把需求用 `hc send` 送進另一個終端。收件端會收到文字並提交，完成後也能透過同樣的方式把摘要回傳。可以先用 `hc ls` 查終端 ID，用 `hc read` 看輸出。已設定的遠端機器也能用 `lab/t7` 這類完整位址。[Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-send) · [遠端機器文件](https://github.com/herdrdev/herdr-core/blob/master/docs/machines.md#what-runs-where)
+就像用通訊軟體請同事校稿。你送出「幫我看這段，改完回我」，對方就在自己的對話視窗裡收到。Herdr 也可以把一句話直接送到另一個 Agent 的終端。`t1` 和 `t7` 是兩個終端的編號，`hc send` 則是送出訊息的指令。
+
+圖裡，Codex 在 `t1` 改功能，Claude Code 在 `t7` 檢查 <dfn>diff</dfn>（像文件的修訂標記，列出哪些內容有變動）。審查完再把結果送回 `t1`。想自己查看回覆，可用 `hc read`。如果審查助手在另一台已設定的電腦，可以用 `lab/t7` 指定那台電腦上的終端。[Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-send) · [遠端機器文件](https://github.com/herdrdev/herdr-core/blob/master/docs/machines.md#what-runs-where)
 
 ```mermaid
+---
+config:
+  sequence:
+    mirrorActors: false
+    width: 108
+    height: 42
+    actorMargin: 68
+    diagramMarginX: 12
+    diagramMarginY: 10
+    messageMargin: 30
+    noteMargin: 8
+---
 sequenceDiagram
   accTitle: 兩個 agent 透過 Herdr Core 交接審查
   accDescr: 實作者送審查需求給另一個終端。審查者看完 diff 後，將結果送回實作者的終端。
   participant A as 實作者 t1
   participant B as 審查者 t7
-  A->>B: hc send t7：請審查這份 diff
-  Note over B: 在自己的終端讀取 diff
-  B-->>A: hc send t1：回報問題與檔案位置
+  A->>B: hc send t7 · 送出審查需求
+  Note over B: 讀取 diff
+  B-->>A: hc send t1 · 回傳審查結果
 ```
 
-Core 也可以用 `hc run --bg` 開另一個終端跑助手。若助手是從 Core 裡的終端啟動，父終端能收到助手退出或需要輸入的通知。要把審查結論送回去，可以請助手明確呼叫 `hc send`，或在原終端讀取輸出。**交接的是訊息，收件 agent 仍要拿得到分支、diff 或檔案。** 我會在訊息裡給 commit、檔案範圍，以及希望對方回報的格式。[herdr-core 官方介紹](https://herdr.dev/core/) · [Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md)
+就像請同事校稿時要附上檔案或文件連結，**收到訊息的 Agent 也要讀得到要審查的檔案**。我會在訊息裡指定 <dfn>commit</dfn>（某一次保存下來的程式改動）、檔案範圍，以及希望對方回報的格式。需要另開助手時，`hc run --bg` 能在背景開一個終端。原本的終端可收到助手退出或需要輸入的通知，審查結論則可以透過 `hc send` 明確送回來。[herdr-core 官方介紹](https://herdr.dev/core/) · [Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md)
 
 下面的 `t7` 請換成 `hc ls` 查到的審查終端。目標應該是已經開啟、準備收提示的 agent。
 
@@ -76,7 +105,7 @@ hc send t7 '請審查最新一個 commit 的 diff，列出需要補的測試。�
 hc read t7
 ```
 
-如果用的是 **Herdr TUI**，named session 各有自己的 server 與 socket。假設 `review` session 已在執行，裡面有別名叫 `reviewer` 的 agent，可以從另一個 session 這樣送訊息：
+在 **Herdr TUI** 裡，<dfn>具名工作階段</dfn>（named session）像是各自掛了門牌的工作室。每個房間有自己的終端和背景服務，送訊息時要先填對門牌。假設 `review` 工作階段已在執行，裡面有個叫 `reviewer` 的 Agent，可以從另一個工作階段這樣送訊息：
 
 ```bash
 herdr --session review agent list
@@ -88,9 +117,9 @@ herdr --session review agent read reviewer
 
 ## 我還會用哪些功能？
 
-- **用 Inbox 找到需要回應的工作。** 多個 agent 同時跑時，可以先看哪些卡在提問或等待批准。App 依賴 agent 回報 OSC 7501 狀態。能在終端執行的工具都可以開，狀態是否出現在側欄要看整合。TUI 則有自己的 agent 偵測與整合機制。[App 常見問題](https://herdr.dev/#questions) · [TUI 支援的 Agent](https://herdr.dev/tui/docs/agents/)
+- **用 Inbox 找到需要回應的工作。** 像會議室門口的狀態牌，你從走廊就能看到哪間還在開會。<dfn>OSC 7501</dfn> 是一種開放規格，讓支援它的 Agent 透過終端送一小段訊號，像是把門牌換成「工作中」「等待你」或「已完成」。Herdr App 收到訊號後，在側欄和 Inbox 更新狀態。未回報狀態的工具仍可在終端執行。TUI 則有自己的 Agent 偵測和整合方式。[herdr-core 官方說明](https://herdr.dev/core/) · [TUI 支援的 Agent](https://herdr.dev/tui/docs/agents/)
 - **把長任務留在遠端。** 有一台常開的機器時，可以把長時間測試放到那裡，用桌面或手機透過 SSH 連回去。跨裝置能查看同一份終端畫面，需要回覆時再接手。[Herdr Mobile](https://herdr.dev/mobile/) · [Core 遠端機器文件](https://github.com/herdrdev/herdr-core/blob/master/docs/machines.md)
-- **讓並行修改各有自己的 checkout。** 我會用工作區收納同一個 repo 的任務。有兩個 agent 會同時改檔時，再用 Git worktree 隔開；TUI 有 `herdr worktree create` 和 `herdr worktree open` 幫忙管理。[TUI Worktree 指令](https://herdr.dev/tui/docs/cli-reference/#worktrees)
+- **讓兩個助手各改各的副本。** 就像兩個人分別拿一份草稿修改，最後再核對要合併哪些改動。<dfn>Git worktree</dfn> 讓同一個專案有多個獨立的工作目錄。TUI 可以用 `herdr worktree create` 和 `herdr worktree open` 管理它們。[TUI Worktree 指令](https://herdr.dev/tui/docs/cli-reference/#worktrees)
 
 ## 優缺點與競品怎麼看？
 

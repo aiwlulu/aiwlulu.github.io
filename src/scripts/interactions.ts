@@ -120,6 +120,25 @@ function openZoom(img: HTMLImageElement) {
 // ---- on every page -------------------------------------------------------------------
 
 function setupPage() {
+  // Visual wrapping leaves the code text and clipboard line breaks intact.
+  document.querySelectorAll<HTMLPreElement>('.prose pre:has(> code):not([data-language="mermaid"])').forEach((pre) => {
+    if (pre.parentElement?.classList.contains('post-code')) return;
+    const block = document.createElement('div');
+    block.className = 'post-code';
+    const toolbar = document.createElement('div');
+    toolbar.className = 'post-code-toolbar';
+    const language = document.createElement('span');
+    language.textContent = pre.dataset.language === 'bash' ? 'Shell' : pre.dataset.language || '程式碼';
+    const label = document.createElement('label');
+    const toggle = document.createElement('input');
+    toggle.type = 'checkbox';
+    toggle.checked = true;
+    label.append(toggle, '自動換行');
+    toggle.addEventListener('change', () => pre.classList.toggle('no-wrap', !toggle.checked));
+    toolbar.append(language, label);
+    pre.before(block);
+    block.append(toolbar, pre);
+  });
   syncSkyMenu();
   // Rise-in on scroll.
   const items = document.querySelectorAll<HTMLElement>('.reveal:not(.in)');
