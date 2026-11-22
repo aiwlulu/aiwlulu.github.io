@@ -9,12 +9,13 @@ const year = new Date().getFullYear();
   <div class="sea-content wrap">
     <p class="sea-name">{SITE.name}</p>
     <nav class="sea-links" aria-label="頁尾">
-      <a href="/blog/">文章</a>
-      <a href="/about/">關於</a>
+      <a href="/blog/"><Icon name="book-open" size={15} />文章</a>
+      <a href="/about/"><Icon name="user-round" size={15} />關於</a>
       <a href="/rss.xml"><Icon name="rss" size={15} />RSS</a>
       <a href={SITE.github} rel="me noopener"><Icon name="github" size={15} />GitHub</a>
     </nav>
     <p class="sea-copy">© {SITE.since}-{year} {SITE.author}</p>
+    <a class="sea-top" href="#main" aria-label="回到頂端"><Icon name="arrow-up" size={18} /></a>
   </div>
 </footer>
 
@@ -68,4 +69,6 @@ const year = new Date().getFullYear();
   .sea-links a { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; padding: 6px 0; font-size: 14.5px; }
   .sea-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
   .sea-copy { margin: 0; font-size: 13.5px; opacity: 0.92; }
+  .sea-top { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: inherit; background: rgb(255 255 255 / 0.16); border: 1px solid rgb(255 255 255 / 0.45); backdrop-filter: blur(6px); transition: background 0.2s, transform 0.2s; }
+  .sea-top:hover { background: rgb(255 255 255 / 0.3); transform: translateY(-3px); }
 </style>

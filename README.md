@@ -2,7 +2,7 @@
 
 <https://aiwlulu.github.io>
 
-用 [Astro](https://astro.build) 建構的靜態部落格。上方是即時計算的雲，頁尾是即時計算的海（WebGL shader）。
+用 [Astro](https://astro.build) 建構的靜態部落格，圖示用 [Lucide](https://lucide.dev)。上方是即時計算的雲，頁尾是即時計算的海（WebGL shader）。
 
 ## 常用指令
 
@@ -55,7 +55,8 @@ tags: ['學習']
 | `src/styles/tokens.css` | 色彩與尺度變數，來自 design-library 的 `sea-breeze` |
 | `astro.config.mjs` | 網站設定與舊網址轉址 |
 | `scripts/check-seo.mjs` | SEO 檢查 |
-| `scripts/make-og.mjs` | 產生分享圖 `public/og.png` |
+| `src/assets/logo.svg` | Logo 原始檔 |
+| `scripts/make-icons.mjs` | 從 logo 產生 favicon、各尺寸圖示與分享圖 `public/og.png`（`npm run icons`） |
 
 ## SEO 與 AEO 已經做的事
 

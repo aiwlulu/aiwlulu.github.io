@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Crumbs from '../../components/Crumbs.astro';
 import YouTube from '../../components/YouTube.astro';
 import Icon from '../../components/Icon.astro';
-import { SITE, getPosts, formatDate, tagSlug, type Post } from '../../site';
+import { SITE, getPosts, formatDate, readingMinutes, tagSlug, type Post } from '../../site';
 import { breadcrumbs, blogPosting } from '../../schema';
 
 export async function getStaticPaths() {
@@ -29,13 +29,14 @@ const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear
       <h1>{title}</h1>
       {subtitle && <p class="lede">{subtitle}</p>}
       <div class="post-meta">
-        <a class="pill" href={`/categories/${category}/`}>{category}</a>
-        <span>By {SITE.author}</span>
-        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        <a class="pill" href={`/categories/${category}/`}><Icon name="folder" size={13} />{category}</a>
+        <span class="meta"><Icon name="user-round" size={15} />{SITE.author}</span>
+        <span class="meta"><Icon name="calendar" size={15} /><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></span>
+        <span class="meta"><Icon name="clock" size={15} />約 {readingMinutes(post)} 分鐘</span>
       </div>
     </header>
     <div class="wrap">
-      {ageYears >= 2 && <p class="note">這篇文章寫於 {pubDate.getFullYear()} 年，保留當時的觀點與紀錄，部分資訊可能已隨時間改變。</p>}
+      {ageYears >= 2 && <p class="note"><Icon name="info" size={17} /><span>這篇文章寫於 {pubDate.getFullYear()} 年，保留當時的觀點與紀錄，部分資訊可能已隨時間改變。</span></p>}
       <div class="prose">
         <Content components={{ YT: YouTube }} />
       </div>
@@ -45,11 +46,33 @@ const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear
             {tags.map((t) => <li><a class="pill" href={`/tags/${tagSlug(t)}/`}><Icon name="tag" size={13} />{t}</a></li>)}
           </ul>
         )}
+        <div class="actions">
+          <button class="btn ghost" type="button" data-copy-link><Icon name="link" size={16} class="when-idle" /><Icon name="check" size={16} class="when-done" /><span data-copy-label>複製連結</span></button>
+          <a class="btn ghost" href="#main"><Icon name="arrow-up" size={16} />回到頂端</a>
+        </div>
         <nav class="pager" aria-label="上下篇">
-          {older && <a class="prev" href={`/blog/${older.id}/`}><small>上一篇</small>{older.data.title}</a>}
-          {newer && <a class="next" href={`/blog/${newer.id}/`}><small>下一篇</small>{newer.data.title}</a>}
+          {older && <a class="prev" href={`/blog/${older.id}/`}><Icon name="chevron-left" size={20} /><span><small>上一篇</small>{older.data.title}</span></a>}
+          {newer && <a class="next" href={`/blog/${newer.id}/`}><span><small>下一篇</small>{newer.data.title}</span><Icon name="chevron-right" size={20} /></a>}
         </nav>
       </footer>
     </div>
   </article>
 </Base>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-copy-link]');
+  const label = btn?.querySelector<HTMLElement>('[data-copy-label]');
+  btn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(location.origin + location.pathname);
+      btn.classList.add('is-done');
+      if (label) label.textContent = '已複製';
+      setTimeout(() => {
+        btn.classList.remove('is-done');
+        if (label) label.textContent = '複製連結';
+      }, 2000);
+    } catch {
+      if (label) label.textContent = '無法複製，請手動複製網址';
+    }
+  });
+</script>

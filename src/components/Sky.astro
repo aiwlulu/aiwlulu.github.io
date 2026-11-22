@@ -21,7 +21,6 @@ const { tall = false } = Astro.props;
     z-index: -1;
     /* Shown until the shader draws, and when WebGL is unavailable. */
     background:
-      radial-gradient(60% 80% at 78% 22%, var(--sun) 0%, transparent 60%),
       linear-gradient(to bottom, var(--sky-top), var(--sky-low));
     -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
     mask-image: linear-gradient(to bottom, #000 55%, transparent);

@@ -10,6 +10,7 @@ export const person = {
   name: SITE.author,
   url: abs('/about/'),
   description: SITE.tagline,
+  image: abs('/favicon.png'),
   sameAs: [SITE.github],
 };
 

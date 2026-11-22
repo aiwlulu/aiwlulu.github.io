@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PostCard from '../components/PostCard.astro';
 import Sidebar from '../components/Sidebar.astro';
+import Icon from '../components/Icon.astro';
 import { SITE, getPosts } from '../site';
 import { website } from '../schema';
 const posts = await getPosts();
@@ -11,6 +12,10 @@ const posts = await getPosts();
   <section class="hero wrap">
     <h1>{SITE.name}</h1>
     <p>{SITE.tagline}</p>
+    <div class="hero-actions">
+      <a class="btn" href="#latest"><Icon name="book-open" size={17} />開始閱讀</a>
+      <a class="btn ghost" href="/about/"><Icon name="user-round" size={17} />關於我</a>
+    </div>
   </section>
   <div class="wrap cols">
     <section aria-labelledby="latest">

@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Crumbs from '../components/Crumbs.astro';
+import Icon from '../components/Icon.astro';
 import { SITE } from '../site';
 import { breadcrumbs, person } from '../schema';
 const crumbs = [{ name: '首頁', href: '/' }, { name: '關於' }];
@@ -17,7 +18,10 @@ const profile = { '@context': 'https://schema.org', '@type': 'ProfilePage', main
       <h2 style="margin-top:0">{SITE.author}</h2>
       <p>{SITE.tagline}</p>
       <p>2020 至 2021 年的文章保留當時的觀點與紀錄，部分資訊可能已隨時間改變。</p>
-      <p><a href="/blog/">看看所有文章</a></p>
+      <div class="actions">
+        <a class="btn" href="/blog/"><Icon name="book-open" size={17} />看看所有文章</a>
+        <a class="btn ghost" href={SITE.github} rel="me noopener"><Icon name="github" size={17} />GitHub</a>
+      </div>
     </div>
   </div>
 </Base>

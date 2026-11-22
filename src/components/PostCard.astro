@@ -1,5 +1,5 @@
 ---
-import { formatDate, type Post } from '../site';
+import { formatDate, readingMinutes, type Post } from '../site';
 import Icon from './Icon.astro';
 interface Props { post: Post; heading?: 'h2' | 'h3' }
 const { post, heading: H = 'h2' } = Astro.props;
@@ -8,12 +8,13 @@ const { title, subtitle, pubDate, category } = post.data;
 
 <article class="card">
   <div class="card-meta">
-    <a class="pill" href={`/categories/${category}/`}>{category}</a>
-    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+    <a class="pill" href={`/categories/${category}/`}><Icon name="folder" size={13} />{category}</a>
+    <span class="meta"><Icon name="calendar" size={14} /><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></span>
+    <span class="meta"><Icon name="clock" size={14} />約 {readingMinutes(post)} 分鐘</span>
   </div>
   <H class="card-title"><a href={`/blog/${post.id}/`}>{title}</a></H>
   {subtitle && <p class="card-sub">{subtitle}</p>}
-  <span class="card-more" aria-hidden="true">閱讀全文<Icon name="arrow" size={16} /></span>
+  <span class="card-more" aria-hidden="true">閱讀全文<Icon name="arrow-right" size={16} /></span>
 </article>
 
 <style>

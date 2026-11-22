@@ -1,10 +1,16 @@
 ---
+import Icon from './Icon.astro';
 interface Props { items: { name: string; href?: string }[] }
 const { items } = Astro.props;
 ---
 
 <nav aria-label="麵包屑">
   <ol class="crumbs">
-    {items.map((i) => <li>{i.href ? <a href={i.href}>{i.name}</a> : <span aria-current="page">{i.name}</span>}</li>)}
+    {items.map((item, i) => (
+      <li>
+        {i > 0 && <Icon name="chevron-right" size={14} />}
+        {item.href ? <a href={item.href}>{i === 0 && <Icon name="house" size={14} />}{item.name}</a> : <span aria-current="page">{item.name}</span>}
+      </li>
+    ))}
   </ol>
 </nav>
