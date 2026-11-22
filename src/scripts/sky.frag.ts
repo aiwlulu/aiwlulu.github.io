@@ -44,7 +44,7 @@ float cumulus(vec2 q, float t) {
   // Medium-sized lumps give each cloud its rounded, piled-up puffs.
   float puff = fbm(q * 2.3 + w * 1.8 + 3.0);
   float field = fbm3(q * 0.16 + w * 0.5 + 21.0);
-  return base + (puff - 0.5) * 0.20 + (field - 0.5) * 0.26;
+  return base + (puff - 0.5) * 0.24 + (field - 0.5) * 0.22;
 }
 
 void main() {
@@ -80,7 +80,28 @@ void main() {
   }
 
   vec3 sunDir = normalize(vec3(0.55, 0.62, 0.56));
-  col = mix(col, uGlow, 0.30 * pow(max(dot(rd, sunDir), 0.0), 5.0));
+
+  // The sun, painted into the sky at the upper right (the moon at night). It is drawn before the
+  // clouds, so they drift across it and its light soaks into their edges.
+  vec2 orb = vec2(0.5 * uRes.x / uRes.y - mix(0.16, 0.44, wide), 0.31) + m * vec2(0.02, -0.012);
+  vec2 toOrb = p - orb;
+  float od = length(toOrb);
+  float ang = atan(toOrb.y, toOrb.x);
+  // A slightly uneven rim, as a brush would leave.
+  float rimWobble = (noise(vec2(ang * 3.0, 1.0)) - 0.5) * 0.004;
+  float day = 1.0 - uNight;
+  // Sun: a white-hot core, a warm disc, a wide soft bloom and faint slow-turning rays.
+  float sunDisc = smoothstep(0.050 + rimWobble, 0.034, od);
+  float bloom = 0.62 * exp(-od * 7.5) + 0.22 * exp(-od * 2.6);
+  float rays = pow(noise(vec2(ang * 5.0 + uTime * 0.02, 3.0)), 3.0) * exp(-od * 4.2) * 0.40;
+  col = mix(col, uGlow, clamp(bloom + rays, 0.0, 1.0) * day);
+  col = mix(col, mix(uGlow, vec3(1.0, 0.995, 0.95), 0.75), sunDisc * day);
+  // Moon: a pale disc with soft grey seas and a cool halo.
+  float moonDisc = smoothstep(0.043 + rimWobble, 0.036, od);
+  float seas = smoothstep(0.42, 0.68, fbm3(toOrb * 34.0 + 5.0)) * 0.20;
+  col = mix(col, vec3(0.80, 0.86, 1.0), (0.34 * exp(-od * 9.0) + 0.10 * exp(-od * 3.0)) * uNight);
+  col = mix(col, vec3(0.95, 0.96, 1.0) * (1.0 - seas), moonDisc * uNight);
+  float orbLight = exp(-od * 3.2);
 
   vec2 q = rd.xz / e * mix(2.7, 1.55, wide);
   float far = smoothstep(0.10, 0.34, e);
@@ -93,20 +114,24 @@ void main() {
   // instead of ending in a drawn line.
   float d = cumulus(q, uTime);
   float fray = (fbm(q * 5.5 + 5.0) - 0.5) * 0.085;
-  float body = smoothstep(0.405, 0.500, d + fray);
+  float body = smoothstep(0.375, 0.465, d + fray);
   // Volume: light falls from the sun side, the thick middle and the underside sit in shade.
   float lit = smoothstep(-0.07, 0.09, d - cumulus(q + sunDir.xz * 0.34, uTime));
-  float thick = smoothstep(0.47, 0.68, d);
+  float thick = smoothstep(0.43, 0.64, d);
   float under = smoothstep(-0.05, 0.08, d - cumulus(q + vec2(0.0, 0.22), uTime));
-  float light = clamp(0.34 + 0.66 * lit - thick * 0.26 * (1.0 - lit) - under * 0.12, 0.0, 1.0);
+  // Thick cloud is bright where the sun reaches it and clearly shaded where it does not.
+  float light = clamp(0.36 + 0.64 * lit + thick * 0.10 * lit - thick * 0.34 * (1.0 - lit) - under * 0.14, 0.0, 1.0);
   vec3 cloud = mix(uShade, uCloud, light);
+  // Cloud near the sun or moon glows, most of all at its thin edges.
+  cloud = mix(cloud, mix(uGlow, vec3(1.0), 0.5), orbLight * (0.22 + 0.45 * (1.0 - thick)) * mix(1.0, 0.45, uNight));
   // Edges take a little of the sky colour, as thin cloud does.
-  cloud = mix(cloud, col, (1.0 - smoothstep(0.405, 0.57, d + fray)) * 0.22);
+  cloud = mix(cloud, col, (1.0 - smoothstep(0.375, 0.52, d + fray)) * 0.18);
   cloud = mix(cloud, uHorizon, (1.0 - far) * 0.55);
-  float alpha = body * mix(0.5, 0.96, far) * smoothstep(0.04, 0.14, e);
+  float alpha = body * mix(0.55, 1.0, far) * smoothstep(0.04, 0.14, e);
+  alpha *= 1.0 - 0.35 * (1.0 - thick) * smoothstep(0.09, 0.0, od);
   col = mix(col, cloud, alpha);
   // A faint trace of the watercolour edge is kept, so the clouds still belong with the sea.
-  float rim = body * (1.0 - smoothstep(0.500, 0.53, d + fray));
+  float rim = body * (1.0 - smoothstep(0.465, 0.495, d + fray));
   col = mix(col, uShade * 0.95, rim * 0.07 * far);
 
   // Paper granulation.

@@ -23,8 +23,6 @@ document.addEventListener('astro:after-swap', () => {
   if (carried.skyHue) document.documentElement.dataset.skyHue = carried.skyHue;
   if (carried.theme) document.documentElement.dataset.theme = carried.theme;
   document.querySelector('.loadbar')?.classList.add('is-done');
-  // The sky element is carried over between pages; only its height changes.
-  document.querySelector('.sky')?.classList.toggle('is-tall', document.body.dataset.sky === 'tall');
 });
 
 // Pointer position drives the sky parallax and the cursor companion.

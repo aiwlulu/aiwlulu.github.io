@@ -51,7 +51,7 @@ void main() {
   vec3 col;
   if (uv.y > HORIZON) {
     // A pale strip of sky; the canvas fades out above it.
-    col = mix(uHorizon, uGlow, 0.25 * exp(-abs(uv.x - 0.5 - (uMouse.x - 0.5) * 0.1) * 6.0));
+    col = mix(uHorizon, uGlow, 0.25 * exp(-abs(uv.x - 0.70 - (uMouse.x - 0.5) * 0.1) * 6.0));
   } else {
     float depth = (HORIZON - uv.y) / HORIZON;          // 0 at the horizon, 1 at the bottom
     float z = 1.0 / (depth + 0.07);                     // perspective: far water is compressed
@@ -81,7 +81,8 @@ void main() {
     col = mix(col, mix(lighter, uSeaLight, 0.55), crest * (0.75 - depth * 0.3));
 
     // Light on the water: a path under the sun or moon, painted as broken dry-brush dashes.
-    float sunX = 0.5 + 0.11 * clamp(aspect, 0.5, 2.4) / 2.4 + (uMouse.x - 0.5) * 0.12;
+    // Under the sun (or moon), which sits toward the right of the sky.
+    float sunX = 0.70 + (uMouse.x - 0.5) * 0.10;
     float path = exp(-pow((uv.x - sunX) / (0.05 + depth * 0.16), 2.0));
     float dash = smoothstep(0.60, 0.63, fbm(vec2(p.x * 2.4 - uTime * 0.05, p.y * 7.0 - uTime * 0.5)));
     float sparkle = smoothstep(0.66, 0.69, n) * 0.35;
