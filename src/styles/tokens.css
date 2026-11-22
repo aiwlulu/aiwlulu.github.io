@@ -1,7 +1,7 @@
-/* Paper Sea: a paper-collage look. Cream paper pages, a cut-paper sky on top and a cut-paper
-   sea at the bottom. Semantic names only; components never use raw hex. Light only. */
+/* Paper Sea: a paper-collage look on a live sky. Paper cards and hand-drawn marks sit on a
+   pale sky-blue page; real-looking clouds drift behind and a real-looking sea closes the page. Semantic names only; components never use raw hex. Light only. */
 :root {
-  --page: #fbf8f1;
+  --page: #eef6fc;
   --surface: #fffdf8;
   --surface-2: #f3eee1;
   --line: #e6dfcf;
@@ -41,9 +41,9 @@
   --cut: drop-shadow(0 3px 0 rgb(34 49 63 / 0.08));
   --sky-tall: clamp(460px, 66vh, 620px);
   --wrap: 1040px;
-  --prose: 700px;
+  --prose: 780px;
   --ease: cubic-bezier(0.34, 1.4, 0.64, 1);
-  --font: 'Lato', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --font: 'Chiron GoRound TC', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   /* Fine paper grain, drawn once and tiled. */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .13 0 0 0 0 .19 0 0 0 0 .25 0 0 0 .055 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");

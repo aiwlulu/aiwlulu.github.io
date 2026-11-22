@@ -22,7 +22,7 @@ const nav = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#cfe6f5" />
+    <meta name="theme-color" content="#9ccbf5" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -44,13 +44,17 @@ const nav = [
       </a>
       <nav class="nav" aria-label="主要">
         {nav.map((n) => <a href={n.href} aria-current={n.on ? 'page' : undefined}><Icon name={n.icon} size={16} />{n.label}</a>)}
-        <a href={SITE.github} rel="me noopener" class="nav-icon" aria-label="GitHub"><Icon name="github" /></a>
+        <a href={SITE.github} target="_blank" rel="me noopener noreferrer" class="nav-icon" aria-label="GitHub（另開視窗）"><Icon name="github" /></a>
       </nav>
     </header>
     <main id="main">
       <slot />
     </main>
     <Sea />
+    <dialog class="lightbox" transition:persist="lightbox" aria-label="放大的圖片">
+      <button class="lightbox-close" type="button" aria-label="關閉"><Icon name="x" size={20} /></button>
+      <figure><figcaption></figcaption></figure>
+    </dialog>
     <div class="cursor" transition:persist="cursor" aria-hidden="true"></div>
     <script>
       import '../scripts/interactions';

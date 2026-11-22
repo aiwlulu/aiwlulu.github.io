@@ -1,7 +1,7 @@
 ---
 // One compact row of topic filters above a post list. Tags that only have a single post are
 // left out here (they would each lead to a one-item page) and stay reachable from /tags/.
-import { getPosts, countBy, tagSlug } from '../site';
+import { getPosts, countBy, tagSlug, topicIcon } from '../site';
 import Icon from './Icon.astro';
 interface Props { current?: string }
 const { current = '/blog/' } = Astro.props;
@@ -10,8 +10,8 @@ const categories = countBy(posts, (p) => [p.data.category]);
 const tags = countBy(posts, (p) => p.data.tags).filter(([, n]) => n > 1);
 const items = [
   { href: '/blog/', label: '全部', count: posts.length, icon: 'book-open' as const },
-  ...categories.map(([c, n]) => ({ href: `/categories/${c}/`, label: c, count: n, icon: 'folder' as const })),
-  ...tags.map(([t, n]) => ({ href: `/tags/${tagSlug(t)}/`, label: t, count: n, icon: 'tag' as const })),
+  ...categories.map(([c, n]) => ({ href: `/categories/${c}/`, label: c, count: n, icon: topicIcon(c, 'folder') })),
+  ...tags.map(([t, n]) => ({ href: `/tags/${tagSlug(t)}/`, label: t, count: n, icon: topicIcon(t, 'tag') })),
 ];
 ---
 

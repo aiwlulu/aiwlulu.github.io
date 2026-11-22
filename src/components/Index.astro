@@ -3,6 +3,8 @@
 import Base from '../layouts/Base.astro';
 import Crumbs from './Crumbs.astro';
 import { breadcrumbs } from '../schema';
+import Icon from './Icon.astro';
+import { topicIcon } from '../site';
 interface Props { title: string; description: string; items: { name: string; href: string; count: number }[] }
 const { title, description, items } = Astro.props;
 const crumbs = [{ name: '首頁', href: '/' }, { name: '文章', href: '/blog/' }, { name: title }];
@@ -15,7 +17,7 @@ const crumbs = [{ name: '首頁', href: '/' }, { name: '文章', href: '/blog/' 
   </div>
   <div class="wrap">
     <ul class="pills">
-      {items.map((i) => <li><a class="pill tag" style="font-size:15.5px;padding:8px 18px" href={i.href}>{i.name}<span class="n">{i.count}</span></a></li>)}
+      {items.map((i) => <li><a class="pill tag" style="font-size:15.5px;padding:8px 18px" href={i.href}><Icon name={topicIcon(i.name, 'tag')} size={15} />{i.name}<span class="n">{i.count}</span></a></li>)}
     </ul>
   </div>
 </Base>

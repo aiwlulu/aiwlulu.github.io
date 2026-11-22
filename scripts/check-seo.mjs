@@ -63,6 +63,10 @@ for (const file of pages) {
     if (!/\balt\b/.test(img)) fail(page, `image without alt: ${img.slice(0, 80)}`);
     if (!/\bwidth=/.test(img) || !/\bheight=/.test(img)) fail(page, `image without width/height (causes layout shift): ${img.slice(0, 80)}`);
   }
+  for (const a of html.match(/<a\b[^>]*href="https?:\/\/[^"]*"[^>]*>/g) ?? []) {
+    if (a.includes(`href="${SITE}`)) continue;
+    if (!/target="_blank"/.test(a) || !/rel="[^"]*noopener/.test(a)) fail(page, `external link does not open in a new tab: ${a.slice(0, 90)}`);
+  }
   for (const block of html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)) {
     try { JSON.parse(block[1]); } catch { fail(page, 'JSON-LD does not parse'); }
   }

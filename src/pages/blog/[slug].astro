@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Crumbs from '../../components/Crumbs.astro';
 import YouTube from '../../components/YouTube.astro';
 import Icon from '../../components/Icon.astro';
-import { SITE, getPosts, formatDate, readingMinutes, tagSlug, type Post } from '../../site';
+import { SITE, getPosts, formatDate, readingMinutes, tagSlug, topicIcon, type Post } from '../../site';
 import { breadcrumbs, blogPosting } from '../../schema';
 
 export async function getStaticPaths() {
@@ -25,12 +25,12 @@ const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear
 
 <Base title={title} description={description} type="article" published={pubDate} modified={updatedDate} tags={tags} progress jsonLd={[blogPosting(post, '/og.png'), breadcrumbs(crumbs)]}>
   <article>
-    <header class="head wrap narrow">
+    <header class="head wrap post-head">
       <Crumbs items={crumbs} />
       <h1>{title}</h1>
       {subtitle && <p class="lede"><span class="marker">{subtitle}</span></p>}
       <div class="post-meta">
-        <a class="pill" href={`/categories/${category}/`}><Icon name="folder" size={13} />{category}</a>
+        <a class="pill" href={`/categories/${category}/`}><Icon name={topicIcon(category, 'folder')} size={13} />{category}</a>
         <span class="meta"><Icon name="user-round" size={15} />{SITE.author}</span>
         <span class="meta"><Icon name="calendar" size={15} /><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></span>
         <span class="meta"><Icon name="clock" size={15} />約 {readingMinutes(post)} 分鐘</span>
@@ -53,7 +53,7 @@ const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear
         <footer class="post-foot">
           {tags.length > 0 && (
             <ul class="pills" aria-label="標籤">
-              {tags.map((t) => <li><a class="pill tag" href={`/tags/${tagSlug(t)}/`}><Icon name="tag" size={13} />{t}</a></li>)}
+              {tags.map((t) => <li><a class="pill tag" href={`/tags/${tagSlug(t)}/`}><Icon name={topicIcon(t, 'tag')} size={13} />{t}</a></li>)}
             </ul>
           )}
           <div class="actions">
@@ -65,6 +65,13 @@ const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear
             <p><strong>{SITE.author}</strong><br />{SITE.tagline}</p>
             <a class="btn small" href="/about/">關於我<Icon name="arrow-right" size={15} /></a>
           </div>
+          <section class="comments" aria-labelledby="comments-title">
+            <h2 id="comments-title"><Icon name="message-circle" size={20} /><span class="marker">留言</span></h2>
+            <p class="comments-hint">用 GitHub 帳號登入就能留言。每篇文章的留言會收在這個網站 GitHub 專案的同一則 issue 裡。</p>
+            <div class="comments-box" data-comments data-repo={SITE.commentsRepo} data-label={SITE.commentsLabel}>
+              <noscript>留言功能需要開啟 JavaScript。</noscript>
+            </div>
+          </section>
           <nav class="pager" aria-label="上下篇">
             {older && <a class="prev" href={`/blog/${older.id}/`}><Icon name="chevron-left" size={20} /><span><small>上一篇</small>{older.data.title}</span></a>}
             {newer && <a class="next" href={`/blog/${newer.id}/`}><span><small>下一篇</small>{newer.data.title}</span><Icon name="chevron-right" size={20} /></a>}

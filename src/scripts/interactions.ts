@@ -45,6 +45,44 @@ if (!reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) {
   document.addEventListener('pointerleave', () => document.querySelector('.cursor')?.classList.remove('is-on'));
 }
 
+// Celebrate button: the confetti code is fetched on first use.
+document.addEventListener('click', async (e) => {
+  const btn = (e.target as Element).closest?.('[data-celebrate]');
+  if (!btn) return;
+  const r = btn.getBoundingClientRect();
+  if (reduce) {
+    // No flying confetti for people who asked for less motion: the label cheers instead.
+    const old = btn.lastChild!.textContent;
+    btn.lastChild!.textContent = '太棒了，恭喜！';
+    setTimeout(() => { btn.lastChild!.textContent = old; }, 2200);
+    return;
+  }
+  const { celebrate } = await import('./celebrate');
+  celebrate({ x: r.left + r.width / 2, y: r.top });
+});
+
+// Image lightbox: one <dialog> shared by every page.
+const box = document.querySelector<HTMLDialogElement>('dialog.lightbox');
+if (box) {
+  box.addEventListener('click', () => box.close());
+  document.addEventListener('click', (e) => {
+    const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
+    if (img) openZoom(img);
+  });
+  document.addEventListener('keydown', (e) => {
+    const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
+    if (img && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoom(img); }
+  });
+}
+function openZoom(img: HTMLImageElement) {
+  if (!box) return;
+  const big = box.querySelector('img') ?? box.querySelector('figure')!.insertBefore(new Image(), box.querySelector('figcaption'));
+  big.src = img.currentSrc || img.src;
+  big.alt = img.alt;
+  box.querySelector('figcaption')!.textContent = img.alt;
+  box.showModal();
+}
+
 // ---- on every page -------------------------------------------------------------------
 
 function setupPage() {
@@ -60,6 +98,11 @@ function setupPage() {
 
   // Images drop their loading shimmer once decoded.
   document.querySelectorAll<HTMLImageElement>('.prose img').forEach((img) => {
+    // Click or press Enter to see the image larger.
+    img.dataset.zoom = '';
+    img.tabIndex = 0;
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', `放大圖片：${img.alt}`);
     const done = () => img.classList.add('is-loaded');
     if (img.complete) done();
     else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
@@ -93,6 +136,29 @@ function setupPage() {
       if (label) label.textContent = '無法複製，請手動複製網址';
     }
   });
+
+  // Comments (utterances): the script is added only when the box scrolls near the viewport.
+  const comments = document.querySelector<HTMLElement>('[data-comments]');
+  if (comments && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      io.disconnect();
+      const s = document.createElement('script');
+      s.src = 'https://utteranc.es/client.js';
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      s.setAttribute('repo', comments.dataset.repo!);
+      s.setAttribute('issue-term', 'pathname');
+      s.setAttribute('label', comments.dataset.label!);
+      s.setAttribute('theme', 'github-light');
+      comments.append(s);
+      // utterances replaces the script with its own frame once it is ready.
+      new MutationObserver((_, mo) => {
+        if (comments.querySelector('.utterances')) { comments.classList.add('is-loaded'); mo.disconnect(); }
+      }).observe(comments, { childList: true });
+    }, { rootMargin: '600px' });
+    io.observe(comments);
+  }
 
   // YouTube: load the player only when asked.
   document.querySelectorAll<HTMLElement>('.yt[data-yt]').forEach((box) => {

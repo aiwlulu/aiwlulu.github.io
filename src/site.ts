@@ -9,6 +9,9 @@ export const SITE = {
   lang: 'zh-Hant-TW',
   github: 'https://github.com/aiwlulu',
   since: 2020,
+  // Comments are stored as GitHub issues, one issue per post (utterances).
+  commentsRepo: 'aiwlulu/aiwlulu.github.io',
+  commentsLabel: '留言',
 };
 
 export type Post = CollectionEntry<'blog'>;
@@ -31,6 +34,14 @@ export function readingMinutes(post: Post): number {
   const words = (text.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9]+/g) ?? []).length;
   return Math.max(1, Math.round(cjk / 450 + words / 220));
 }
+
+// One icon per category and tag, so a topic is recognisable at a glance.
+const TOPIC_ICONS = {
+  心得: 'notebook-pen', 工具: 'wrench',
+  學習: 'graduation-cap', 閱讀: 'book-heart', 歷史: 'landmark', 心理: 'brain', TED: 'mic', 效率: 'zap',
+} as const;
+export const topicIcon = (name: string, fallback: 'folder' | 'tag') =>
+  (TOPIC_ICONS as Record<string, (typeof TOPIC_ICONS)[keyof typeof TOPIC_ICONS]>)[name] ?? fallback;
 
 export function countBy(posts: Post[], pick: (p: Post) => string[]): [string, number][] {
   const m = new Map<string, number>();

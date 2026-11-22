@@ -1,5 +1,5 @@
 ---
-import { formatDate, readingMinutes, type Post } from '../site';
+import { formatDate, readingMinutes, topicIcon, type Post } from '../site';
 import Icon from './Icon.astro';
 interface Props { post: Post; heading?: 'h2' | 'h3'; featured?: boolean; index?: number }
 const { post, heading: H = 'h2', featured = false, index = 0 } = Astro.props;
@@ -8,7 +8,7 @@ const { title, subtitle, description, pubDate, category } = post.data;
 
 <article class:list={['card', 'reveal', { featured }]} style={`--i:${index}`}>
   <div class="card-meta">
-    <a class="pill" href={`/categories/${category}/`}><Icon name="folder" size={13} />{category}</a>
+    <a class="pill" href={`/categories/${category}/`}><Icon name={topicIcon(category, 'folder')} size={13} />{category}</a>
     <span class="meta"><Icon name="calendar" size={14} /><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></span>
     <span class="meta"><Icon name="clock" size={14} />約 {readingMinutes(post)} 分鐘</span>
   </div>

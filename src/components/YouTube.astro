@@ -6,7 +6,7 @@ const { id, title = 'YouTube 影片' } = Astro.props;
 ---
 
 <div class="yt" data-yt={id}>
-  <a href={`https://www.youtube.com/watch?v=${id}`} rel="noopener" aria-label={`播放${title}`}>
+  <a href={`https://www.youtube.com/watch?v=${id}`} target="_blank" rel="noopener noreferrer" aria-label={`播放${title}`}>
     <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" width="480" height="360" loading="lazy" decoding="async" />
     <span class="yt-play"><Icon name="play" size={22} filled /></span>
   </a>
