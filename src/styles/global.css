@@ -23,7 +23,8 @@ img { max-width: 100%; height: auto; }
 a { color: var(--link); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
-::selection { background: var(--sun); color: var(--on-accent); }
+/* Selected text: a light wash of the accent, so a long selection stays easy on the eyes. */
+::selection { background: color-mix(in srgb, var(--sun) 40%, transparent); color: inherit; }
 
 .wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: 24px; }
 .narrow { max-width: calc(var(--prose) + 48px); }
@@ -51,30 +52,10 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .nav .nav-icon::after { display: none; }
 .nav button { border: 0; background: none; font: inherit; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; padding: 8px 10px; border-radius: 999px; transition: transform 0.4s var(--ease); }
 .nav button:hover { transform: rotate(40deg) scale(1.15); }
-/* The sky toggle shows one icon: sun-moon for auto, sun for day, moon for night. */
-.sky-mode .icon { display: none; }
-[data-sky-mode='auto'] .sky-mode .m-auto, [data-sky-mode='day'] .sky-mode .m-day, [data-sky-mode='night'] .sky-mode .m-night { display: block; }
+/* The theme button shows the sun in the light theme and the moon in the dark one. */
+.theme-toggle .t-dark, [data-theme='dark'] .theme-toggle .t-light { display: none; }
+[data-theme='dark'] .theme-toggle .t-dark { display: block; }
 .lang-switch { margin-top: 16px; }
-/* Appearance menu, opened by the sun and moon button. */
-.sky-menu { position: fixed; inset: 74px max(16px, calc(50vw - var(--wrap) / 2 + 24px)) auto auto; width: 232px; margin: 0; padding: 14px 14px 12px; border: 0; border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lift); }
-.sky-menu:popover-open { animation: menu-in 0.28s var(--ease); }
-@keyframes menu-in { from { opacity: 0; transform: translateY(-8px) scale(0.96); } }
-.sky-menu fieldset { margin: 0 0 10px; padding: 0; border: 0; display: grid; gap: 2px; }
-.sky-menu legend { padding: 0 0 4px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); }
-.sky-menu label { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; transition: background 0.2s, transform 0.25s var(--ease); }
-.sky-menu label:hover { background: var(--surface-2); transform: translateX(3px); }
-.sky-menu label:has(input:checked) { background: var(--sun); color: var(--on-accent); }
-.sky-menu label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
-.sky-menu input { position: absolute; opacity: 0; pointer-events: none; }
-.sky-menu p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
-/* The sky choices only apply to the light theme. */
-[data-theme='dark'] .sky-menu .hues { opacity: 0.45; pointer-events: none; }
-@media (max-width: 560px) { .nav a:not(.nav-icon) .icon { display: none; } .nav a { padding: 8px 10px; } }
-@media (max-width: 430px) { .brand span { display: none; } }
-
-/* Colours ease between themes instead of snapping. */
-body, .prose, .card, .chip, .toc, .comments, .author, .pager a, .note, .btn.ghost { transition-property: background-color, color, box-shadow, transform, opacity; transition-duration: 0.5s; }
-
 /* ---------- Page heads ---------- */
 /* The hero fills exactly the tall sky, so the list below starts on plain paper. */
 .hero { min-height: calc(var(--sky-tall) - 90px); display: grid; align-content: center; justify-items: center; padding-block: 12px 84px; text-align: center; }
@@ -183,34 +164,131 @@ a.pill.tag:hover { background: var(--sage); color: var(--on-accent); }
 .prose li > p { margin: 0; }
 .prose ul > li::marker { color: var(--coral); }
 .prose ol > li::marker { color: var(--accent); font-weight: 900; }
-.prose pre { margin: 1.4em 0; padding: 14px clamp(12px, 3vw, 20px); border-radius: var(--radius-sm); background: var(--surface-2); overflow-x: auto; font-size: 14.5px; line-height: 1.7; }
-.prose code { font-family: var(--mono); }
-.prose :not(pre) > code { padding: 0.08em 0.28em; border-radius: 0.25em; background: var(--surface-2); color: var(--ink); font-size: 0.9em; overflow-wrap: anywhere; }
-.prose dfn { color: var(--link); font-style: normal; font-weight: 750; }
-.prose pre:not(.no-wrap) { white-space: pre-wrap; overflow-wrap: anywhere; }
+/* ---------- Article components ----------
+   Rule: controls never use the browser's built-in look (checkbox, select, range, file button).
+   Use the custom ones below, an open-source component, or build one; keep it keyboard-operable
+   and give it the right ARIA role. See README, "元件原則". */
+
+/* Switch: <button class="switch" role="switch" aria-checked="true">…<span class="switch-track"><span class="switch-thumb"></span></span>Label</button> */
+.switch { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 8px; border: 0; border-radius: 999px; background: none; color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s, color 0.2s; }
+.switch:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+.switch-track { position: relative; flex: none; width: 34px; height: 20px; border-radius: 999px; background: var(--line-2); transition: background 0.25s; }
+.switch-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.3); transition: transform 0.3s var(--ease); }
+.switch[aria-checked='true'] .switch-track { background: var(--accent); }
+.switch[aria-checked='true'] .switch-thumb { transform: translateX(14px); }
+.switch:active .switch-thumb { width: 19px; }
+
+/* Checkbox: any checkbox that does appear (for example a Markdown task list) is redrawn. */
+.prose input[type='checkbox'], .check { appearance: none; -webkit-appearance: none; display: inline-grid; place-content: center; width: 19px; height: 19px; margin: 0 9px 0 0; border: 2px solid var(--line-2); border-radius: 6px; background: var(--surface); vertical-align: -4px; transition: background 0.2s, border-color 0.2s; }
+.prose input[type='checkbox']::before, .check::before { content: ''; width: 11px; height: 11px; background: #fff; clip-path: polygon(13% 49%, 0 64%, 39% 100%, 100% 22%, 85% 9%, 38% 68%); transform: scale(0); transition: transform 0.25s var(--ease); }
+.prose input[type='checkbox']:checked, .check:checked { background: var(--accent); border-color: var(--accent); }
+.prose input[type='checkbox']:checked::before, .check:checked::before { transform: scale(1); }
+.prose li:has(> input[type='checkbox']), .prose li:has(> p > input[type='checkbox']) { list-style: none; margin-left: -1.4em; }
+
+/* Code. Inline code is a small chip; blocks get a bar with the language, a wrap switch and copy. */
+.prose code { font-family: var(--mono); font-variant-ligatures: none; }
+.prose :not(pre) > code { padding: 0.1em 0.38em; border-radius: 6px; background: var(--surface-2); color: var(--ink); font-size: 0.88em; overflow-wrap: anywhere; }
+.prose pre { margin: 1.6em 0; padding: 14px clamp(12px, 3vw, 18px); border-radius: var(--radius-sm); background: var(--surface-2); overflow-x: auto; font-size: 14.5px; line-height: 1.75; tab-size: 2; white-space: pre-wrap; overflow-wrap: anywhere; }
 .prose .astro-code, .prose .astro-code span { color: var(--shiki-light, var(--ink)); }
 [data-theme='dark'] .prose .astro-code, [data-theme='dark'] .prose .astro-code span { color: var(--shiki-dark, var(--ink)); }
-.post-code { margin: 1.4em 0; border: 1px solid var(--line); border-radius: var(--radius-sm); }
-.post-code-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px clamp(12px, 3vw, 20px); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 0.8em; font-weight: 700; }
-.post-code-toolbar label { display: inline-flex; align-items: center; gap: 7px; min-height: 30px; color: var(--ink); cursor: pointer; }
-.post-code-toolbar input { margin: 0; width: 16px; height: 16px; accent-color: var(--link); }
-.prose .post-code pre { margin: 0; border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
-.prose .post-diagram { margin: 1.5em 0; padding: clamp(8px, 2.5vw, 22px); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); overflow-x: auto; }
-.post-diagram svg { display: block; width: 100%; height: auto; margin: 0 auto; }
-.post-diagram .node.runtime > rect { fill: var(--sky-2) !important; stroke: var(--accent) !important; }
+.post-code { margin: 1.6em 0; border-radius: var(--radius-sm); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.post-code-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 12px; padding: 4px 6px 4px 14px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 60%, var(--surface-2)); }
+.post-code-lang { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; }
+.post-code-actions { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; }
+html:not(.js) .post-code-actions { display: none; }
+.post-code-copy { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px; border: 0; border-radius: 999px; background: none; color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s, color 0.2s, transform 0.3s var(--ease); }
+.post-code-copy:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+.post-code-copy:active { transform: scale(0.94); }
+.post-code-copy .when-idle, .post-code-copy .when-done { display: inline-flex; }
+.post-code-copy .when-done, .post-code-copy.is-done .when-idle { display: none; }
+.post-code-copy.is-done .when-done { display: inline-flex; color: #3c8a4e; }
+[data-theme='dark'] .post-code-copy.is-done .when-done { color: var(--sage); }
+.prose .post-code pre { margin: 0; padding: 12px 0; border-radius: 0; background: none; }
+/* Wrapping: a long line breaks at spaces where it can, and its continuation hangs two
+   characters in, so it is never mistaken for a new line. Switched off, the block scrolls. */
+.post-code .line { display: block; min-height: 1lh; padding: 0 clamp(12px, 3vw, 18px) 0 calc(clamp(12px, 3vw, 18px) + 2ch); text-indent: -2ch; transition: background 0.15s; }
+.post-code .line:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.post-code.no-wrap pre { white-space: pre; overflow-wrap: normal; }
+.post-code.no-wrap .line { width: max-content; min-width: 100%; }
+
+/* Keys, marks and small inline pieces. */
+.prose kbd { display: inline-block; padding: 0.05em 0.45em; border-radius: 6px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2), 0 2px 0 var(--line-2); color: var(--ink); font-family: var(--mono); font-size: 0.82em; line-height: 1.5; white-space: nowrap; }
+.prose mark { background: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%); color: inherit; padding-inline: 2px; }
+/* A term being defined: a quiet green tag. Not blue and not underlined, so it is never taken
+   for a link (links are underlined in yellow) or for emphasis (a yellow marker stroke). */
+.prose dfn { padding: 0.06em 0.36em; border-radius: 6px; background: var(--sage-tint); color: var(--ink); font-style: normal; font-weight: 700; }
+.prose abbr[title] { text-decoration: underline dotted var(--muted); text-underline-offset: 4px; cursor: help; }
+.prose del { color: var(--muted); }
+.prose ins { text-decoration: none; background: var(--sage-tint); border-radius: 3px; padding-inline: 2px; }
+.prose sup, .prose sub { font-size: 0.72em; line-height: 0; }
+.prose h4 { margin: 1.6em 0 0.6em; font-size: 17.5px; color: var(--ink); }
+
+/* Diagrams (Mermaid). The source is hidden behind a shimmer of about the right height until
+   the drawing is ready, so the page does not jump. Click or press Enter to see it larger. */
+.js .prose pre[data-language='mermaid']:not([hidden]) { height: 240px; overflow: hidden; color: transparent; border-radius: var(--radius); background: linear-gradient(100deg, var(--surface-2) 30%, var(--surface) 50%, var(--surface-2) 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
+.js .prose pre[data-language='mermaid']:not([hidden]) * { color: transparent !important; }
+.prose .post-diagram { position: relative; margin: 1.8em 0; padding: clamp(14px, 3vw, 26px); border-radius: var(--radius); background: var(--sky-2); overflow-x: auto; cursor: zoom-in; transition: transform 0.4s var(--ease), box-shadow 0.3s; }
+.prose .post-diagram:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.post-diagram svg { display: block; width: 100%; min-width: min(100%, 300px); height: auto; margin: 0 auto; }
+.post-diagram .node rect, .post-diagram .actor, .post-diagram .note { rx: 12px; ry: 12px; }
+.post-diagram .node.runtime > rect { fill: var(--surface) !important; stroke: var(--accent) !important; stroke-width: 2px !important; }
+.post-diagram .edgeLabel, .post-diagram .messageText { font-weight: 700; }
+/* A sequence diagram needs room; on a phone it scrolls sideways instead of shrinking to dust. */
+.post-diagram svg[aria-roledescription='sequence'] { min-width: 460px; }
+
+/* Figures. */
 .prose .post-figure { margin: 2em auto; text-align: center; }
 .prose .post-figure img { margin: 0 auto 0.85em; }
-.prose figcaption { font-size: 14.5px; color: var(--muted); }
-.prose table { width: 100%; margin: 1.5em 0; border: 1px solid var(--line); border-spacing: 0; border-radius: var(--radius-sm); overflow: hidden; font-size: 0.92em; line-height: 1.65; }
-.prose th, .prose td { padding: clamp(8px, 2vw, 14px) clamp(9px, 2vw, 16px); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
-.prose th { background: var(--sky-2); color: var(--ink); border-bottom: 1px solid var(--line-2); }
+.prose figcaption { font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+
+/* Tables. The build step puts each one in a .post-table frame that scrolls sideways when the
+   table is wider than the page. */
+.post-table { margin: 1.8em 0; border-radius: var(--radius-sm); box-shadow: inset 0 0 0 1px var(--line); overflow-x: auto; }
+.prose table { width: 100%; margin: 1.8em 0; border: 1px solid var(--line); border-spacing: 0; border-radius: var(--radius-sm); overflow: hidden; font-size: 0.92em; line-height: 1.65; }
+.prose .post-table table { margin: 0; border: 0; border-radius: 0; }
+.prose table:has(thead tr > :nth-child(3)) { min-width: 520px; }
+.prose th, .prose td { padding: clamp(9px, 2vw, 14px) clamp(10px, 2vw, 16px); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+.prose th { background: var(--sky-2); color: var(--ink); font-weight: 700; white-space: nowrap; border-bottom: 2px solid var(--line-2); }
 .prose tbody tr + tr td { border-top: 1px solid var(--line); }
-.prose tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface-2) 54%, var(--surface)); }
+.prose tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface-2) 50%, var(--surface)); }
+.prose tbody tr { transition: background 0.15s; }
+.prose tbody tr:hover { background: color-mix(in srgb, var(--sun) 16%, var(--surface)); }
 .prose td:first-child { color: var(--ink); font-weight: 700; }
+/* The first column is already bold; a marker stroke on top of that is noise. */
+.prose td strong { background: none; padding: 0; }
+.prose td > :last-child { margin-bottom: 0; }
 @media (max-width: 520px) {
   .prose table:has(thead tr > :nth-child(2):last-child) { table-layout: fixed; }
-  .prose table:has(thead tr > :nth-child(2):last-child) th:first-child { width: 38%; }
+  .prose table:has(thead tr > :nth-child(2):last-child) th { white-space: normal; }
+  .prose table:has(thead tr > :nth-child(2):last-child) th:first-child { width: 36%; }
 }
+
+/* Fold-away sections: <details><summary>Title</summary>…</details> */
+.prose details { margin: 1.6em 0; border-radius: var(--radius-sm); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.prose summary { display: flex; align-items: center; gap: 10px; padding: 12px 16px; color: var(--ink); font-weight: 700; cursor: pointer; list-style: none; border-radius: var(--radius-sm); transition: background 0.2s; }
+.prose summary::-webkit-details-marker { display: none; }
+.prose summary::before { content: ''; flex: none; width: 9px; height: 9px; border-right: 2.5px solid var(--accent); border-bottom: 2.5px solid var(--accent); transform: rotate(-45deg); transition: transform 0.3s var(--ease); }
+.prose details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px); }
+.prose summary:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.prose details > :not(summary) { margin-inline: 16px; }
+.prose details > :last-child { padding-bottom: 14px; margin-bottom: 0; }
+
+/* Callouts: <aside class="callout">, plus .tip, .warn */
+.prose .callout { margin: 1.6em 0; padding: 14px 18px; border-radius: var(--radius-sm); background: var(--sky-2); border-left: 5px solid var(--brand); color: var(--ink); font-size: 0.96em; line-height: 1.85; }
+.prose .callout.tip { background: var(--sage-tint); border-left-color: var(--sage); }
+.prose .callout.warn { background: var(--coral-tint); border-left-color: var(--coral); }
+.prose .callout > :last-child { margin-bottom: 0; }
+
+/* Definition lists and footnotes. */
+.prose dl { margin: 0 0 1em; }
+.prose dt { margin-top: 0.9em; color: var(--ink); font-weight: 700; }
+.prose dd { margin: 0.15em 0 0 0; padding-left: 14px; border-left: 3px solid var(--line-2); }
+.prose .footnotes, .prose section[data-footnotes] { margin-top: 2.6em; padding-top: 1em; border-top: 1px solid var(--line); font-size: 0.9em; color: var(--muted); }
+.prose [data-footnote-ref], .prose .footnote-ref { text-decoration: none; padding: 0 3px; color: var(--link); font-weight: 700; }
+
+/* Embedded media keeps its shape and never overflows. */
+.prose iframe, .prose video { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 16 / 9; margin: 1.8em 0; border: 0; border-radius: var(--radius-sm); }
+
 .prose a { color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--sun); text-decoration-thickness: 3px; text-underline-offset: 4px; overflow-wrap: anywhere; border-radius: 3px; transition: background 0.2s, text-decoration-color 0.2s; }
 .prose a:hover { background: var(--sun); color: var(--on-accent); text-decoration-color: var(--sun-deep); }
 /* A small arrow marks links that open in a new tab. */
@@ -276,6 +354,7 @@ main { view-transition-name: main; }
 .lightbox:not([open]) { display: none; }
 .lightbox::backdrop { background: transparent; }
 .lightbox img { max-width: 100%; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); width: auto; height: auto; padding: 10px; background: #fff; border-radius: 6px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
+.lightbox svg { width: min(100%, 1100px); max-width: 100%; height: auto; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); padding: clamp(12px, 3vw, 28px); background: var(--sky-2); border-radius: 10px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
 .lightbox figcaption { margin-top: 12px; color: #fff; font-size: 14.5px; text-align: center; max-width: 70ch; }
 .lightbox figure { margin: 0; display: grid; justify-items: center; }
 .lightbox-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--sun); color: var(--on-accent); box-shadow: 0 4px 0 var(--sun-deep); cursor: pointer; transition: transform 0.3s var(--ease); }

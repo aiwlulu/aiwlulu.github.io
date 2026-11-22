@@ -1,6 +1,8 @@
 // Small page behaviours. The site uses client-side navigation, so anything tied to page
 // content is set up again on every `astro:page-load` (which also fires on first load).
 
+import { codeBar, joinLines } from './code-block.js';
+
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---- once per visit ------------------------------------------------------------------
@@ -11,16 +13,15 @@ document.addEventListener('astro:before-preparation', () => {
   document.documentElement.classList.add('is-loading');
 });
 // Navigation replaces the attributes on <html>, so the sky choice and tone are carried over.
-let carried: { skyMode?: string; skyHue?: string; theme?: string } = {};
+let carried: { skyMode?: string; theme?: string } = {};
 document.addEventListener('astro:before-swap', () => {
   const d = document.documentElement.dataset;
-  carried = { skyMode: d.skyMode, skyHue: d.skyHue, theme: d.theme };
+  carried = { skyMode: d.skyMode, theme: d.theme };
 });
 document.addEventListener('astro:after-swap', () => {
   document.documentElement.classList.remove('is-loading');
   document.documentElement.classList.add('js');
   if (carried.skyMode) document.documentElement.dataset.skyMode = carried.skyMode;
-  if (carried.skyHue) document.documentElement.dataset.skyHue = carried.skyHue;
   if (carried.theme) document.documentElement.dataset.theme = carried.theme;
   document.querySelector('.loadbar')?.classList.add('is-done');
 });
@@ -64,18 +65,12 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', async () =
   syncCommentsTheme();
 });
 
-// Appearance menu: theme (automatic, light, dark) and, for the light theme, the sky colour.
-function syncSkyMenu() {
-  const d = document.documentElement.dataset;
-  document.querySelectorAll<HTMLInputElement>('.sky-menu input').forEach((input) => {
-    input.checked = (input.name === 'sky-mode' ? d.skyMode ?? 'auto' : d.skyHue ?? 'auto') === input.value;
-  });
-}
-document.addEventListener('change', async (e) => {
-  const input = e.target as HTMLInputElement;
-  if (!input.closest?.('.sky-menu')) return;
-  const { setSky } = await import('./palette');
-  setSky(input.name as 'sky-mode' | 'sky-hue', input.value);
+// Theme button: one press flips between light and dark. Until it is pressed the page follows
+// the device setting and the local time.
+document.addEventListener('click', async (e) => {
+  if (!(e.target as Element).closest?.('[data-theme-toggle]')) return;
+  const { toggleTheme } = await import('./palette');
+  toggleTheme();
   syncCommentsTheme();
 });
 
@@ -101,45 +96,78 @@ if (box) {
   box.addEventListener('click', () => box.close());
   document.addEventListener('click', (e) => {
     const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
-    if (img) openZoom(img);
+    if (img) return openZoom(img);
+    const diagram = (e.target as Element).closest?.<HTMLElement>('[data-zoom-diagram]');
+    const svg = diagram?.querySelector('svg');
+    if (diagram && svg) openZoom(svg, diagram.dataset.zoomDiagram);
   });
   document.addEventListener('keydown', (e) => {
     const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
     if (img && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoom(img); }
+    const diagram = (e.target as Element).closest?.<HTMLElement>('[data-zoom-diagram]');
+    const svg = diagram?.querySelector('svg');
+    if (diagram && svg && e.target === diagram && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoom(svg, diagram.dataset.zoomDiagram); }
   });
 }
-function openZoom(img: HTMLImageElement) {
+function openZoom(source: HTMLImageElement | SVGSVGElement, caption = '') {
   if (!box) return;
-  const big = box.querySelector('img') ?? box.querySelector('figure')!.insertBefore(new Image(), box.querySelector('figcaption'));
-  big.src = img.currentSrc || img.src;
-  big.alt = img.alt;
-  box.querySelector('figcaption')!.textContent = img.alt;
+  const figure = box.querySelector('figure')!;
+  figure.querySelectorAll('img, svg').forEach((el) => el.remove());
+  let media: Element;
+  if (source instanceof HTMLImageElement) {
+    const big = new Image();
+    big.src = source.currentSrc || source.src;
+    big.alt = source.alt;
+    caption ||= source.alt;
+    media = big;
+  } else {
+    media = source.cloneNode(true) as Element;
+    media.removeAttribute('style');
+    media.removeAttribute('id');
+  }
+  figure.prepend(media);
+  box.querySelector('figcaption')!.textContent = caption;
   box.showModal();
 }
+
+// Code blocks: the wrap switch and the copy button.
+document.addEventListener('click', async (e) => {
+  const target = e.target as Element;
+  const wrap = target.closest?.<HTMLElement>('[data-code-wrap]');
+  if (wrap) {
+    const on = wrap.getAttribute('aria-checked') !== 'true';
+    wrap.setAttribute('aria-checked', String(on));
+    wrap.closest('.post-code')?.classList.toggle('no-wrap', !on);
+    return;
+  }
+  const copy = target.closest?.<HTMLElement>('[data-code-copy]');
+  if (!copy) return;
+  // Line by line, so the copied text keeps its real line breaks whether or not it is wrapped.
+  const lines = [...(copy.closest('.post-code')?.querySelectorAll('.line') ?? [])].map((l) => l.textContent ?? '');
+  const label = copy.querySelector<HTMLElement>('[data-copy-label]');
+  try {
+    await navigator.clipboard.writeText(lines.join('\n'));
+    copy.classList.add('is-done');
+    if (label) label.textContent = '已複製';
+  } catch {
+    if (label) label.textContent = '無法複製';
+  }
+  setTimeout(() => { copy.classList.remove('is-done'); if (label) label.textContent = '複製'; }, 2000);
+});
 
 // ---- on every page -------------------------------------------------------------------
 
 function setupPage() {
-  // Visual wrapping leaves the code text and clipboard line breaks intact.
-  document.querySelectorAll<HTMLPreElement>('.prose pre:has(> code):not([data-language="mermaid"])').forEach((pre) => {
+  // Code blocks are wrapped by the build step; in `astro dev` it has not run, so do it here.
+  document.querySelectorAll<HTMLPreElement>('.prose pre[data-language]:not([data-language="mermaid"])').forEach((pre) => {
     if (pre.parentElement?.classList.contains('post-code')) return;
     const block = document.createElement('div');
     block.className = 'post-code';
-    const toolbar = document.createElement('div');
-    toolbar.className = 'post-code-toolbar';
-    const language = document.createElement('span');
-    language.textContent = pre.dataset.language === 'bash' ? 'Shell' : pre.dataset.language || '程式碼';
-    const label = document.createElement('label');
-    const toggle = document.createElement('input');
-    toggle.type = 'checkbox';
-    toggle.checked = true;
-    label.append(toggle, '自動換行');
-    toggle.addEventListener('change', () => pre.classList.toggle('no-wrap', !toggle.checked));
-    toolbar.append(language, label);
+    block.innerHTML = codeBar(pre.dataset.language ?? '');
+    pre.innerHTML = joinLines(pre.innerHTML);
     pre.before(block);
-    block.append(toolbar, pre);
+    block.append(pre);
   });
-  syncSkyMenu();
   // Rise-in on scroll.
   const items = document.querySelectorAll<HTMLElement>('.reveal:not(.in)');
   if (reduce || !('IntersectionObserver' in window)) items.forEach((el) => el.classList.add('in'));

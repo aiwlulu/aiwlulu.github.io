@@ -19,13 +19,11 @@ let stamp = 0;
 export type SkyMode = 'auto' | 'day' | 'night';
 export const skyMode = (): SkyMode => (document.documentElement.dataset.skyMode as SkyMode) || 'auto';
 
-export type SkyHue = 'auto' | 'dawn' | 'day' | 'dusk';
-export const skyHue = (): SkyHue => (document.documentElement.dataset.skyHue as SkyHue) || 'auto';
-
-/** Saves a choice from the appearance menu and repaints at once. */
-export function setSky(key: 'sky-mode' | 'sky-hue', value: string) {
-  document.documentElement.dataset[key === 'sky-mode' ? 'skyMode' : 'skyHue'] = value;
-  try { localStorage.setItem(key, value); } catch { /* private window: the choice lasts for this page only */ }
+/** Flips between light and dark, remembers the choice and repaints at once. */
+export function toggleTheme() {
+  const next: SkyMode = resolveTheme() === 'dark' ? 'day' : 'night';
+  document.documentElement.dataset.skyMode = next;
+  try { localStorage.setItem('sky-mode', next); } catch { /* private window: the choice lasts for this page only */ }
   refreshPalette();
 }
 
@@ -54,15 +52,12 @@ export function resolveTheme(): 'light' | 'dark' {
 }
 
 // The hour the sky is painted for. In the light theme it follows the clock through dawn, day
-// and dusk (or the hue the reader picked), but never turns to night by itself; the dark theme
-// is always the night sky.
+// and dusk, but never turns to night by itself; the dark theme is always the night sky.
 function hourNow(): number {
   const preview = forcedHour();
   if (preview !== null) return preview;
   const h = clock();
   if (resolveTheme() === 'dark') return isNight(h) && (h >= 20.2 || h < 4.6) ? h : 23;
-  const hue = skyHue();
-  if (hue !== 'auto') return { dawn: 6, day: 12, dusk: 18.2 }[hue];
   // Stops at full dusk: blending on toward night would darken the sky under dark text.
   return isNight(h) ? 12 : Math.min(Math.max(h, 5.6), 18.2);
 }

@@ -75,6 +75,11 @@ for (const file of pages) {
     if (a.includes(`href="${SITE}`)) continue;
     if (!/target="_blank"/.test(a) || !/rel="[^"]*noopener/.test(a)) fail(page, `external link does not open in a new tab: ${a.slice(0, 90)}`);
   }
+  // Article components: every code block and table is framed, and no control keeps the
+  // browser's built-in look.
+  if (/<pre class="astro-code[^>]*data-language="(?!mermaid)/.test(html.replace(/<div class="post-code"[\s\S]*?<\/pre><\/div>/g, ''))) fail(page, 'code block without its .post-code frame');
+  if (/<table>/.test(html.replace(/<div class="post-table"[\s\S]*?<\/table><\/div>/g, ''))) fail(page, 'table without its .post-table frame');
+  if (/<select\b|<input[^>]*type="(range|file|color|date)"/.test(html)) fail(page, 'native form control (select, range, file, color, date): use a custom component');
   for (const block of html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)) {
     try { JSON.parse(block[1]); } catch { fail(page, 'JSON-LD does not parse'); }
   }

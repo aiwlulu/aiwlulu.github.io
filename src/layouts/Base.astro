@@ -13,20 +13,8 @@ const path = Astro.url.pathname;
 const lang = seo.lang ?? SITE.lang;
 const en = lang === 'en';
 const t = en
-  ? { skip: 'Skip to content', home: 'Home', posts: 'Posts', about: 'About', main: 'Main', brand: `${SITE.name} home`, sky: 'Appearance', theme: 'Theme', hue: 'Sky', hint: 'Automatic follows your device, then your local time.' }
-  : { skip: '跳到主要內容', home: '首頁', posts: '文章', about: '關於', main: '主要', brand: `${SITE.name}首頁`, sky: '外觀設定', theme: '外觀', hue: '天色', hint: '自動：先看裝置設定，再依當地時間。' };
-const themes = [
-  { value: 'auto', icon: 'sun-moon' as const, label: en ? 'Automatic' : '自動' },
-  { value: 'day', icon: 'sun' as const, label: en ? 'Light' : '淺色' },
-  { value: 'night', icon: 'moon' as const, label: en ? 'Dark' : '深色' },
-];
-// Sky colour while the light theme is on.
-const hues = [
-  { value: 'auto', icon: 'clock' as const, label: en ? 'By time of day' : '依時間' },
-  { value: 'dawn', icon: 'sunrise' as const, label: en ? 'Dawn' : '清晨' },
-  { value: 'day', icon: 'sun' as const, label: en ? 'Day' : '白天' },
-  { value: 'dusk', icon: 'sunset' as const, label: en ? 'Dusk' : '黃昏' },
-];
+  ? { skip: 'Skip to content', home: 'Home', posts: 'Posts', about: 'About', main: 'Main', brand: `${SITE.name} home`, sky: 'Switch between light and dark' }
+  : { skip: '跳到主要內容', home: '首頁', posts: '文章', about: '關於', main: '主要', brand: `${SITE.name}首頁`, sky: '切換淺色與深色' };
 const nav = [
   { href: '/', label: t.home, icon: 'house' as const, on: path === '/' },
   { href: '/blog/', label: t.posts, icon: 'book-open' as const, on: path.startsWith('/blog') || path.startsWith('/categories') || path.startsWith('/tags') },
@@ -56,10 +44,8 @@ const nav = [
       (function () {
         var root = document.documentElement, mode = 'auto';
         root.classList.add('js');
-        var hue = 'auto';
-        try { mode = localStorage.getItem('sky-mode') || 'auto'; hue = localStorage.getItem('sky-hue') || 'auto'; } catch (e) {}
+        try { mode = localStorage.getItem('sky-mode') || 'auto'; } catch (e) {}
         root.dataset.skyMode = mode;
-        root.dataset.skyHue = hue;
         var d = new Date(), h = d.getHours() + d.getMinutes() / 60, night = h >= 19.2 || h < 5.3;
         var m = location.search.match(/[?&]hour=([\d.]+)/);
         if (m) { var p = Number(m[1]); night = p >= 19.2 || p < 5.3; mode = night ? 'night' : 'day'; }
@@ -80,23 +66,12 @@ const nav = [
       </a>
       <nav class="nav" aria-label={t.main}>
         {nav.map((n) => <a href={n.href} aria-current={n.on ? 'page' : undefined}><Icon name={n.icon} size={16} />{n.label}</a>)}
-        <button class="nav-icon sky-mode" type="button" popovertarget="sky-menu" aria-label={t.sky} title={t.sky}>
-          <Icon name="sun-moon" class="m-auto" /><Icon name="sun" class="m-day" /><Icon name="moon" class="m-night" />
+        <button class="nav-icon theme-toggle" type="button" data-theme-toggle aria-label={t.sky} title={t.sky}>
+          <Icon name="sun" class="t-light" /><Icon name="moon" class="t-dark" />
         </button>
         <a href={SITE.github} target="_blank" rel="me noopener noreferrer" class="nav-icon" aria-label="GitHub（另開視窗）"><Icon name="github" /></a>
       </nav>
     </header>
-    <div class="sky-menu" id="sky-menu" popover>
-      <fieldset>
-        <legend>{t.theme}</legend>
-        {themes.map((o) => <label><input type="radio" name="sky-mode" value={o.value} /><Icon name={o.icon} size={16} />{o.label}</label>)}
-      </fieldset>
-      <fieldset class="hues">
-        <legend>{t.hue}</legend>
-        {hues.map((o) => <label><input type="radio" name="sky-hue" value={o.value} /><Icon name={o.icon} size={16} />{o.label}</label>)}
-      </fieldset>
-      <p>{t.hint}</p>
-    </div>
     <main id="main">
       <slot />
     </main>

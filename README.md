@@ -2,7 +2,7 @@
 
 <https://aiwlulu.github.io>
 
-用 [Astro](https://astro.build) 建構的靜態部落格，圖示用 [Lucide](https://lucide.dev)。紙張拼貼風格的介面，放在一片會動的水彩天空上：整頁背景是淡淡飄動的雲，頁尾是水彩筆觸的海（WebGL shader），有淺色與深色兩種外觀，深色時是星空與夜晚的海，閱讀區也換成深底淺字。網址加 `?hour=18.2` 可以預覽任何時間。
+用 [Astro](https://astro.build) 建構的靜態部落格，圖示用 [Lucide](https://lucide.dev)。紙張拼貼風格的介面，放在一片會動的水彩天空上：整頁背景是淡淡飄動的雲，頁尾是水彩筆觸的海（WebGL shader），有淺色與深色兩種外觀，深色時是星空與夜晚的海，閱讀區也換成深底淺字。網址加 `?hour=18.2` 可以預覽任何時間的天色。
 
 ## 常用指令
 
@@ -73,7 +73,8 @@ tags: ['學習']
 | `scripts/check-seo.mjs` | SEO 檢查 |
 | `scripts/typography.mjs` | 中文排版檢查與自動修正 |
 | `scripts/make-fonts.mjs` | 建構前執行：把圓體字型裁成只含網站用到的字 |
-| `scripts/polish-html.mjs` | 建構後執行：外部連結另開視窗、英文引言換成英文字體 |
+| `scripts/polish-html.mjs` | 建構後執行：外部連結另開視窗、英文引言換成英文字體、替程式碼區塊與表格加上外框 |
+| `src/scripts/code-block.js` | 程式碼區塊上方那一列的樣板，建構步驟與頁面共用 |
 | `src/assets/logo.svg` | Logo 原始檔 |
 | `scripts/make-icons.mjs` | 從 logo 產生 favicon、各尺寸圖示與分享圖 `public/og.png`（`npm run icons`） |
 
@@ -87,15 +88,57 @@ tags: ['學習']
 - 換頁用 Astro 的 `<ClientRouter />`，滑鼠移到連結上就預先載入，天空與海跨頁保留。
 - 文章圖片點一下可以放大；外部連結一律另開視窗。
 
-## 外觀：淺色、深色與天色
+## 外觀：淺色與深色
 
-導覽列的太陽月亮按鈕會開啟外觀選單，選擇記在瀏覽器的 `localStorage`。
+導覽列的太陽／月亮按鈕按一下，就在淺色與深色之間切換，選擇記在瀏覽器的 `localStorage`。
 
-- **外觀**：自動（預設）、淺色、深色。讀者選了淺色或深色就固定，不再隨時間改變。
-- **自動的判斷順序**：先看裝置的深色設定；裝置是淺色時再看當地時間，晚上 19:12 到清晨 5:18 用深色。
-- **天色**（只在淺色時有作用）：依時間（清晨、白天、黃昏自動變化）、或固定其中一種。淺色不會自己變成夜晚。
+- 沒按過的訪客是自動：先看裝置的深色設定；裝置是淺色時再看當地時間，晚上 19:12 到清晨 5:18 用深色。
+- 按過之後就固定，不再隨時間改變。
+- 淺色時，天空仍會隨時間在清晨、白天、黃昏之間變化，但不會自己變成夜晚。
 
 同一條規則在 `<head>` 的行內指令與 `src/scripts/palette.ts` 的 `resolveTheme()` 各寫一次，前者是為了第一次繪製就用對顏色，改規則時兩邊都要改。深色的色彩變數在 `src/styles/tokens.css` 的 `:root[data-theme='dark']`。
+
+## 元件原則
+
+**預設不使用瀏覽器原生外觀的元件**，例如核取方塊、下拉選單、滑桿、檔案選擇鈕、日期與顏色選擇器。原生外觀在每個瀏覽器和作業系統都不一樣，也和網站的風格不搭。
+
+需要這類控制項時，依序考慮：
+
+1. 用這個網站已有的客製元件（見下表）。
+2. 用開源元件，並套上 `tokens.css` 的變數。
+3. 自己做一個。
+
+不論哪一種，都要能用鍵盤操作、有清楚的焦點樣式，並有正確的語意（例如開關用 `<button role="switch" aria-checked>`）。`npm run check:seo` 會擋下 `<select>` 與 `range`、`file`、`color`、`date` 類型的 `<input>`。
+
+| 需要 | 用這個 |
+|---|---|
+| 開或關 | `.switch`（`<button role="switch">`），例如程式碼區塊的「自動換行」 |
+| 勾選 | 核取方塊會自動重畫成客製外觀（文章裡的待辦清單 `- [x]`，或加 `.check`） |
+| 幾個選項選一個 | 一排 `.chip`，例如文章列表的主題篩選 |
+| 動作 | `.btn`、`.btn.ghost`、`.btn.small` |
+
+## 文章裡可以用的元素
+
+樣式都在 `src/styles/global.css` 的「Article components」一節。
+
+| 寫法 | 呈現 |
+|---|---|
+| ` ```bash ` 等程式碼區塊 | 上方有語言名稱、「自動換行」開關與「複製」按鈕。預設換行，續行會內縮兩個字元；關掉後改成橫向捲動。複製的內容永遠是原本的行 |
+| ` ```mermaid ` | 圖表，顏色跟著淺色或深色。載入前先顯示流光佔位；點一下或按 Enter 放大。可用 `accTitle`、`accDescr` 補上文字說明 |
+| Markdown 表格 | 有外框與隔行底色，第一欄加粗；三欄以上的表格在窄螢幕可橫向捲動 |
+| `` `code` `` | 行內程式碼 |
+| `<kbd>Ctrl</kbd>` | 鍵盤按鍵 |
+| `<dfn>名詞</dfn>` | 第一次出現、正在解釋的名詞（淡綠標籤） |
+| `<mark>文字</mark>`、`**粗體**` | 黃色麥克筆 |
+| `> 引言` | 淡藍紙片；全英文的引言會自動改用襯線斜體 |
+| `<details><summary>標題</summary>…</details>` | 可摺疊的區塊 |
+| `<aside class="callout">…</aside>` | 提示框；另有 `callout tip`（綠）與 `callout warn`（珊瑚） |
+| `- [ ]`、`- [x]` | 待辦清單 |
+| `<figure class="post-figure">` 加 `<figcaption>` | 置中的圖片與圖說 |
+| `<YT id="…" />` | YouTube 影片，點了才載入 |
+| 註腳、定義清單（`<dl>`）、`<abbr title>`、`<ins>`、`<del>` | 都有對應樣式 |
+
+程式碼區塊與表格的外框是建構後由 `scripts/polish-html.mjs` 加上的；`astro dev` 不會跑這一步，所以開發時由頁面的程式補上，兩邊共用 `src/scripts/code-block.js` 的同一份樣板。
 
 ## 英文版
 

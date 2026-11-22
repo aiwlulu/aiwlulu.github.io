@@ -48,15 +48,16 @@ async function renderDiagrams() {
       suppressErrorRendering: true,
       htmlLabels: false,
       fontFamily: token('--font'),
+      fontSize: 15,
       themeVariables: {
         darkMode: theme === 'dark',
-        background: token('--surface-2'),
+        background: token('--sky-2'),
         primaryColor: token('--surface'),
         primaryTextColor: token('--ink'),
         primaryBorderColor: token('--line-2'),
         lineColor: token('--accent'),
-        edgeLabelBackground: token('--surface-2'),
-        actorBkg: token('--sky-2'),
+        edgeLabelBackground: token('--sky-2'),
+        actorBkg: token('--surface'),
         actorBorder: token('--accent'),
         actorTextColor: token('--ink'),
         actorLineColor: token('--muted'),
@@ -79,6 +80,12 @@ async function renderDiagrams() {
           : document.createElement('div');
         diagram.className = 'post-diagram';
         diagram.innerHTML = svg;
+        // Click or press Enter to open it larger; the title written in the diagram labels it.
+        const title = diagram.querySelector('svg > title')?.textContent ?? '';
+        diagram.setAttribute('data-zoom-diagram', title);
+        diagram.setAttribute('role', 'button');
+        diagram.setAttribute('tabindex', '0');
+        diagram.setAttribute('aria-label', `放大圖表${title ? '：' + title : ''}`);
         if (!diagram.isConnected) source.after(diagram);
         fitFlowchart(diagram);
         source.hidden = true;
