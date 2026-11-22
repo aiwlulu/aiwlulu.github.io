@@ -1,0 +1,38 @@
+---
+// Herdr: where you look (the apps) and where the work runs (herdr-core on each machine).
+import Diagram from './Diagram.astro';
+---
+
+<Diagram
+  title="Herdr App 的終端與執行主機"
+  description="桌面 App 可以連到本機的 herdr-core，也可以透過 SSH 連到遠端的 herdr-core；手機 App 透過 SSH 連到遠端。終端和裡面的程式由各台機器上的 herdr-core 持有。"
+  height={296}
+>
+  <text class="dg-caption" x="24" y="18">你看進度的地方</text>
+  <text class="dg-caption" x="24" y="282">工作實際執行的地方</text>
+
+  <!-- Each line leaves and arrives straight; only the desktop-to-remote link needs one step. -->
+  <path class="dg-line" d="M100 84V192" />
+  <path class="dg-line" d="M168 84V122Q168 134 180 134H238Q250 134 250 146V192" />
+  <path class="dg-line" d="M319 84V192" />
+
+  <rect class="dg-box" x="24" y="32" width="166" height="52" rx="14" />
+  <text x="107" y="58">桌面 App</text>
+  <rect class="dg-box" x="262" y="32" width="114" height="52" rx="14" />
+  <text x="319" y="58">手機 App</text>
+
+  <!-- Labels sit beside their lines on a small chip, never on top of the stroke. -->
+  <rect class="dg-chip" x="110" y="140" width="46" height="24" rx="12" />
+  <text class="dg-label" x="133" y="152">本機</text>
+  <rect class="dg-chip" x="187" y="104" width="44" height="24" rx="12" />
+  <text class="dg-label" x="209" y="116">SSH</text>
+  <rect class="dg-chip" x="329" y="126" width="44" height="24" rx="12" />
+  <text class="dg-label" x="351" y="138">SSH</text>
+
+  <rect class="dg-box is-strong" x="24" y="196" width="152" height="68" rx="14" />
+  <text x="100" y="220">本機 <tspan class="dg-code">herdr-core</tspan></text>
+  <text class="dg-sub" x="100" y="243">終端、Agent</text>
+  <rect class="dg-box is-strong" x="208" y="196" width="168" height="68" rx="14" />
+  <text x="292" y="220">遠端 <tspan class="dg-code">herdr-core</tspan></text>
+  <text class="dg-sub" x="292" y="243">Agent、測試</text>
+</Diagram>

@@ -1,0 +1,33 @@
+---
+// Herdr: one agent hands a review to another terminal and gets the result back.
+import Diagram from './Diagram.astro';
+---
+
+<Diagram
+  title="兩個 Agent 透過 Herdr 交接審查"
+  description="實作者在終端 t1，用 hc send t7 把審查需求送給終端 t7 的審查者。審查者讀取 diff 之後，用 hc send t1 把審查結果送回實作者。"
+  height={284}
+>
+  <line class="dg-life" x1="84" y1="68" x2="84" y2="268" />
+  <line class="dg-life" x1="316" y1="68" x2="316" y2="268" />
+
+  <rect class="dg-box is-strong" x="24" y="18" width="120" height="50" rx="14" />
+  <text x="84" y="43">實作者 <tspan class="dg-code">t1</tspan></text>
+  <rect class="dg-box is-strong" x="256" y="18" width="120" height="50" rx="14" />
+  <text x="316" y="43">審查者 <tspan class="dg-code">t7</tspan></text>
+
+  <!-- 1: the request goes across. Each numbered dot sits where that step starts. -->
+  <text class="dg-label" x="200" y="100"><tspan class="dg-code">hc send t7</tspan>　送出審查需求</text>
+  <path class="dg-line" d="M98 122H308" />
+  <g class="dg-step"><circle cx="84" cy="122" r="11" /><text x="84" y="122">1</text></g>
+
+  <!-- 2: the reviewer reads -->
+  <rect class="dg-note" x="262" y="148" width="108" height="40" rx="14" />
+  <text class="dg-label" x="324" y="168">讀取 <tspan class="dg-code">diff</tspan></text>
+  <g class="dg-step"><circle cx="262" cy="168" r="11" /><text x="262" y="168">2</text></g>
+
+  <!-- 3: the result comes back, dashed because it is a reply -->
+  <text class="dg-label" x="200" y="218"><tspan class="dg-code">hc send t1</tspan>　回傳審查結果</text>
+  <path class="dg-line is-dashed" d="M302 240H92" />
+  <g class="dg-step"><circle cx="316" cy="240" r="11" /><text x="316" y="240">3</text></g>
+</Diagram>

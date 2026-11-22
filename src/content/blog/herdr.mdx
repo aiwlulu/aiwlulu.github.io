@@ -9,6 +9,9 @@ tags: ['效率', 'AI']
 
 import { Image } from 'astro:assets';
 import inbox from '../../assets/posts/herdr-inbox.webp';
+import HerdrHosts from '../../components/diagrams/HerdrHosts.astro';
+import HerdrHandoff from '../../components/diagrams/HerdrHandoff.astro';
+import HerdrSessions from '../../components/diagrams/HerdrSessions.astro';
 
 Herdr 讓我關掉視窗後，還能回到原本的工作。
 
@@ -34,27 +37,7 @@ Herdr 讓我關掉視窗後，還能回到原本的工作。
 
 工作可以在自己的電腦跑，也可以放到另一台常開的電腦。圖上的 <dfn>SSH</dfn> 是一種加密的遠端連線方式。透過它，桌面或手機都能連回那台機器，查看同一個終端。工作在遠端執行時，你的筆電睡眠，遠端仍可繼續跑。
 
-```mermaid
----
-config:
-  flowchart:
-    nodeSpacing: 22
-    rankSpacing: 42
-    curve: linear
----
-flowchart TB
-  accTitle: Herdr App 的終端與執行主機
-  accDescr: 桌面可連到本機或遠端 Herdr Core，手機透過 SSH 連到遠端。終端行程由各機的 Core 持有。
-  desktop("桌面 App")
-  mobile("手機 App")
-  local("本機 herdr-core<br/>終端、Agent")
-  remote("遠端 herdr-core<br/>Agent、測試")
-  desktop -->|本機| local
-  desktop -->|SSH| remote
-  mobile -->|SSH| remote
-  classDef runtime stroke-width:1.5px
-  class local,remote runtime
-```
+<HerdrHosts />
 
 | 你做了什麼 | 工作會怎樣？|
 | --- | --- |
@@ -72,28 +55,7 @@ App 和 TUI 各有自己的背景服務，**兩邊的工作階段互不相通**�
 
 圖裡，Codex 在 `t1` 改功能，Claude Code 在 `t7` 檢查 <dfn>diff</dfn>（像文件的修訂標記，列出哪些內容有變動）。審查完再把結果送回 `t1`。想自己查看回覆，可用 `hc read`。如果審查助手在另一台已設定的電腦，可以用 `lab/t7` 指定那台電腦上的終端。[Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-send) · [遠端機器文件](https://github.com/herdrdev/herdr-core/blob/master/docs/machines.md#what-runs-where)
 
-```mermaid
----
-config:
-  sequence:
-    mirrorActors: false
-    width: 108
-    height: 42
-    actorMargin: 68
-    diagramMarginX: 12
-    diagramMarginY: 10
-    messageMargin: 30
-    noteMargin: 8
----
-sequenceDiagram
-  accTitle: 兩個 agent 透過 Herdr Core 交接審查
-  accDescr: 實作者送審查需求給另一個終端。審查者看完 diff 後，將結果送回實作者的終端。
-  participant A as 實作者 t1
-  participant B as 審查者 t7
-  A->>B: hc send t7 · 送出審查需求
-  Note over B: 讀取 diff
-  B-->>A: hc send t1 · 回傳審查結果
-```
+<HerdrHandoff />
 
 就像請同事校稿時要附上檔案或文件連結，**收到訊息的 Agent 也要讀得到要審查的檔案**。我會在訊息裡指定 <dfn>commit</dfn>（某一次保存下來的程式改動）、檔案範圍，以及希望對方回報的格式。需要另開助手時，`hc run --bg` 能在背景開一個終端。原本的終端可收到助手退出或需要輸入的通知，審查結論則可以透過 `hc send` 明確送回來。[herdr-core 官方介紹](https://herdr.dev/core/) · [Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md)
 
@@ -112,6 +74,8 @@ herdr --session review agent list
 herdr --session review agent prompt reviewer '請審查目前的 diff，回報問題與檔案位置。' --wait --timeout 120000
 herdr --session review agent read reviewer
 ```
+
+<HerdrSessions />
 
 這裡的 `--session review` 指向 Herdr 的工作階段。Claude Code 或 Codex 自己的對話 session 則由各自的工具管理。`--wait` 觀察的是 agent 狀態，確認審查結果仍要讀輸出。[TUI Socket 路由](https://herdr.dev/tui/docs/socket-api/#socket-paths) · [Agent 自動化](https://herdr.dev/tui/docs/agent-automation/)
 
