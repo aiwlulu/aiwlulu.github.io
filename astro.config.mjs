@@ -17,12 +17,19 @@ const redirects = {
   '/page/2': '/',
   '/contact': '/about/',
   '/search': '/blog/',
+  // Tags retired when the tag list was trimmed to topics.
+  '/tags/hugo': '/tags/',
+  '/tags/github': '/tags/',
+  '/tags/hahow': '/tags/',
+  '/tags/english': '/tags/',
+  '/tags/tools': '/tags/效率/',
 };
 
 export default defineConfig({
   site: 'https://aiwlulu.github.io',
   trailingSlash: 'always',
   redirects,
-  integrations: [mdx(), sitemap({ filter: (page) => !Object.keys(redirects).some((r) => page.endsWith(r + '/')) })],
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
+  integrations: [mdx(), sitemap({ filter: (page) => !Object.keys(redirects).some((r) => decodeURI(page).endsWith(r + '/')) })],
   markdown: { shikiConfig: { theme: 'github-light' } },
 });

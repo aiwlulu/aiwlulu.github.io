@@ -18,7 +18,7 @@ const crumbs = [{ name: '首頁', href: '/' }, { name: '文章' }];
   <div class="wrap">
     <Topics current="/blog/" />
     <div class="grid">
-      {posts.map((post) => <PostCard post={post} />)}
+      {posts.map((post, i) => <PostCard post={post} index={i} />)}
     </div>
   </div>
 </Base>

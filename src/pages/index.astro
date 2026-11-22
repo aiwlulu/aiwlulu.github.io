@@ -10,7 +10,7 @@ const posts = await getPosts();
 
 <Base tallSky jsonLd={[website]}>
   <section class="hero wrap">
-    <h1>{SITE.name}</h1>
+    <h1 aria-label={SITE.name}>{[...SITE.name].map((ch, i) => <span aria-hidden="true" style={`--i:${i}`}>{ch}</span>)}</h1>
     <p>{SITE.tagline}</p>
     <div class="hero-actions">
       <a class="btn" href="#latest"><Icon name="book-open" size={17} />開始閱讀</a>
@@ -18,10 +18,10 @@ const posts = await getPosts();
     </div>
   </section>
   <section class="wrap" aria-labelledby="latest">
-    <h2 id="latest" class="section-title">最新文章</h2>
+    <h2 id="latest" class="section-title"><span class="marker">最新文章</span></h2>
     <Topics current="" />
     <div class="grid">
-      {posts.map((post, i) => <PostCard post={post} heading="h3" featured={i === 0} />)}
+      {posts.map((post, i) => <PostCard post={post} heading="h3" featured={i === 0} index={i} />)}
     </div>
   </section>
 </Base>

@@ -26,7 +26,7 @@ for (const file of pages) {
   if (/http-equiv="refresh"/.test(html)) {
     redirects++;
     const to = attr(html, /url=([^"]+)"/);
-    if (!known.has(to)) fail(page, `redirects to a missing page ${to}`);
+    if (!to || !known.has(decodeURI(to))) fail(page, `redirects to a missing page ${to}`);
     if (!/rel="canonical"/.test(html)) fail(page, 'redirect has no canonical');
     continue;
   }

@@ -1,12 +1,12 @@
 ---
 import { formatDate, readingMinutes, type Post } from '../site';
 import Icon from './Icon.astro';
-interface Props { post: Post; heading?: 'h2' | 'h3'; featured?: boolean }
-const { post, heading: H = 'h2', featured = false } = Astro.props;
+interface Props { post: Post; heading?: 'h2' | 'h3'; featured?: boolean; index?: number }
+const { post, heading: H = 'h2', featured = false, index = 0 } = Astro.props;
 const { title, subtitle, description, pubDate, category } = post.data;
 ---
 
-<article class:list={['card', { featured }]}>
+<article class:list={['card', 'reveal', { featured }]} style={`--i:${index}`}>
   <div class="card-meta">
     <a class="pill" href={`/categories/${category}/`}><Icon name="folder" size={13} />{category}</a>
     <span class="meta"><Icon name="calendar" size={14} /><time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time></span>
@@ -19,20 +19,29 @@ const { title, subtitle, description, pubDate, category } = post.data;
 </article>
 
 <style>
-  .card { position: relative; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow); transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; }
-  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); border-color: var(--line-2); }
+  .card { position: relative; display: flex; flex-direction: column; background: var(--surface); border-radius: var(--radius); padding: 28px 30px 24px; box-shadow: var(--shadow); }
+  .card.in { transition: opacity 0.6s ease-out, transform 0.45s var(--ease), box-shadow 0.3s; }
+  .card:hover { transform: translateY(-6px) rotate(-0.6deg); box-shadow: var(--shadow-lift); }
+  .card:nth-child(even):hover { transform: translateY(-6px) rotate(0.6deg); }
+  /* A strip of tape holds each card to the page. */
+  .card::before { content: ''; position: absolute; top: -11px; left: 34px; width: 84px; height: 24px; rotate: -4deg; background: rgb(255 203 61 / 0.78); border-radius: 2px; transition: rotate 0.4s var(--ease), translate 0.4s var(--ease); }
+  .card:nth-child(3n + 2)::before { background: rgb(239 143 107 / 0.7); left: auto; right: 40px; rotate: 3deg; }
+  .card:nth-child(3n)::before { background: rgb(168 201 160 / 0.85); rotate: 2deg; }
+  .card:hover::before { rotate: 6deg; translate: 0 -2px; }
   .card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .card-meta .pill { position: relative; z-index: 1; }
-  .card-title { margin: 12px 0 6px; font-size: 21px; line-height: 1.4; color: var(--ink); }
-  .card-title a { color: inherit; text-decoration: none; }
+  .card-title { margin: 14px 0 6px; font-size: 22px; line-height: 1.45; color: var(--ink); letter-spacing: 0.01em; }
+  .card-title a { color: inherit; text-decoration: none; background: linear-gradient(var(--sun), var(--sun)) 0 92% / 0 8px no-repeat; transition: background-size 0.35s ease-out; }
+  .card:hover .card-title a { background-size: 100% 8px; }
   /* Whole card is clickable through the title link. */
   .card-title a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
   .card-sub { margin: 0; color: var(--ink); font-weight: 700; }
-  .card-desc { margin: 8px 0 0; font-size: 15px; line-height: 1.75; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .card.featured { grid-column: 1 / -1; padding: 32px 36px; }
-  .card.featured .card-title { font-size: clamp(23px, 3vw, 29px); }
+  .card-desc { margin: 8px 0 0; font-size: 15px; line-height: 1.8; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-more { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 18px; font-size: 14px; font-weight: 900; color: var(--ink); }
+  .card-more :global(svg) { transition: transform 0.35s var(--ease); }
+  .card:hover .card-more :global(svg) { transform: translateX(7px); }
+  .card.featured { grid-column: 1 / -1; padding: 36px 40px 30px; }
+  .card.featured .card-title { font-size: clamp(24px, 3.2vw, 31px); }
   .card.featured .card-desc { font-size: 16px; max-width: 70ch; }
-  .card-more { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 16px; font-size: 14px; font-weight: 700; color: var(--link); }
-  .card-more :global(svg) { transition: transform 0.25s; }
-  .card:hover .card-more :global(svg) { transform: translateX(4px); }
+  @media (max-width: 560px) { .card, .card.featured { padding: 26px 22px 22px; } }
 </style>

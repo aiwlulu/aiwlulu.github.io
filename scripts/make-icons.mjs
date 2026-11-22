@@ -11,7 +11,7 @@ fs.writeFileSync('public/icon-192.png', await png(logo, 192));
 
 // iOS rounds the corners itself, so the touch icon fills the whole square.
 const square = logo.replace(' clip-path="url(#c)"', '');
-fs.writeFileSync('public/apple-touch-icon.png', await sharp(await png(square, 180)).flatten({ background: '#2f80d0' }).png().toBuffer());
+fs.writeFileSync('public/apple-touch-icon.png', await sharp(await png(square, 180)).flatten({ background: '#57a5d3' }).png().toBuffer());
 
 // favicon.ico: an ICO container holding 16, 32 and 48px PNGs.
 const sizes = [16, 32, 48];
@@ -32,26 +32,30 @@ sizes.forEach((s, i) => {
 });
 fs.writeFileSync('public/favicon.ico', Buffer.concat([header, ...images]));
 
-// Share image, 1200x630.
+// Share image, 1200x630, in the same cut-paper style as the site.
+const cloud = 'M32 88a27 27 0 0 1 2-54 38 38 0 0 1 70-16 30 30 0 0 1 54 14 27 27 0 0 1 10 56z';
+const wave = (half, amp) => { let d = `M0 30Q${half / 2} ${30 - amp} ${half} 30`; for (let x = half * 2; x <= 1500; x += half) d += `T${x} 30`; return `${d}V300H0z`; };
 const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6aaef3"/><stop offset="0.55" stop-color="#a9d4f8"/><stop offset="0.75" stop-color="#e3f1fd"/></linearGradient>
-    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8e8"/><stop offset="0.45" stop-color="#3a94d6"/><stop offset="1" stop-color="#164f86"/></linearGradient>
-    <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
-    <filter id="halo"><feGaussianBlur stdDeviation="18"/></filter>
-  </defs>
-  <rect width="1200" height="630" fill="url(#sky)"/>
-  <g fill="#fff" filter="url(#soft)">
-    <ellipse cx="170" cy="150" rx="210" ry="46"/><ellipse cx="280" cy="112" rx="110" ry="50"/><ellipse cx="90" cy="118" rx="90" ry="40"/>
-    <ellipse cx="1060" cy="250" rx="190" ry="40"/><ellipse cx="980" cy="218" rx="100" ry="44"/><ellipse cx="1130" cy="214" rx="80" ry="36"/>
-    <ellipse cx="640" cy="405" rx="420" ry="26" opacity="0.8"/>
+  <defs><filter id="cut"><feDropShadow dx="0" dy="4" stdDeviation="0" flood-color="#22313f" flood-opacity="0.09"/></filter></defs>
+  <rect width="1200" height="630" fill="#cfe6f5"/>
+  <g filter="url(#cut)">
+    <circle cx="1030" cy="130" r="58" fill="#ffcb3d"/>
+    <g fill="#fffdf6">
+      <path d="${cloud}" transform="translate(70 70) scale(1.5)"/>
+      <path d="${cloud}" transform="translate(860 250) scale(1.15)"/>
+      <path d="${cloud}" transform="translate(470 40) scale(0.8)"/>
+    </g>
   </g>
-  <rect y="455" width="1200" height="175" fill="url(#sea)"/>
-  <path d="M0 470 Q150 452 300 470 T600 470 T900 470 T1200 470 V500 H0Z" fill="#fff" opacity="0.28"/>
-  <path d="M0 520 Q200 500 400 520 T800 520 T1200 520 V545 H0Z" fill="#fff" opacity="0.12"/>
-  <rect x="250" y="205" width="700" height="190" rx="95" fill="#fff" opacity="0.55" filter="url(#halo)"/>
-  <text x="600" y="310" text-anchor="middle" font-family="PingFang TC, Noto Sans TC, sans-serif" font-weight="800" font-size="104" letter-spacing="6" fill="#20344b">過鹿人部落格</text>
-  <text x="600" y="382" text-anchor="middle" font-family="PingFang TC, Noto Sans TC, sans-serif" font-weight="600" font-size="38" letter-spacing="10" fill="#20344b">喜歡閱讀和學習</text>
+  <path d="M90 330q16-26 32 0t32 0 32 0" fill="none" stroke="#ef8f6b" stroke-width="8" stroke-linecap="round"/>
+  <g stroke="#fff" stroke-opacity="0.5" stroke-width="3">
+    <path d="${wave(150, 20)}" fill="#b5ddec" transform="translate(0 430)"/>
+    <path d="${wave(200, 26)}" fill="#86c5e2" transform="translate(-60 470)"/>
+    <path d="${wave(120, 18)}" fill="#57a5d3" transform="translate(-30 515)"/>
+    <path d="${wave(150, 24)}" fill="#2f7fbd" transform="translate(-90 560)"/>
+  </g>
+  <text x="600" y="330" text-anchor="middle" font-family="PingFang TC, Noto Sans TC, sans-serif" font-weight="800" font-size="108" letter-spacing="8" fill="#22313f">過鹿人部落格</text>
+  <rect x="452" y="372" width="296" height="20" rx="6" fill="#ffcb3d"/>
+  <text x="600" y="390" text-anchor="middle" font-family="PingFang TC, Noto Sans TC, sans-serif" font-weight="600" font-size="38" letter-spacing="10" fill="#22313f">喜歡閱讀和學習</text>
 </svg>`;
-await sharp(Buffer.from(og)).composite([{ input: await png(logo, 120), left: 540, top: 62 }]).png({ compressionLevel: 9 }).toFile('public/og.png');
+await sharp(Buffer.from(og)).composite([{ input: await png(logo, 120), left: 540, top: 96 }]).png({ compressionLevel: 9 }).toFile('public/og.png');
 console.log('wrote favicon.svg, favicon.png, favicon.ico, icon-192.png, apple-touch-icon.png, og.png');

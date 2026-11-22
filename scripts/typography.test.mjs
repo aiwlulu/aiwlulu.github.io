@@ -42,6 +42,11 @@ for (const [input, expected] of cases) {
   });
 }
 
+test('nested list items are typeset, indented code is not', () => {
+  assert.equal(typesetFile('- 習慣\n    - 提示 (To-Do)\n'), '- 習慣\n    - 提示（To-Do）\n');
+  assert.equal(typesetFile('段落\n\n    const a = "中文abc";\n'), '段落\n\n    const a = "中文abc";\n');
+});
+
 test('front matter keys, code fences and imports are untouched', () => {
   const src = "---\ntitle: '用AI寫作'\npubDate: 2026-11-22\ntags: ['AI工具']\n---\n\n內文用AI\n\n```js\nconst a='中文abc';\n```\n";
   const out = typesetFile(src);

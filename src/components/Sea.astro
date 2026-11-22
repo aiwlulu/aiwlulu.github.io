@@ -1,17 +1,49 @@
 ---
+// Cut-paper sea: layered waves sliding at different speeds, a paper boat and two gulls.
 import { SITE } from '../site';
 import Icon from './Icon.astro';
 const year = new Date().getFullYear();
+// One wave strip is 2400 wide and repeats every 1200, so sliding it by half its width loops.
+const wave = (half: number, amp: number) => {
+  let d = `M0 30Q${half / 2} ${30 - amp} ${half} 30`;
+  for (let x = half * 2; x <= 2400; x += half) d += `T${x} 30`;
+  return `${d}V240H0z`;
+};
+const layers = [
+  { cls: 'w1', d: wave(150, 20), dur: 46 },
+  { cls: 'w2', d: wave(200, 26), dur: 34 },
+  { cls: 'w3', d: wave(120, 18), dur: 27 },
+  { cls: 'w4', d: wave(150, 24), dur: 21 },
+  { cls: 'w5', d: wave(200, 22), dur: 16 },
+];
 ---
 
-<footer class="sea">
-  <canvas class="sea-canvas" aria-hidden="true"></canvas>
+<footer class="sea" transition:persist="sea">
+  <div class="sea-scene" aria-hidden="true">
+    <svg class="gull g1" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
+    <svg class="gull g2" viewBox="0 0 60 24" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16q10-14 26 0 16-14 26 0" /></svg>
+    {layers.slice(0, 2).map((l) => (
+      <svg class:list={['wave', l.cls]} viewBox="0 0 2400 240" preserveAspectRatio="none" style={`animation-duration:${l.dur}s`}><path d={l.d} /></svg>
+    ))}
+    <div class="boat-track">
+      <svg class="boat" viewBox="0 0 120 88">
+        <path d="M60 16V2l16 6-16 6z" fill="var(--coral)" />
+        <path d="M60 14 92 54H28z" fill="var(--cloud)" />
+        <path d="M60 14 92 54H60z" fill="var(--surface-2)" />
+        <path d="M6 56h108L90 84H30z" fill="var(--cloud)" />
+        <path d="M60 56h54L90 84H60z" fill="var(--surface-2)" />
+      </svg>
+    </div>
+    {layers.slice(2).map((l) => (
+      <svg class:list={['wave', l.cls]} viewBox="0 0 2400 240" preserveAspectRatio="none" style={`animation-duration:${l.dur}s`}><path d={l.d} /></svg>
+    ))}
+  </div>
   <div class="sea-content wrap">
     <p class="sea-name">{SITE.name}</p>
     <nav class="sea-links" aria-label="頁尾">
       <a href="/blog/"><Icon name="book-open" size={15} />文章</a>
       <a href="/about/"><Icon name="user-round" size={15} />關於</a>
-      <a href="/rss.xml"><Icon name="rss" size={15} />RSS</a>
+      <a href="/rss.xml" data-astro-reload><Icon name="rss" size={15} />RSS</a>
       <a href={SITE.github} rel="me noopener"><Icon name="github" size={15} />GitHub</a>
     </nav>
     <p class="sea-copy">© {SITE.since}-{year} {SITE.author}</p>
@@ -19,56 +51,38 @@ const year = new Date().getFullYear();
   </div>
 </footer>
 
-<script>
-  import { mountScene } from '../scripts/scene';
-  import frag from '../scripts/sea.frag';
-  const canvas = document.querySelector<HTMLCanvasElement>('canvas.sea-canvas');
-  if (canvas) mountScene(canvas, frag);
-</script>
-
 <style>
-  .sea {
-    position: relative;
-    height: clamp(420px, 62vh, 620px);
-    margin-top: 96px;
-    display: flex;
-    align-items: flex-end;
-    color: var(--on-sea);
-    isolation: isolate;
-  }
-  .sea-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
-    background: linear-gradient(to bottom, var(--page) 0%, var(--sky-low) 30%, var(--sea-light) 34%, var(--sea) 60%, var(--sea-deep) 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 26%);
-    mask-image: linear-gradient(to bottom, transparent, #000 26%);
-  }
-  /* Darkens the near water so the footer text stays readable. */
-  .sea::after {
-    content: '';
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 46%;
-    z-index: -1;
-    background: linear-gradient(to bottom, transparent, rgb(13 62 110 / 0.72));
-  }
-  .sea-content {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 28px;
-    padding-bottom: 28px;
-    text-shadow: 0 1px 8px rgb(8 40 76 / 0.45);
-  }
-  .sea-name { margin: 0; font-weight: 900; font-size: 17px; letter-spacing: 0.02em; }
-  .sea-links { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-right: auto; }
-  .sea-links a { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; padding: 6px 0; font-size: 14.5px; }
-  .sea-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
-  .sea-copy { margin: 0; font-size: 13.5px; opacity: 0.92; }
-  .sea-top { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: inherit; background: rgb(255 255 255 / 0.16); border: 1px solid rgb(255 255 255 / 0.45); backdrop-filter: blur(6px); transition: background 0.2s, transform 0.2s; }
-  .sea-top:hover { background: rgb(255 255 255 / 0.3); transform: translateY(-3px); }
+  .sea { position: relative; height: clamp(360px, 52vh, 480px); margin-top: 72px; display: flex; align-items: flex-end; color: var(--on-sea); isolation: isolate; overflow: hidden; }
+  .sea-scene { position: absolute; inset: 0; z-index: -1; }
+  .sea-scene::after { content: ''; position: absolute; inset: calc(26% + 34px) 0 0 0; background: var(--grain); pointer-events: none; }
+
+  .wave { position: absolute; left: 0; width: 200%; height: 100%; animation: slide linear infinite; will-change: transform; }
+  .wave path { stroke: rgb(255 255 255 / 0.5); stroke-width: 3; vector-effect: non-scaling-stroke; }
+  .w1 { top: 26%; fill: var(--sea-1); }
+  .w2 { top: 38%; fill: var(--sea-2); animation-direction: reverse; }
+  .w3 { top: 51%; fill: var(--sea-3); }
+  .w4 { top: 63%; fill: var(--sea-4); animation-direction: reverse; }
+  .w5 { top: 76%; fill: var(--sea-5); }
+  @keyframes slide { to { transform: translateX(-50%); } }
+
+  /* The boat crosses slowly while it rocks on the swell. */
+  .boat-track { position: absolute; top: calc(38% - 46px); left: 0; width: 100%; animation: sail 90s linear infinite; animation-delay: -38s; }
+  .boat { width: 92px; filter: var(--cut); transform-origin: 50% 90%; animation: rock 4.5s ease-in-out infinite; }
+  @keyframes sail { from { transform: translateX(-120px); } to { transform: translateX(100vw); } }
+  @keyframes rock { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(7px) rotate(5deg); } }
+
+  .gull { position: absolute; width: 38px; animation: glide 14s ease-in-out infinite; }
+  .g1 { top: 6%; left: 16%; }
+  .g2 { top: 14%; left: 24%; width: 26px; animation-delay: -5s; }
+  @keyframes glide { 50% { transform: translate(26px, -10px) rotate(4deg); } }
+
+  .sea-content { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 26px; padding-bottom: 26px; }
+  .sea-name { margin: 0; font-weight: 900; font-size: 17px; letter-spacing: 0.04em; }
+  .sea-links { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-right: auto; }
+  .sea-links a { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; padding: 6px 12px; border-radius: 999px; font-size: 14.5px; transition: background 0.2s, transform 0.3s var(--ease); }
+  .sea-links a:hover { background: rgb(255 255 255 / 0.18); transform: translateY(-2px); }
+  .sea-copy { margin: 0; font-size: 13.5px; }
+  .sea-top { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; color: var(--ink); background: var(--sun); box-shadow: 0 3px 0 var(--sun-deep); transition: transform 0.3s var(--ease), box-shadow 0.2s; }
+  .sea-top:hover { transform: translateY(-4px) rotate(-8deg); box-shadow: 0 7px 0 var(--sun-deep); }
+  .sea-top:active { transform: translateY(1px); box-shadow: 0 1px 0 var(--sun-deep); }
 </style>

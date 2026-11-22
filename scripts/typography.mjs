@@ -83,7 +83,9 @@ export function typesetFile(source) {
       return m ? `${m[1]}: '${typeset(m[2])}'` : line;
     }
     if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; return line; }
-    if (inFence || /^( {4}|\t)/.test(line) || /^\s*(import|export) /.test(line)) return line;
+    // Indented lines are code, unless they are nested list items.
+    const nestedItem = /^\s+(?:[-*+]|\d+\\?\.)\s/.test(line);
+    if (inFence || (/^( {4}|\t)/.test(line) && !nestedItem) || /^\s*(import|export) /.test(line)) return line;
     return typeset(line);
   }).join('\n');
 }

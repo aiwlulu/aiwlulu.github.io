@@ -2,7 +2,7 @@
 
 <https://aiwlulu.github.io>
 
-用 [Astro](https://astro.build) 建構的靜態部落格，圖示用 [Lucide](https://lucide.dev)。上方是即時計算的雲，頁尾是即時計算的海（WebGL shader）。
+用 [Astro](https://astro.build) 建構的靜態部落格，圖示用 [Lucide](https://lucide.dev)。紙張拼貼風格：上方是剪紙的天空，頁尾是剪紙的海，都用 SVG 與 CSS 動畫，沒有用到 WebGL。
 
 ## 常用指令
 
@@ -62,9 +62,9 @@ tags: ['學習']
 | `src/site.ts` | 網站名稱、作者等設定 |
 | `src/schema.ts` | 結構化資料（JSON-LD） |
 | `src/components/Seo.astro` | 每頁的 title、description、canonical、Open Graph |
-| `src/components/Sky.astro`、`Sea.astro` | 雲與海的畫布 |
-| `src/scripts/*.frag.ts` | 雲與海的 shader |
-| `src/styles/tokens.css` | 色彩與尺度變數，來自 design-library 的 `sea-breeze` |
+| `src/components/Sky.astro`、`Sea.astro` | 剪紙天空與海（SVG 加 CSS 動畫） |
+| `src/scripts/interactions.ts` | 換頁載入條、捲動進場、目錄標示、游標小夥伴等行為 |
+| `src/styles/tokens.css` | 色彩與尺度變數，和 design-library 的 `paper-sea` 同一份 |
 | `astro.config.mjs` | 網站設定與舊網址轉址 |
 | `scripts/check-seo.mjs` | SEO 檢查 |
 | `scripts/typography.mjs` | 中文排版檢查與自動修正 |
@@ -78,3 +78,6 @@ tags: ['學習']
 - `sitemap-index.xml`、`robots.txt`、`rss.xml`，以及給 AI 助理讀的 `llms.txt`。
 - 舊站的重複網址都轉到唯一的網址，轉址頁不進 sitemap。
 - 圖片有說明文字與寬高；YouTube 影片點了才載入。
+- 換頁用 Astro 的 `<ClientRouter />`，滑鼠移到連結上就預先載入，天空與海跨頁保留。
+
+先前擬真版的天空與海（WebGL shader）保存在 design-library 的 `sea-breeze`。

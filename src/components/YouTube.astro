@@ -12,24 +12,11 @@ const { id, title = 'YouTube 影片' } = Astro.props;
   </a>
 </div>
 
-<script>
-  document.querySelectorAll<HTMLElement>('.yt[data-yt]').forEach((box) => {
-    box.querySelector('a')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      const f = document.createElement('iframe');
-      f.src = `https://www.youtube-nocookie.com/embed/${box.dataset.yt}?autoplay=1`;
-      f.title = 'YouTube 影片';
-      f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      f.allowFullscreen = true;
-      box.replaceChildren(f);
-    });
-  });
-</script>
-
 <style>
-  .yt { position: relative; aspect-ratio: 16 / 9; margin: 24px 0; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); box-shadow: var(--shadow); }
+  .yt { position: relative; aspect-ratio: 16 / 9; margin: 2em 0; border: 10px solid #fff; border-radius: 6px; overflow: hidden; background: linear-gradient(100deg, var(--surface-2) 30%, #fff 50%, var(--surface-2) 70%) 0 0 / 300% 100%; box-shadow: var(--shadow-lift); transition: transform 0.4s var(--ease); }
+  .yt:hover { transform: rotate(-0.6deg) scale(1.01); }
   .yt a, .yt :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
-  .yt img { width: 100%; height: 100%; object-fit: cover; margin: 0; border-radius: 0; box-shadow: none; }
-  .yt-play { position: absolute; inset: 0; margin: auto; width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: #fff; padding-left: 3px; box-shadow: 0 6px 24px rgb(22 79 134 / 0.4); transition: transform 0.2s; }
-  .yt a:hover .yt-play { transform: scale(1.08); }
+  .yt img, .yt img:hover { width: 100%; height: 100%; object-fit: cover; margin: 0; padding: 0; border-radius: 0; box-shadow: none; rotate: 0deg; scale: 1; }
+  .yt-play { position: absolute; inset: 0; margin: auto; width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: var(--sun); color: var(--ink); padding-left: 3px; box-shadow: 0 5px 0 var(--sun-deep); transition: transform 0.35s var(--ease); }
+  .yt a:hover .yt-play { transform: scale(1.18) rotate(-8deg); }
 </style>
