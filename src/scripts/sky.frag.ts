@@ -41,8 +41,10 @@ float fbm3(vec2 p) {
 float cumulus(vec2 q, float t) {
   vec2 w = vec2(t * 0.020, t * 0.006);
   float base = fbm(q * 0.72 + w + 0.30 * vec2(fbm3(q * 0.5 + 2.0), fbm3(q * 0.5 + 9.0)));
+  // Medium-sized lumps give each cloud its rounded, piled-up puffs.
+  float puff = fbm(q * 2.3 + w * 1.8 + 3.0);
   float field = fbm3(q * 0.16 + w * 0.5 + 21.0);
-  return base + (field - 0.5) * 0.30;
+  return base + (puff - 0.5) * 0.20 + (field - 0.5) * 0.26;
 }
 
 void main() {
@@ -91,20 +93,20 @@ void main() {
   // instead of ending in a drawn line.
   float d = cumulus(q, uTime);
   float fray = (fbm(q * 5.5 + 5.0) - 0.5) * 0.085;
-  float body = smoothstep(0.435, 0.530, d + fray);
+  float body = smoothstep(0.405, 0.500, d + fray);
   // Volume: light falls from the sun side, the thick middle and the underside sit in shade.
   float lit = smoothstep(-0.07, 0.09, d - cumulus(q + sunDir.xz * 0.34, uTime));
-  float thick = smoothstep(0.50, 0.70, d);
+  float thick = smoothstep(0.47, 0.68, d);
   float under = smoothstep(-0.05, 0.08, d - cumulus(q + vec2(0.0, 0.22), uTime));
-  float light = clamp(0.30 + 0.70 * lit - thick * 0.22 * (1.0 - lit) - under * 0.10, 0.0, 1.0);
+  float light = clamp(0.34 + 0.66 * lit - thick * 0.26 * (1.0 - lit) - under * 0.12, 0.0, 1.0);
   vec3 cloud = mix(uShade, uCloud, light);
   // Edges take a little of the sky colour, as thin cloud does.
-  cloud = mix(cloud, col, (1.0 - smoothstep(0.435, 0.60, d + fray)) * 0.25);
+  cloud = mix(cloud, col, (1.0 - smoothstep(0.405, 0.57, d + fray)) * 0.22);
   cloud = mix(cloud, uHorizon, (1.0 - far) * 0.55);
   float alpha = body * mix(0.5, 0.96, far) * smoothstep(0.04, 0.14, e);
   col = mix(col, cloud, alpha);
   // A faint trace of the watercolour edge is kept, so the clouds still belong with the sea.
-  float rim = body * (1.0 - smoothstep(0.530, 0.56, d + fray));
+  float rim = body * (1.0 - smoothstep(0.500, 0.53, d + fray));
   col = mix(col, uShade * 0.95, rim * 0.07 * far);
 
   // Paper granulation.

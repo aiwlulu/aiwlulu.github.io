@@ -42,8 +42,15 @@ const icons = ['calculator', 'database', 'code-xml', 'blocks'] as const;
   .route b { color: var(--ink); font-size: 16.5px; }
   .route small { color: var(--text); font-size: 13.5px; }
   .route figcaption { margin-top: 18px; text-align: center; font-size: 14.5px; color: var(--text); }
-  @media (max-width: 560px) {
-    .route ol { grid-template-columns: 1fr 1fr; gap: 22px 8px; }
-    .route li:nth-child(3)::before { display: none; }
+  /* Small screens: the route runs top to bottom, each stop on its own line. */
+  @media (max-width: 640px) {
+    .route { padding: 22px 20px 18px; }
+    .route ol { grid-template-columns: 1fr; gap: 22px; }
+    .route li { grid-template-columns: 60px 1fr; justify-items: start; align-items: center; column-gap: 16px; row-gap: 0; text-align: left; }
+    .stop { grid-row: span 2; margin-bottom: 0; }
+    .route b { align-self: end; }
+    .route small { align-self: start; }
+    .route li + li::before { top: -20px; right: auto; left: 28px; width: 0; height: 18px; border-top: 0; border-left: 4px dotted var(--coral); }
+    .route figcaption { text-align: left; }
   }
 </style>
