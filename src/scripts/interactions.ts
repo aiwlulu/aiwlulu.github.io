@@ -94,7 +94,8 @@ document.addEventListener('click', async (e) => {
 const box = document.querySelector<HTMLDialogElement>('dialog.lightbox');
 if (box) {
   box.addEventListener('click', (e) => {
-    if (!(e.target as Element).closest('figcaption')) box.close();
+    if (e.target instanceof Node && box.querySelector('figcaption')?.contains(e.target)) return;
+    box.close();
   });
   document.addEventListener('click', (e) => {
     const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
