@@ -70,6 +70,8 @@ import Arrow from '../../components/diagrams/parts/Arrow.astro';
 
 ## Zero Trust 怎麼決定要不要放行？
 
+**NIST** 是美國國家標準與技術研究院（National Institute of Standards and Technology），隸屬美國商務部。它發布的 SP 800-207 說明 Zero Trust 的設計原則與架構分工。[NIST 官方介紹](https://www.nist.gov/about-nist)
+
 Zero Trust 把權限綁在 **要存取的資源** 上。即使訪客連著公司 Wi-Fi，也要依身分、裝置狀態和該資源的政策決定能不能進入。以審閱站為例，最小權限可以從「只讓審閱成員讀取這個站」開始，其他內部工具各自有自己的政策。[NIST SP 800-207，〈Zero Trust Architecture〉](https://csrc.nist.gov/pubs/sp/800/207/final)
 
 ### 誰驗證身分，誰決定權限？
