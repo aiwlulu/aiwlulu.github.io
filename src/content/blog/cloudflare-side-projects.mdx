@@ -15,11 +15,14 @@ import Arrow from '../../components/diagrams/parts/Arrow.astro';
 
 我最喜歡的是第二個做法。審閱站本身只要產出靜態網頁，登入和權限規則交給 Cloudflare 管理。要開放給新成員時，可以直接調整 Access 規則，網頁也省去了自己做登入頁的工。
 
-## 快速看懂兩個專案的分工
+## TL;DR：什麼需求用哪個工具？
 
-- **音訊工具** 用 Workers 提供網頁和 API，D1 記錄逐字稿與任務狀態，R2 保存音檔，Cron Triggers 定時執行背景程式。
-- **審閱站** 用 Pages 部署靜態檔案，再用 Zero Trust 裡的 Cloudflare Access 管理誰可以讀取內容。
-- **部署工具** 是 Wrangler。兩個專案都用這套命令列工具，把程式或建置好的檔案送上 Cloudflare。[Wrangler 官方文件](https://developers.cloudflare.com/workers/wrangler/)
+- **只要發布靜態網站** → **Pages**。如果專案已用 Workers 跑 API，也能用 **Workers Static Assets** 一起部署前端。
+- **要執行 API 或定時跑程式** → **Workers**。要定時執行，再加 **Cron Triggers**。
+- **要查詢紀錄或存進度** → **D1**。要存放、上傳或播放音檔與影片，選 **R2**。
+- **網站只開放給指定成員** → **Cloudflare Access**。例如在靜態審閱站前加上登入與成員存取規則。
+
+所以音訊工具用了 **Workers + D1 + R2**，另加排程處理背景工作。審閱站則用了 **Pages + Access**。兩個專案都透過 Wrangler 部署。[Wrangler 官方文件](https://developers.cloudflare.com/workers/wrangler/)
 
 ## 一份音檔進來之後，資料分別放在哪裡？
 
@@ -102,13 +105,17 @@ NIST 把這件事拆成三個邏輯角色。**政策引擎**（Policy Engine）�
 
 以下是截至 2026 年 11 月 23 日查到的官方免費額度。不同服務分別看請求數、資料列、儲存量、建置次數或使用者人數。
 
+<div class="quota-table">
+
 | 工具 | 白話用途與免費額度 |
 | --- | --- |
-| **Workers／Static Assets** | Workers 負責執行程式，例如回傳搜尋結果。Static Assets 負責送出做好的網頁、樣式和圖片。<br />Workers 每天 10 萬次請求，每次呼叫的 CPU 時間上限為 10 毫秒。一般直接提供的靜態檔案免費且不限請求數，執行 Worker 程式的請求要計入用量。[Workers 定價](https://developers.cloudflare.com/workers/platform/pricing/) |
+| **Workers<br />Static Assets** | Workers 負責執行程式，例如回傳搜尋結果。Static Assets 負責送出做好的網頁、樣式和圖片。<br />Workers 每天 10 萬次請求，每次呼叫的 CPU 時間上限為 10 毫秒。一般直接提供的靜態檔案免費且不限請求數，執行 Worker 程式的請求要計入用量。[Workers 定價](https://developers.cloudflare.com/workers/platform/pricing/) |
 | **D1** | 像一套可用 SQL 查詢的表格，適合記錄節目名稱、逐字稿和處理進度。<br />每天讀取 500 萬列、寫入 10 萬列。帳號合計 5 GB，單一資料庫上限 500 MB。讀取量看查詢掃過的資料列數。[D1 定價](https://developers.cloudflare.com/d1/platform/pricing/) · [D1 限制](https://developers.cloudflare.com/d1/platform/limits/) |
 | **R2** | 放音檔、影片和圖片的地方，程式可以按檔名和路徑取回整份檔案。<br />Standard 儲存每月含 10 GB-month、100 萬次 Class A 操作（例如上傳）及 1,000 萬次 Class B 操作（例如讀檔）。相當於存放 10 GB 一整月的額度，R2 傳到網際網路的流量免費。[R2 定價](https://developers.cloudflare.com/r2/pricing/) |
 | **Pages** | 把做好的網頁發布成網站，例如部落格、作品集或內部文件。<br />每月 500 次建置，每站最多 2 萬個檔案，單檔上限 25 MiB。靜態檔案請求免費且不限量。若加上 Pages Functions，其請求與 Workers 共用每日額度。[Pages 限制](https://developers.cloudflare.com/pages/platform/limits/) · [Functions 定價](https://developers.cloudflare.com/pages/functions/pricing/) |
-| **Cloudflare One／Zero Trust** | 用其中的 Access 替網站加上登入，只有符合規則的人才能讀取。<br />免費方案最多 50 位使用者，標準日誌最長保留 24 小時。[Cloudflare 方案比較](https://www.cloudflare.com/plans/) |
+| **Cloudflare One<br />Zero Trust** | 用其中的 Access 替網站加上登入，只有符合規則的人才能讀取。<br />免費方案最多 50 位使用者，標準日誌最長保留 24 小時。[Cloudflare 方案比較](https://www.cloudflare.com/plans/) |
+
+</div>
 
 ### 10 GB 大概能存幾部影片？
 
@@ -126,3 +133,30 @@ NIST 把這件事拆成三個邏輯角色。**政策引擎**（Policy Engine）�
 Cloudflare 還有 **Workers AI** 和 **Queues**。Workers AI 提供模型推論，每天有 10,000 Neurons 的免費配置，實際能處理多少請求取決於模型和用量。Queues 適合讓背景程式接收訊息並重試，免費每天 1 萬次操作，一則訊息的寫入、讀取和刪除各會計入。音訊工具這次採用的架構是由排程從 D1 領取工作，再呼叫模型服務。[Workers AI 定價](https://developers.cloudflare.com/workers-ai/platform/pricing/) · [Queues 定價](https://developers.cloudflare.com/queues/platform/pricing/)
 
 下次做小工具，我會先看兩件事。網站只需要送出靜態檔案，Pages 就能做。要提供 API、保存資料或定時跑程式，再看 Workers、D1 和 R2。至於誰能進網站，可以單獨用 Access 決定，這也是我最想在下一個內部工具沿用的做法。
+
+## 可複製的 AI 提示詞：幫我挑 Cloudflare 工具
+
+把你的專案需求填進去。知道每日使用人數、每月上傳量或誰需要登入的話，也一併附上，AI 才能用你的情境評估免費額度。
+
+```text
+請根據我的專案需求，從有免費方案或免費額度的 Cloudflare 工具中，挑出足夠支援第一版的組合。
+
+專案需求：[填寫要做什麼、使用者要完成哪些操作。若已知道預估人數、流量、檔案大小、保存時間或登入對象，也請填上。]
+
+可評估的工具：
+- Pages：發布靜態網站。
+- Workers + Static Assets：執行 API，也能一起提供前端檔案。
+- Cron Triggers：定時執行 Worker。
+- D1：用 SQL 儲存、查詢結構化資料。
+- R2：存放音訊、影片、圖片等檔案。
+- Cloudflare Access（Zero Trust）：控制誰能登入和存取網站。
+- Queues、Workers AI：有背景訊息處理或模型推論需求時再納入。
+
+請用繁體中文回答：
+1. 把需求和建議工具配對，說明每個工具負責什麼，以及哪些工具現階段可以先省略。
+2. 用幾行說明請求會經過哪些服務，資料和檔案各放哪裡。
+3. 依照我的使用情境估算是否能落在免費額度內。列出估算假設、最可能先碰到的限制，以及超出時會計費或停止服務。請附 Cloudflare 官方定價或限制文件連結。
+4. 如果資料不足，先做有明確假設的初步建議，再列出哪些資訊可能改變選擇。
+
+這一輪只做工具選型與用量評估。
+```

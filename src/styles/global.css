@@ -287,10 +287,13 @@ html:not(.js) .post-code-actions { display: none; }
 /* The first column is already bold; a marker stroke on top of that is noise. */
 .prose td strong { background: none; padding: 0; }
 .prose td > :last-child { margin-bottom: 0; }
+.prose .quota-table th:first-child { width: 25%; }
+.prose .quota-table td:first-child { overflow-wrap: normal; }
 @media (max-width: 520px) {
   .prose table:has(thead tr > :nth-child(2):last-child) { table-layout: fixed; }
   .prose table:has(thead tr > :nth-child(2):last-child) th { white-space: normal; }
-  .prose table:has(thead tr > :nth-child(2):last-child) th:first-child { width: 36%; }
+  .prose table:has(thead tr > :nth-child(2):last-child) th:first-child { width: var(--table-label-width, 36%); }
+  .quota-table { --table-label-width: 6rem; }
 }
 
 /* Fold-away sections: <details><summary>Title</summary>…</details> */
