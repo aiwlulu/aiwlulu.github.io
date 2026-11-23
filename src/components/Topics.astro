@@ -37,4 +37,8 @@ const items = [
   .chip.more:hover { background: var(--surface); box-shadow: none; }
   .chip :global(.icon) { opacity: 0.8; transition: transform 0.4s var(--ease); }
   .chip:hover :global(.icon) { transform: rotate(-12deg) scale(1.15); }
+  @media (max-width: 42rem) {
+    .topics { flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding: 6px; margin: -6px -6px 18px; }
+    .chip { flex: none; min-height: 44px; padding-inline: 12px; }
+  }
 </style>
