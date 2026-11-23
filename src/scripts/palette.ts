@@ -16,6 +16,8 @@ const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 let cached: Palette | null = null;
 let stamp = 0;
 
+export const paletteChanges = new EventTarget();
+
 export type SkyMode = 'auto' | 'day' | 'night';
 export const skyMode = (): SkyMode => (document.documentElement.dataset.skyMode as SkyMode) || 'auto';
 
@@ -84,6 +86,7 @@ export function currentPalette(): Palette {
 export function refreshPalette() {
   cached = null;
   palette();
+  paletteChanges.dispatchEvent(new Event('change'));
 }
 
 export function palette(): Palette {

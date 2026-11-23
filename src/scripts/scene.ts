@@ -1,5 +1,7 @@
 // Minimal WebGL runner for a full-canvas fragment shader.
 // The canvas keeps its CSS gradient until the first frame is drawn, so no-WebGL still looks fine.
+import { paletteChanges } from './palette.ts';
+
 const VERT = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
 
 export interface SceneOptions {
@@ -95,6 +97,9 @@ export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1
       canvas.classList.add('is-live');
     }
   };
+
+  // A static or paused canvas still needs a frame when the reader switches themes.
+  paletteChanges.addEventListener('change', () => draw(performance.now()));
 
   let last = 0;
   const loop = (now: number) => {
