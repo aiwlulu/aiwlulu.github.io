@@ -64,17 +64,64 @@ import Arrow from '../../components/diagrams/parts/Arrow.astro';
 
 部署審閱站時，我把登入檢查放進部署腳本。上傳檔案前，腳本會先用未登入的請求確認正式入口會轉去 Access。Pages 的 **正式網址和預覽網址** 要各自確認是否套用政策。如果另有自訂網域，也要確認該入口受保護。[Cloudflare Pages 的 Access 設定說明](https://developers.cloudflare.com/pages/platform/known-issues/#enable-access-on-your-pagesdev-domain)
 
+## Zero Trust 怎麼決定要不要放行？
+
+Zero Trust 把權限綁在 **要存取的資源** 上。即使訪客連著公司 Wi-Fi，也要依身分、裝置狀態和該資源的政策決定能不能進入。以審閱站為例，最小權限可以從「只讓審閱成員讀取這個站」開始，其他內部工具各自有自己的政策。[NIST SP 800-207，〈Zero Trust Architecture〉](https://csrc.nist.gov/pubs/sp/800/207/final)
+
+### 誰驗證身分，誰決定權限？
+
+NIST 把這件事拆成三個邏輯角色。**政策引擎**（Policy Engine）用身分、裝置與政策做出決定。**政策管理元件**（Policy Administrator）把決定轉成建立或終止連線的指令。**政策執行點**（Policy Enforcement Point）在流量路徑上執行這些指令。三個角色描述的是分工，可以由同一套服務實作。[NIST SP 800-207，第 3 節](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf#page=18)
+
+放回審閱站來看，登入用的身分提供者（IdP）先確認你是誰，**Cloudflare Access 再判斷你能不能進這個站**，並在 Cloudflare 的邊緣節點執行結果。例如，一條允許政策可以讓指定信箱或群組符合 `Include`，再用 `Require` 要求使用指定登入方式或通過裝置檢查。預設拒絕，符合允許政策的人才能進入。[Access 政策](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/) · [Cloudflare 身分驗證架構](https://developers.cloudflare.com/reference-architecture/architectures/identity-gated-edge/)
+
+### 登入後，每次開頁面都要重新驗證嗎？
+
+以瀏覽器為例，登入並符合政策後，Access 會簽發有期限的應用程式權杖（JWT），存在該站的 `CF_Authorization` Cookie。後續請求會自動帶上 Cookie，由 Access 檢查工作階段。權杖的簽章可供驗證，裡面的 `aud` 表明它是發給哪個應用程式，`exp` 記錄何時到期。[Authorization Cookie](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/) · [Application Token](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/application-token/)
+
+<Diagram title="登入後，瀏覽器用有期限的權杖存取網站" description="Cloudflare Access 在登入且符合政策後簽發應用程式權杖。瀏覽器在後續請求帶上 Cookie。Access 檢查工作階段，通過後才讓請求抵達網站。" height={298}>
+  <Box x={14} y={16} w={146} label="瀏覽器" />
+  <Box x={228} y={16} w={158} label="Cloudflare Access" strong />
+  <line className="dg-life" x1="87" y1="66" x2="87" y2="220" />
+  <line className="dg-life" x1="307" y1="66" x2="307" y2="220" />
+  <text className="dg-label" x="197" y="97">登入並通過政策</text>
+  <Arrow d="M95 115H298" travel={{ at: 0, cycle: 8 }} />
+  <text className="dg-label" x="197" y="146">簽發 JWT，設定 Cookie</text>
+  <Arrow d="M298 164H95" dashed travel={{ at: 2, cycle: 8 }} />
+  <text className="dg-label" x="197" y="195">後續請求帶上 Cookie</text>
+  <Arrow d="M95 213H298" travel={{ at: 4, cycle: 8 }} />
+  <Arrow d="M307 220V242" />
+  <text className="dg-label dg-end" x="294" y="234">檢查通過</text>
+  <Box x={228} y={244} w={158} h={42} label="讀取網站內容" />
+</Diagram>
+
+應用程式權杖到期時，若全域登入工作階段仍有效，且身分仍符合政策，Access 可以重新簽發權杖。全域工作階段也到期時，才會提示重新登入。檢查頻率也依條件而異，例如電子郵件是登入時取得的身分資訊，來源 IP 則可在工作階段中隨新請求重新評估。[工作階段管理](https://developers.cloudflare.com/cloudflare-one/access-controls/access-settings/session-management/) · [Access 政策條件](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/#cloudflare-access-selectors)
+
+執行點必須涵蓋所有能讀到資料的入口。以 Pages 來說，就是讓正式、預覽和自訂網域都套用相應政策。若改成有自架後端的應用，可以限制後端只接受經過授權入口的流量，並在後端驗證 Access 轉送的 JWT 簽章、發行者、適用的應用程式和有效期限。[Pages 的 Access 設定](https://developers.cloudflare.com/pages/platform/known-issues/#enable-access-on-your-pagesdev-domain) · [Cloudflare JWT 驗證文件](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/)
+
 ## 免費額度怎麼看？
 
 以下是截至 2026 年 11 月 23 日查到的官方免費額度。不同服務分別看請求數、資料列、儲存量、建置次數或使用者人數。
 
-| 工具 | 免費額度與限制 |
+| 工具 | 白話用途與免費額度 |
 | --- | --- |
-| **Workers／Static Assets** | Workers 每天 10 萬次請求，每次呼叫的 CPU 時間上限為 10 毫秒。一般直接提供的靜態檔案免費且不限請求數，執行 Worker 程式的請求要計入用量。[Workers 定價](https://developers.cloudflare.com/workers/platform/pricing/) |
-| **D1** | 每天讀取 500 萬列、寫入 10 萬列。帳號合計 5 GB，單一資料庫上限 500 MB。讀取量看查詢掃過的資料列數。[D1 定價](https://developers.cloudflare.com/d1/platform/pricing/) · [D1 限制](https://developers.cloudflare.com/d1/platform/limits/) |
-| **R2** | Standard 儲存每月含 10 GB-month、100 萬次 Class A 操作（例如上傳）及 1,000 萬次 Class B 操作（例如讀檔）。相當於存放 10 GB 一整月的額度，R2 傳到網際網路的流量免費。[R2 定價](https://developers.cloudflare.com/r2/pricing/) |
-| **Pages** | 每月 500 次建置，每站最多 2 萬個檔案，單檔上限 25 MiB。靜態檔案請求免費且不限量。若加上 Pages Functions，其請求與 Workers 共用每日額度。[Pages 限制](https://developers.cloudflare.com/pages/platform/limits/) · [Functions 定價](https://developers.cloudflare.com/pages/functions/pricing/) |
-| **Cloudflare One／Zero Trust** | 免費方案最多 50 位使用者，標準日誌最長保留 24 小時。[Cloudflare 方案比較](https://www.cloudflare.com/plans/) |
+| **Workers／Static Assets** | Workers 負責執行程式，例如回傳搜尋結果。Static Assets 負責送出做好的網頁、樣式和圖片。<br />Workers 每天 10 萬次請求，每次呼叫的 CPU 時間上限為 10 毫秒。一般直接提供的靜態檔案免費且不限請求數，執行 Worker 程式的請求要計入用量。[Workers 定價](https://developers.cloudflare.com/workers/platform/pricing/) |
+| **D1** | 像一套可用 SQL 查詢的表格，適合記錄節目名稱、逐字稿和處理進度。<br />每天讀取 500 萬列、寫入 10 萬列。帳號合計 5 GB，單一資料庫上限 500 MB。讀取量看查詢掃過的資料列數。[D1 定價](https://developers.cloudflare.com/d1/platform/pricing/) · [D1 限制](https://developers.cloudflare.com/d1/platform/limits/) |
+| **R2** | 放音檔、影片和圖片的地方，程式可以按檔名和路徑取回整份檔案。<br />Standard 儲存每月含 10 GB-month、100 萬次 Class A 操作（例如上傳）及 1,000 萬次 Class B 操作（例如讀檔）。相當於存放 10 GB 一整月的額度，R2 傳到網際網路的流量免費。[R2 定價](https://developers.cloudflare.com/r2/pricing/) |
+| **Pages** | 把做好的網頁發布成網站，例如部落格、作品集或內部文件。<br />每月 500 次建置，每站最多 2 萬個檔案，單檔上限 25 MiB。靜態檔案請求免費且不限量。若加上 Pages Functions，其請求與 Workers 共用每日額度。[Pages 限制](https://developers.cloudflare.com/pages/platform/limits/) · [Functions 定價](https://developers.cloudflare.com/pages/functions/pricing/) |
+| **Cloudflare One／Zero Trust** | 用其中的 Access 替網站加上登入，只有符合規則的人才能讀取。<br />免費方案最多 50 位使用者，標準日誌最長保留 24 小時。[Cloudflare 方案比較](https://www.cloudflare.com/plans/) |
+
+### 10 GB 大概能存幾部影片？
+
+如果一部影片是 **500 MB**，R2 的 10 GB-month 大約能存 **20 部一整個月**。每部只有 **100 MB**，就大約是 **100 部**。也可以用碼率估算。假設影片的影音總平均碼率是 **4 Mbps**，1 小時大約是 **1.8 GB**，10 GB 大約可以存 **5.5 小時**。這些數字用十進位的 GB 和 MB 估算，實際以匯出後的檔案大小為準，音檔也可以用一樣的方式換算。[R2 定價與計費範例](https://developers.cloudflare.com/r2/pricing/)
+
+**GB-month** 用一個計費週期內每天的最高儲存量來算平均。以 30 天為例，15 天各存 20 GB，另外 15 天都是 0 GB，容量用量就是 10 GB-month。讀取或上傳仍會用掉各自的操作額度。Pages 的 **25 MiB** 則是單一檔案上限，一部 100 MB 的影片已超過。可以把影片放 R2，由 Pages 提供播放介面。[R2 定價](https://developers.cloudflare.com/r2/pricing/) · [Pages 檔案限制](https://developers.cloudflare.com/pages/platform/limits/#file-size)
+
+### 請求、資料列和人數怎麼換算？
+
+- **Workers**。如果平均每次造訪會呼叫 API 5 次，2 萬次造訪就會用掉 10 萬次請求。實際也要把背景請求等其他流量算進去。[Workers 定價](https://developers.cloudflare.com/workers/platform/pricing/)
+- **D1**。假設一個查詢每次掃過 1,000 列，執行 5,000 次就會用掉 500 萬列的每日讀取額度。影片本體的容量則看 R2 等檔案儲存服務。[D1 定價與資料列定義](https://developers.cloudflare.com/d1/platform/pricing/)
+- **Pages**。如果一天觸發 10 次建置，一個 30 天的月份會用掉約 300 次。訪客讀取靜態頁面的請求免費且不限次數。[Pages 建置限制](https://developers.cloudflare.com/pages/platform/limits/#builds) · [靜態請求定價](https://developers.cloudflare.com/pages/functions/pricing/#static-asset-requests)
+- **Zero Trust**。10 位審閱者使用 10 個身分，對應的是 50 位使用者額度中的 10 位。同一人一天開 20 次頁面，仍算同一位使用者。[Cloudflare 方案比較](https://www.cloudflare.com/plans/)
 
 Cloudflare 還有 **Workers AI** 和 **Queues**。Workers AI 提供模型推論，每天有 10,000 Neurons 的免費配置，實際能處理多少請求取決於模型和用量。Queues 適合讓背景程式接收訊息並重試，免費每天 1 萬次操作，一則訊息的寫入、讀取和刪除各會計入。音訊工具這次採用的架構是由排程從 D1 領取工作，再呼叫模型服務。[Workers AI 定價](https://developers.cloudflare.com/workers-ai/platform/pricing/) · [Queues 定價](https://developers.cloudflare.com/queues/platform/pricing/)
 
