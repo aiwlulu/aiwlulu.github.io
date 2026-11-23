@@ -93,7 +93,9 @@ document.addEventListener('click', async (e) => {
 // Image lightbox: one <dialog> shared by every page.
 const box = document.querySelector<HTMLDialogElement>('dialog.lightbox');
 if (box) {
-  box.addEventListener('click', () => box.close());
+  box.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('figcaption')) box.close();
+  });
   document.addEventListener('click', (e) => {
     const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
     if (img) return openZoom(img);
