@@ -18,6 +18,7 @@ export async function GET({ site }: APIContext) {
     '',
     `- [關於](${url('/about/')})：作者介紹`,
     `- [About (English)](${url('/en/about/')}): who writes this blog`,
+    `- [4-7-8 放鬆呼吸](${url('/breathe/')})：跟著圓圈做的呼吸練習`,
     `- [RSS](${url('/rss.xml')})：文章更新`,
     '',
   ].join('\n');

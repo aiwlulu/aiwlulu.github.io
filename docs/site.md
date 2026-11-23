@@ -68,6 +68,8 @@
 | `src/scripts/celebrate.ts` | 頁尾「為自己慶祝」的彩帶與煙火 |
 | `src/scripts/interactions.ts` | 換頁載入條、捲動進場、目錄標示、游標小夥伴等行為 |
 | `src/styles/tokens.css` | 色彩與尺度變數，和 design-library 的 `paper-sea` 同一份 |
+| `src/pages/breathe.astro`、`src/scripts/breathe.ts` | 4-7-8 放鬆呼吸頁面與它的畫面控制 |
+| `src/scripts/breath-cycle.js` | 呼吸練習的計時（各步驟秒數、目前在第幾輪），頁面與測試共用 |
 | `astro.config.mjs` | 網站設定與舊網址轉址 |
 | `scripts/check-seo.mjs` | SEO 檢查 |
 | `scripts/typography.mjs` | 中文排版檢查與自動修正 |

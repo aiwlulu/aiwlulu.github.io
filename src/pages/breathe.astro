@@ -1,0 +1,175 @@
+---
+import Base from '../layouts/Base.astro';
+import Crumbs from '../components/Crumbs.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../site';
+import { breadcrumbs } from '../schema';
+import { PHASES } from '../scripts/breath-cycle.js';
+
+const crumbs = [{ name: '首頁', href: '/' }, { name: '放鬆呼吸' }];
+const label = { in: '吸氣', hold: '停住', out: '吐氣' } as const;
+const steps = [
+  '坐著或躺著都可以，背打直，舌尖輕輕頂在上排門牙後方。',
+  '先用嘴巴把肺裡的氣吐完。',
+  '閉上嘴，用鼻子安靜地吸氣，心裡數 4 秒。',
+  '停住呼吸 7 秒。',
+  '用嘴巴慢慢吐氣 8 秒，可以發出輕輕的「呼」聲。',
+  '這樣算一輪。剛開始做四輪就好，熟悉之後最多做到八輪。',
+];
+const howTo = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: '4-7-8 放鬆呼吸',
+  inLanguage: SITE.lang,
+  totalTime: 'PT1M19S',
+  step: steps.map((text, i) => ({ '@type': 'HowToStep', position: i + 1, text })),
+};
+---
+
+<Base title="4-7-8 放鬆呼吸" description="4-7-8 放鬆呼吸練習：吸氣 4 秒、停住 7 秒、吐氣 8 秒。跟著畫面中央的圓圈做四輪，只要一分多鐘，適合睡前或想讓自己靜下來的時候。" jsonLd={[howTo, breadcrumbs(crumbs)]}>
+  <div class="head wrap narrow">
+    <Crumbs items={crumbs} />
+    <h1>4-7-8 放鬆呼吸</h1>
+    <p class="lede">吸氣 4 秒、停住 7 秒、吐氣 8 秒，跟著圓圈慢慢來。</p>
+  </div>
+
+  <div class="wrap narrow">
+    <section class="breathe" data-breathe data-state="idle" data-phase="idle" aria-label="呼吸引導">
+      <div class="b-stage">
+        <span class="b-track" aria-hidden="true"></span>
+        <svg class="b-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="56" pathLength="100" />
+        </svg>
+        <span class="b-halo" aria-hidden="true"></span>
+        <span class="b-disc" aria-hidden="true"></span>
+        <div class="b-label">
+          <span class="b-word" data-word>4 · 7 · 8</span>
+          <span class="b-count" data-count aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <p class="b-hint" data-hint>按「開始」，跟著圓圈呼吸</p>
+      <p class="b-say" data-say aria-live="polite"></p>
+
+      <ol class="b-phases" aria-label="一輪的三個步驟">
+        {PHASES.map((p) => (
+          <li data-step={p.id}><span class="b-dot" aria-hidden="true"></span>{label[p.id as keyof typeof label]}<b>{p.seconds}</b>秒</li>
+        ))}
+      </ol>
+
+      <div class="b-progress">
+        <span class="b-dots" data-dots aria-hidden="true"></span>
+        <span data-round>共 4 輪，約 1 分 19 秒</span>
+      </div>
+
+      <div class="b-controls">
+        <button class="btn b-toggle" type="button" data-toggle>
+          <span class="when idle"><Icon name="play" size={17} />開始</span>
+          <span class="when running"><Icon name="pause" size={17} />暫停</span>
+          <span class="when paused"><Icon name="play" size={17} />繼續</span>
+          <span class="when done"><Icon name="rotate-ccw" size={17} />再做一次</span>
+        </button>
+        <button class="btn ghost" type="button" data-reset disabled><Icon name="rotate-ccw" size={17} />重來</button>
+      </div>
+
+      <div class="b-options">
+        <div class="b-rounds" role="radiogroup" aria-label="要做幾輪">
+          <button class="b-chip" type="button" role="radio" aria-checked="true" data-rounds="4">4 輪</button>
+          <button class="b-chip" type="button" role="radio" aria-checked="false" data-rounds="8" tabindex="-1">8 輪</button>
+        </div>
+        <button class="switch" type="button" role="switch" aria-checked="false" data-sound>
+          <span class="switch-track"><span class="switch-thumb"></span></span>換步驟時的提示音
+        </button>
+      </div>
+      <noscript><p class="b-hint">這個引導需要 JavaScript；也可以照下面的步驟自己數秒。</p></noscript>
+    </section>
+
+    <div class="prose b-notes">
+      <h2>怎麼做</h2>
+      <ol>
+        {steps.map((s) => <li>{s}</li>)}
+      </ol>
+      <h2>什麼時候做</h2>
+      <p>睡前、緊張的時候，或只是想停下來一分鐘的時候。這個練習由 Andrew Weil 醫師推廣，源自瑜伽的調息法；重點是吐氣比吸氣長，讓身體慢下來。</p>
+      <p>秒數跟不上也沒關係，不必勉強撐到最後一秒，維持「吐氣最長」的節奏就好。</p>
+      <aside class="callout warn">
+        <p>過程中如果頭暈或不舒服，就停下來，恢復平常的呼吸。這是放鬆練習，不能取代醫療；有呼吸道或心血管疾病時，請先問過醫師。</p>
+      </aside>
+    </div>
+  </div>
+</Base>
+
+<script>
+  import '../scripts/breathe';
+</script>
+
+<style>
+  .breathe { --c: var(--brand); position: relative; display: grid; justify-items: center; gap: 18px; padding: clamp(30px, 6vw, 52px) clamp(18px, 5vw, 48px) clamp(26px, 5vw, 40px); background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; }
+  /* A strip of tape holds the card to the page, like the post cards. */
+  .breathe::before { content: ''; position: absolute; top: -11px; left: 50%; width: 96px; height: 24px; translate: -50% 0; rotate: -3deg; background: rgb(255 203 61 / 0.78); border-radius: 2px; }
+  .breathe[data-phase='hold'] { --c: var(--sun); }
+  .breathe[data-phase='out'], .breathe[data-phase='done'] { --c: var(--sage); }
+
+  /* The stage: a dashed outline marks full lungs, the disc grows to meet it and shrinks back.
+     --s (scale) and --p (progress of the current step) are set by src/scripts/breathe.ts. */
+  .b-stage { --s: 0.54; --p: 0; position: relative; width: min(74vw, 320px); aspect-ratio: 1; display: grid; place-items: center; }
+  .b-track, .b-halo, .b-disc { position: absolute; border-radius: 50%; }
+  .b-track { inset: 9%; border: 2px dashed var(--line-2); }
+  .b-halo { inset: 3%; background: var(--c); opacity: 0.2; transform: scale(var(--s)); transition: background-color 0.9s; }
+  .b-disc { inset: 9%; background: var(--c) var(--grain); filter: var(--cut); transform: scale(var(--s)); transition: background-color 0.9s; }
+  .b-ring { position: absolute; inset: 0; width: 100%; height: 100%; rotate: -90deg; overflow: visible; }
+  .b-ring circle { fill: none; stroke: var(--c); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--p) * 100); transition: stroke 0.9s; }
+  .breathe[data-phase='idle'] .b-ring, .breathe[data-phase='done'] .b-ring { opacity: 0; }
+  /* Before starting, the disc breathes a little on its own as an invitation. */
+  .breathe[data-state='idle'] .b-disc, .breathe[data-state='idle'] .b-halo { animation: invite 4.5s ease-in-out infinite; }
+  @keyframes invite { 50% { transform: scale(calc(var(--s) + 0.05)); } }
+
+  .b-label { position: relative; display: grid; justify-items: center; color: var(--on-accent); line-height: 1.15; }
+  .b-word { font-size: 22px; font-weight: 900; letter-spacing: 0.12em; text-indent: 0.12em; }
+  .b-count { font-size: 50px; font-weight: 900; font-variant-numeric: tabular-nums; min-height: 0; }
+  .b-count:empty { display: none; }
+  .breathe[data-phase='idle'] .b-word { letter-spacing: 0.04em; text-indent: 0; }
+
+  .b-hint { margin: 0; min-height: 1.8em; font-size: 17px; font-weight: 700; color: var(--ink); }
+  .b-say { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
+
+  .b-phases { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .b-phases li { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 999px; background: var(--surface-2); color: var(--text); font-size: 14.5px; font-weight: 700; transition: background 0.4s, color 0.4s, transform 0.4s var(--ease); }
+  .b-phases b { font-size: 16px; font-weight: 900; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .b-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand); }
+  [data-step='hold'] .b-dot { background: var(--sun); }
+  [data-step='out'] .b-dot { background: var(--sage); }
+  .breathe[data-phase='in'] [data-step='in'], .breathe[data-phase='hold'] [data-step='hold'], .breathe[data-phase='out'] [data-step='out'] { background: var(--c); color: var(--on-accent); transform: translateY(-3px) scale(1.06); }
+  .breathe[data-phase='in'] [data-step='in'] :is(b, .b-dot), .breathe[data-phase='hold'] [data-step='hold'] :is(b, .b-dot), .breathe[data-phase='out'] [data-step='out'] :is(b, .b-dot) { color: var(--on-accent); background: var(--on-accent); }
+  .breathe [data-step] b { background: none !important; }
+
+  .b-progress { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; font-size: 14.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .b-dots { display: inline-flex; gap: 6px; }
+  .b-dots :global(i) { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--line-2); transition: background 0.4s, box-shadow 0.4s, transform 0.4s var(--ease); }
+  .b-dots :global(i.now) { box-shadow: inset 0 0 0 2px var(--accent); transform: scale(1.25); }
+  .b-dots :global(i.on) { background: var(--sage); box-shadow: none; }
+
+  .b-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 6px; }
+  .b-toggle { min-width: 132px; }
+  .when { display: none; align-items: center; gap: 8px; }
+  .breathe[data-state='idle'] .when.idle, .breathe[data-state='running'] .when.running, .breathe[data-state='paused'] .when.paused, .breathe[data-state='done'] .when.done { display: inline-flex; }
+  .btn:disabled { opacity: 0.45; cursor: default; pointer-events: none; }
+
+  .b-options { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px; padding-top: 16px; border-top: 2px dashed var(--line); width: 100%; }
+  .b-rounds { display: inline-flex; gap: 8px; }
+  .b-chip { min-height: 38px; padding: 4px 16px; border: 0; border-radius: 999px; background: var(--surface); box-shadow: 0 3px 0 var(--line-2), inset 0 0 0 1px var(--line); color: var(--ink); font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer; transition: transform 0.3s var(--ease), box-shadow 0.2s, background 0.2s; }
+  .b-chip:hover { transform: translateY(-3px) rotate(-2deg); box-shadow: 0 6px 0 var(--line-2), inset 0 0 0 1px var(--line); }
+  .b-chip:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line-2); }
+  .b-chip[aria-checked='true'] { background: var(--sun); color: var(--on-accent); box-shadow: 0 3px 0 var(--sun-deep); }
+
+  .b-notes { margin-top: 28px; }
+
+  @media (max-width: 42rem) {
+    .b-word { font-size: 19px; }
+    .b-count { font-size: 42px; }
+    .b-controls .btn { flex: 1 1 130px; }
+    .b-phases { gap: 6px; }
+    .b-phases li { padding: 4px 10px; gap: 5px; font-size: 13.5px; }
+    .b-phases b { font-size: 15px; }
+  }
+</style>

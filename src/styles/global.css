@@ -121,6 +121,10 @@ a.pill.tag:hover { background: var(--sage); color: var(--on-accent); }
   .nav a { gap: 5px; padding-inline: 6px; white-space: nowrap; }
   .nav a:not(.nav-icon) { flex: 1 0 auto; }
   .nav .nav-icon { padding-inline: 8px; }
+  /* Four text links and two icon buttons: on the narrowest phones the link icons give way so
+     the row stays on one line. */
+  .nav { gap: 0; }
+  @media (max-width: 24rem) { .nav a:not(.nav-icon) .icon { display: none; } }
 
   body[data-sky='tall'] { --sky-tall: clamp(310px, 52svh, 420px); }
   .hero { min-height: calc(var(--sky-tall) - 108px); padding-block: 24px 40px; }

@@ -29,6 +29,7 @@
 - [x] 用手工畫的 SVG 元件或 Mermaid 畫圖表，顏色跟著外觀變化
 - [x] 產生 SEO 需要的 title、description、canonical、Open Graph、結構化資料、sitemap、RSS 與 `llms.txt`
 - [x] 用 GitHub 帳號在文章下方留言（utterances）
+- [x] 跟著會放大縮小的圓圈做 4-7-8 放鬆呼吸（`/breathe/`），可以選 4 輪或 8 輪、開關提示音
 - [x] 部署前自動檢查中文排版與每一頁的 SEO 基本項目
 - [ ] 英文版文章（目前只有關於頁有英文版）
 
@@ -129,7 +130,7 @@ src/
 ├── content/blog/        文章（MDX）
 ├── layouts/             所有頁面共用的版型
 ├── pages/               網址路由，含 RSS、robots.txt 與 llms.txt
-├── scripts/             瀏覽器端的互動、天空與海的 shader
+├── scripts/             瀏覽器端的互動、天空與海的 shader、呼吸練習的計時
 ├── styles/              色彩與尺度變數、全站樣式
 ├── content.config.ts    文章欄位與限制
 └── site.ts              網站名稱、作者等設定

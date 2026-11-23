@@ -13,11 +13,12 @@ const path = Astro.url.pathname;
 const lang = seo.lang ?? SITE.lang;
 const en = lang === 'en';
 const t = en
-  ? { skip: 'Skip to content', home: 'Home', posts: 'Posts', about: 'About', main: 'Main', brand: `${SITE.name} home`, sky: 'Switch between light and dark' }
-  : { skip: '跳到主要內容', home: '首頁', posts: '文章', about: '關於', main: '主要', brand: `${SITE.name}首頁`, sky: '切換淺色與深色' };
+  ? { skip: 'Skip to content', home: 'Home', posts: 'Posts', breathe: 'Breathe', about: 'About', main: 'Main', brand: `${SITE.name} home`, sky: 'Switch between light and dark' }
+  : { skip: '跳到主要內容', home: '首頁', posts: '文章', breathe: '呼吸', about: '關於', main: '主要', brand: `${SITE.name}首頁`, sky: '切換淺色與深色' };
 const nav = [
   { href: '/', label: t.home, icon: 'house' as const, on: path === '/' },
   { href: '/blog/', label: t.posts, icon: 'book-open' as const, on: path.startsWith('/blog') || path.startsWith('/categories') || path.startsWith('/tags') },
+  { href: '/breathe/', label: t.breathe, icon: 'wind' as const, on: path.startsWith('/breathe') },
   { href: en ? '/en/about/' : '/about/', label: t.about, icon: 'user-round' as const, on: path.includes('/about') },
 ];
 ---

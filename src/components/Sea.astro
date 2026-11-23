@@ -6,8 +6,8 @@ import Icon from './Icon.astro';
 interface Props { lang?: string }
 const en = Astro.props.lang === 'en';
 const t = en
-  ? { footer: 'Footer', posts: 'Posts', about: 'About', party: 'Celebrate yourself', top: 'Back to top' }
-  : { footer: '頁尾', posts: '文章', about: '關於', party: '為自己慶祝', top: '回到頂端' };
+  ? { footer: 'Footer', posts: 'Posts', breathe: 'Breathe', about: 'About', party: 'Celebrate yourself', top: 'Back to top' }
+  : { footer: '頁尾', posts: '文章', breathe: '呼吸', about: '關於', party: '為自己慶祝', top: '回到頂端' };
 // Three gull silhouettes of different sizes cross the sky at their own pace, mostly gliding.
 const gulls = [
   { top: 9, size: 46, cross: 64, delay: -20, flap: 5.2, bob: 8 },
@@ -53,6 +53,7 @@ const fallback = [
     <p class="sea-name">{SITE.name}</p>
     <nav class="sea-links" aria-label={t.footer}>
       <a href="/blog/"><Icon name="book-open" size={15} />{t.posts}</a>
+      <a href="/breathe/"><Icon name="wind" size={15} />{t.breathe}</a>
       <a href={en ? '/en/about/' : '/about/'}><Icon name="user-round" size={15} />{t.about}</a>
       <a href="/rss.xml" data-astro-reload><Icon name="rss" size={15} />RSS</a>
       <a href={SITE.github} target="_blank" rel="me noopener noreferrer"><Icon name="github" size={15} />GitHub</a>
