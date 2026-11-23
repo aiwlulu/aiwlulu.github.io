@@ -19,7 +19,8 @@ import Arrow from '../../components/diagrams/parts/Arrow.astro';
 
 - **只要發布靜態網站** → **Pages**。如果專案已用 Workers 跑 API，也能用 **Workers Static Assets** 一起部署前端。
 - **要執行 API 或定時跑程式** → **Workers**。要定時執行，再加 **Cron Triggers**。
-- **要查詢紀錄或存進度** → **D1**。要存放、上傳或播放音檔與影片，選 **R2**。
+- **要查詢紀錄或存進度** → **D1**。
+- **要存放、上傳或播放音檔與影片** → **R2**。
 - **網站只開放給指定成員** → **Cloudflare Access**。例如在靜態審閱站前加上登入與成員存取規則。
 
 所以音訊工具用了 **Workers + D1 + R2**，另加排程處理背景工作。審閱站則用了 **Pages + Access**。兩個專案都透過 Wrangler 部署。[Wrangler 官方文件](https://developers.cloudflare.com/workers/wrangler/)
