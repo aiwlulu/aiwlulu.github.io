@@ -1,0 +1,81 @@
+---
+title: 'Cloudflare 小專案實戰：從音訊工具到內部審閱站'
+subtitle: 'Workers、D1、R2 怎麼分工？用 Pages 與 Zero Trust 幫審閱站加上登入'
+description: '用音訊工具和內部審閱站兩個案例，圖解 Cloudflare Workers、D1、R2、Pages 與 Zero Trust Access 的分工，整理各項免費額度和部署時容易漏掉的設定。'
+pubDate: 2026-11-23
+category: '工具'
+tags: ['Cloudflare', '部署', '資安']
+---
+
+import Diagram from '../../components/diagrams/Diagram.astro';
+import Box from '../../components/diagrams/parts/Box.astro';
+import Arrow from '../../components/diagrams/parts/Arrow.astro';
+
+我用 Cloudflare 做了兩個用途很不一樣的小專案。一個可以上傳音檔、看逐字稿，還會在背景處理匯入和轉錄。另一個是給指定成員看的審閱站，部署好之後，能用 Cloudflare Access 控制誰可以進去。
+
+我最喜歡的是第二個做法。審閱站本身只要產出靜態網頁，登入和權限規則交給 Cloudflare 管理。要開放給新成員時，可以直接調整 Access 規則，網頁也省去了自己做登入頁的工。
+
+## 快速看懂兩個專案的分工
+
+- **音訊工具** 用 Workers 提供網頁和 API，D1 記錄逐字稿與任務狀態，R2 保存音檔，Cron Triggers 定時執行背景程式。
+- **審閱站** 用 Pages 部署靜態檔案，再用 Zero Trust 裡的 Cloudflare Access 管理誰可以讀取內容。
+- **部署工具** 是 Wrangler。兩個專案都用這套命令列工具，把程式或建置好的檔案送上 Cloudflare。[Wrangler 官方文件](https://developers.cloudflare.com/workers/wrangler/)
+
+## 一份音檔進來之後，資料分別放在哪裡？
+
+打開音訊工具時，瀏覽器先載入 Workers Static Assets 提供的 HTML、CSS 和 JavaScript。要查節目或更新資料時，前端就呼叫 API，由 Worker 處理。原始音檔放進 **R2 物件儲存**，節目資料、音檔對應位置、逐字稿和處理進度則寫進 **D1 SQL 資料庫**。這樣一來，查詢節目清單或逐字稿時，可以直接查資料庫，等到使用者按播放才需要取用音檔。音檔傳輸也可以走有時效的簽名網址，讓瀏覽器直接和 R2 傳輸檔案。[Static Assets](https://developers.cloudflare.com/workers/static-assets/) · [D1](https://developers.cloudflare.com/d1/) · [R2](https://developers.cloudflare.com/r2/)
+
+<Diagram title="Workers 接 API，D1 存逐字稿，R2 存音檔" description="瀏覽器呼叫 Workers API。Worker 查寫 D1 的節目與逐字稿資料，也能讀寫存放於 R2 的音檔。" height={288}>
+  <Box x={112} y={14} w={176} label="瀏覽器" />
+  <Arrow d="M200 64V104" travel={{ at: 0, cycle: 7 }} />
+  <text className="dg-label dg-start" x="213" y="84">呼叫 API</text>
+  <Box x={112} y={106} w={176} label="Workers" sub="處理 API 請求" strong />
+  <Arrow d="M148 156V177H99V220" travel={{ at: 2, cycle: 7 }} />
+  <Arrow d="M252 156V177H301V220" travel={{ at: 2, cycle: 7 }} />
+  <text className="dg-label dg-start" x="109" y="201">查寫資料</text>
+  <text className="dg-label dg-end" x="291" y="201">讀寫檔案</text>
+  <Box x={20} y={222} w={158} label="D1" sub="節目、逐字稿、進度" />
+  <Box x={222} y={222} w={158} label="R2" sub="原始與處理後的音檔" />
+</Diagram>
+
+轉錄需要在背景繼續跑。啟用雲端轉錄時，**Cron Triggers** 每分鐘會觸發一個背景 Worker，讓它檢查 D1 裡的待辦工作，接著處理一筆匯入工作或一段音訊。轉錄與 AI 功能會呼叫外部服務，相關用量由各服務另外計算。主 Worker 也有自己的排程，定期清理過期資料。外部服務的 API 金鑰則透過 Workers Secrets 提供給程式。[Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/) · [Workers Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
+
+## 靜態網站也能只開放給指定的人嗎？
+
+**Cloudflare Pages** 負責提供建置好的檔案。**Cloudflare Access** 則在檔案送到瀏覽器前，依登入身分和存取規則決定是否放行。用電子郵件一次性驗證碼（OTP）當例子，你可以指定哪些信箱有權限。受允許的人收到驗證碼、完成登入後，就能進入審閱站。團隊已有身分提供者時，也可以用既有的登入方式。[Cloudflare Access](https://www.cloudflare.com/products/access/) · [一次性驗證碼文件](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/)
+
+<Diagram title="Access 驗證通過後才會放行到 Pages" description="訪客開啟審閱站時，Cloudflare Access 驗證身分並檢查存取規則。符合規則才會讀取 Pages 網站，未通過則無法讀取。" height={320}>
+  <Box x={113} y={16} w={174} label="訪客" />
+  <Arrow d="M200 66V106" travel={{ at: 0, cycle: 7 }} />
+  <text className="dg-label dg-start" x="214" y="86">開啟審閱站</text>
+  <Box x={87} y={108} w={226} h={58} label="Cloudflare Access" sub="驗證身分、檢查存取規則" strong />
+  <Arrow d="M148 166V194H99V244" travel={{ at: 2, cycle: 7 }} />
+  <Arrow d="M252 166V194H301V244" dashed />
+  <text className="dg-label dg-start" x="110" y="221">符合規則</text>
+  <text className="dg-label dg-end" x="290" y="221">未通過驗證或規則</text>
+  <Box x={18} y={246} w={162} h={56} label="Cloudflare Pages" sub="讀取審閱站內容" />
+  <Box x={220} y={246} w={162} h={56} label="拒絕存取" sub="頁面內容不會送出" />
+</Diagram>
+
+<figure class="post-figure">
+  <img src="https://developers.cloudflare.com/_astro/otp1.CDOVB8yE.png" width="507" height="466" loading="lazy" alt="Cloudflare Access 的電子郵件登入畫面，輸入信箱後可要求寄送一次性驗證碼" />
+  <figcaption>Cloudflare Access 的一次性驗證碼登入範例（<a href="https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/#log-in-with-otp">Cloudflare 官方畫面</a>）</figcaption>
+</figure>
+
+部署審閱站時，我把登入檢查放進部署腳本。上傳檔案前，腳本會先用未登入的請求確認正式入口會轉去 Access。Pages 的 **正式網址和預覽網址** 要各自確認是否套用政策。如果另有自訂網域，也要確認該入口受保護。[Cloudflare Pages 的 Access 設定說明](https://developers.cloudflare.com/pages/platform/known-issues/#enable-access-on-your-pagesdev-domain)
+
+## 免費額度怎麼看？
+
+以下是截至 2026 年 11 月 23 日查到的官方免費額度。不同服務分別看請求數、資料列、儲存量、建置次數或使用者人數。
+
+| 工具 | 免費額度與限制 |
+| --- | --- |
+| **Workers／Static Assets** | Workers 每天 10 萬次請求，每次呼叫的 CPU 時間上限為 10 毫秒。一般直接提供的靜態檔案免費且不限請求數，執行 Worker 程式的請求要計入用量。[Workers 定價](https://developers.cloudflare.com/workers/platform/pricing/) |
+| **D1** | 每天讀取 500 萬列、寫入 10 萬列。帳號合計 5 GB，單一資料庫上限 500 MB。讀取量看查詢掃過的資料列數。[D1 定價](https://developers.cloudflare.com/d1/platform/pricing/) · [D1 限制](https://developers.cloudflare.com/d1/platform/limits/) |
+| **R2** | Standard 儲存每月含 10 GB-month、100 萬次 Class A 操作（例如上傳）及 1,000 萬次 Class B 操作（例如讀檔）。相當於存放 10 GB 一整月的額度，R2 傳到網際網路的流量免費。[R2 定價](https://developers.cloudflare.com/r2/pricing/) |
+| **Pages** | 每月 500 次建置，每站最多 2 萬個檔案，單檔上限 25 MiB。靜態檔案請求免費且不限量。若加上 Pages Functions，其請求與 Workers 共用每日額度。[Pages 限制](https://developers.cloudflare.com/pages/platform/limits/) · [Functions 定價](https://developers.cloudflare.com/pages/functions/pricing/) |
+| **Cloudflare One／Zero Trust** | 免費方案最多 50 位使用者，標準日誌最長保留 24 小時。[Cloudflare 方案比較](https://www.cloudflare.com/plans/) |
+
+Cloudflare 還有 **Workers AI** 和 **Queues**。Workers AI 提供模型推論，每天有 10,000 Neurons 的免費配置，實際能處理多少請求取決於模型和用量。Queues 適合讓背景程式接收訊息並重試，免費每天 1 萬次操作，一則訊息的寫入、讀取和刪除各會計入。音訊工具這次採用的架構是由排程從 D1 領取工作，再呼叫模型服務。[Workers AI 定價](https://developers.cloudflare.com/workers-ai/platform/pricing/) · [Queues 定價](https://developers.cloudflare.com/queues/platform/pricing/)
+
+下次做小工具，我會先看兩件事。網站只需要送出靜態檔案，Pages 就能做。要提供 API、保存資料或定時跑程式，再看 Workers、D1 和 R2。至於誰能進網站，可以單獨用 Access 決定，這也是我最想在下一個內部工具沿用的做法。
