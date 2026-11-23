@@ -379,9 +379,14 @@ main { view-transition-name: main; }
   --gutter: clamp(12px, 3vw, 32px);
   position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh;
   max-width: none; max-height: none; margin: 0; border: 0;
-  padding: max(var(--gutter), env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right)) max(var(--gutter), env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+  padding: 12px;
   display: grid; grid-template: auto minmax(0, 1fr) / minmax(0, 1fr); gap: 8px;
   background: rgb(22 34 46 / 0.93); cursor: zoom-out; overscroll-behavior: contain;
+}
+@supports (padding: max(12px, env(safe-area-inset-top, 0px))) {
+  .lightbox {
+    padding: max(var(--gutter), env(safe-area-inset-top, 0px)) max(var(--gutter), env(safe-area-inset-right, 0px)) max(var(--gutter), env(safe-area-inset-bottom, 0px)) max(var(--gutter), env(safe-area-inset-left, 0px));
+  }
 }
 .lightbox:not([open]) { display: none; }
 .lightbox::backdrop { background: transparent; }
