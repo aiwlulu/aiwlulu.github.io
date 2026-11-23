@@ -121,6 +121,11 @@ a.pill.tag:hover { background: var(--sage); color: var(--on-accent); }
 
   body[data-sky='tall'] { --sky-tall: clamp(310px, 52svh, 420px); }
   .hero { min-height: calc(var(--sky-tall) - 108px); padding-block: 24px 40px; }
+  .crumbs { flex-wrap: nowrap; gap: 6px; padding: 0 8px; margin-bottom: 10px; }
+  .crumbs a { min-height: 44px; padding-inline: 4px; }
+  /* The page heading immediately below names the article or listing. */
+  .crumbs li:last-child:nth-child(n+3) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
   .hero h1 { font-size: clamp(32px, 9vw, 44px); }
   .hero p { margin-top: 10px; }
   .hero-actions { gap: 10px; margin-top: 22px; }
@@ -370,18 +375,28 @@ main { view-transition-name: main; }
 @keyframes vt-in { from { opacity: 0; transform: translateY(18px); } }
 
 /* ---------- Image lightbox ---------- */
-.lightbox { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: clamp(16px, 4vw, 48px); border: 0; background: rgb(22 34 46 / 0.93); display: grid; place-items: center; cursor: zoom-out; overscroll-behavior: contain; }
+.lightbox {
+  --gutter: clamp(12px, 3vw, 32px);
+  position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh;
+  max-width: none; max-height: none; margin: 0; border: 0;
+  padding: 12px;
+  display: grid; grid-template: auto minmax(0, 1fr) / minmax(0, 1fr); gap: 8px;
+  background: rgb(22 34 46 / 0.93); cursor: zoom-out; overscroll-behavior: contain;
+}
+@supports (padding: max(12px, env(safe-area-inset-top, 0px))) {
+  .lightbox {
+    padding: max(var(--gutter), env(safe-area-inset-top, 0px)) max(var(--gutter), env(safe-area-inset-right, 0px)) max(var(--gutter), env(safe-area-inset-bottom, 0px)) max(var(--gutter), env(safe-area-inset-left, 0px));
+  }
+}
 .lightbox:not([open]) { display: none; }
 .lightbox::backdrop { background: transparent; }
-.lightbox img { max-width: 100%; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); width: auto; height: auto; padding: 10px; background: #fff; border-radius: 6px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
-/* An enlarged diagram fills the width (up to 1100px); it is drawn from a 400-wide canvas, so
-   without an explicit width it would open no bigger than it was. Only the figure's own drawing
-   is styled: the close button has an icon that is also an svg. */
-.lightbox figure { width: 100%; }
-.lightbox figure > svg { width: min(100%, 1100px); max-width: 100%; height: auto; max-height: calc(100vh - 2 * clamp(16px, 4vw, 48px) - 44px); padding: clamp(12px, 3vw, 28px); background: var(--sky-2); border-radius: 10px; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
-.lightbox figcaption { margin-top: 12px; color: #fff; font-size: 14.5px; text-align: center; max-width: 70ch; }
-.lightbox figure { margin: 0; display: grid; justify-items: center; }
-.lightbox-close { position: fixed; top: 16px; right: 20px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--sun); color: var(--on-accent); box-shadow: 0 4px 0 var(--sun-deep); cursor: pointer; transition: transform 0.3s var(--ease); }
+.lightbox figure { margin: 0; min-height: 0; display: grid; grid-template: minmax(0, 1fr) auto / minmax(0, 1fr); justify-items: center; }
+.lightbox figure > img, .lightbox figure > svg { align-self: center; min-height: 0; max-height: 100%; max-width: 100%; height: auto; box-shadow: 0 24px 80px rgb(0 0 0 / 0.45); animation: zoom-in 0.35s var(--ease); }
+.lightbox img { width: auto; padding: 4px; background: #fff; border-radius: 6px; object-fit: contain; }
+.lightbox figure > svg { width: min(100%, 1100px); padding: clamp(8px, 2vw, 24px); background: var(--sky-2); border-radius: 10px; }
+.lightbox figcaption { margin-top: 8px; max-width: 70ch; max-height: 24vh; max-height: 24dvh; overflow: auto; overflow-wrap: anywhere; cursor: auto; color: #fff; font-size: 14.5px; line-height: 1.5; text-align: center; }
+.lightbox figcaption:empty { display: none; }
+.lightbox-close { justify-self: end; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--sun); color: var(--on-accent); box-shadow: 0 4px 0 var(--sun-deep); cursor: pointer; transition: transform 0.3s var(--ease); }
 .lightbox-close:hover { transform: rotate(90deg) scale(1.1); }
 @keyframes zoom-in { from { opacity: 0; transform: scale(0.86) rotate(-2deg); } }
 
