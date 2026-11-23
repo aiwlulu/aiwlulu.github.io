@@ -25,6 +25,34 @@ import Arrow from '../../components/diagrams/parts/Arrow.astro';
 
 所以音訊工具用了 **Workers + D1 + R2**，另加排程處理背景工作。審閱站則用了 **Pages + Access**。兩個專案都透過 Wrangler 部署。[Wrangler 官方文件](https://developers.cloudflare.com/workers/wrangler/)
 
+## 可複製的 AI 提示詞：幫我挑 Cloudflare 工具
+
+想用免費工具做個小專案，可以直接複製這段，填入你想做的功能。知道每日使用人數、每月上傳量或誰需要登入的話，也一併附上，讓 AI 幫你挑工具、估算用量，再排出第一版的實作步驟。
+
+```text
+請根據我的專案需求，從有免費方案或免費額度的 Cloudflare 工具中，挑出足夠支援第一版的組合。
+
+專案需求：[填寫要做什麼、使用者要完成哪些操作。若已知道預估人數、流量、檔案大小、保存時間或登入對象，也請填上。]
+
+可評估的工具：
+- Pages：發布靜態網站。
+- Workers + Static Assets：執行 API，也能一起提供前端檔案。
+- Cron Triggers：定時執行 Worker。
+- D1：用 SQL 儲存、查詢結構化資料。
+- R2：存放音訊、影片、圖片等檔案。
+- Cloudflare Access（Zero Trust）：控制誰能登入和存取網站。
+- Queues、Workers AI：有背景訊息處理或模型推論需求時再納入。
+
+請用繁體中文回答：
+1. 把需求和建議工具配對，說明每個工具負責什麼，以及哪些工具現階段可以先省略。
+2. 用幾行說明請求會經過哪些服務，資料和檔案各放哪裡。
+3. 依照我的使用情境估算是否能落在免費額度內。列出估算假設、最可能先碰到的限制，以及超出時會計費或停止服務。請附 Cloudflare 官方定價或限制文件連結。
+4. 如果資料不足，先做有明確假設的初步建議，再列出哪些資訊可能改變選擇。
+5. 給一份第一版的實作順序，列出要建立的資源、要接起來的功能，以及怎麼驗證主要流程可以運作。
+
+先給我這份方案。等我確認選型之後，再依照實作順序開始開發。
+```
+
 ## 一份音檔進來之後，資料分別放在哪裡？
 
 打開音訊工具時，瀏覽器先載入 Workers Static Assets 提供的 HTML、CSS 和 JavaScript。要查節目或更新資料時，前端就呼叫 API，由 Worker 處理。原始音檔放進 **R2 物件儲存**，節目資料、音檔對應位置、逐字稿和處理進度則寫進 **D1 SQL 資料庫**。這樣一來，查詢節目清單或逐字稿時，可以直接查資料庫，等到使用者按播放才需要取用音檔。音檔傳輸也可以走有時效的簽名網址，讓瀏覽器直接和 R2 傳輸檔案。[Static Assets](https://developers.cloudflare.com/workers/static-assets/) · [D1](https://developers.cloudflare.com/d1/) · [R2](https://developers.cloudflare.com/r2/)
@@ -136,30 +164,3 @@ NIST 把這件事拆成三個邏輯角色。**政策引擎**（Policy Engine）�
 Cloudflare 還有 **Workers AI** 和 **Queues**。Workers AI 提供模型推論，每天有 10,000 Neurons 的免費配置，實際能處理多少請求取決於模型和用量。Queues 適合讓背景程式接收訊息並重試，免費每天 1 萬次操作，一則訊息的寫入、讀取和刪除各會計入。音訊工具這次採用的架構是由排程從 D1 領取工作，再呼叫模型服務。[Workers AI 定價](https://developers.cloudflare.com/workers-ai/platform/pricing/) · [Queues 定價](https://developers.cloudflare.com/queues/platform/pricing/)
 
 下次做小工具，我會先看兩件事。網站只需要送出靜態檔案，Pages 就能做。要提供 API、保存資料或定時跑程式，再看 Workers、D1 和 R2。至於誰能進網站，可以單獨用 Access 決定，這也是我最想在下一個內部工具沿用的做法。
-
-## 可複製的 AI 提示詞：幫我挑 Cloudflare 工具
-
-把你的專案需求填進去。知道每日使用人數、每月上傳量或誰需要登入的話，也一併附上，AI 才能用你的情境評估免費額度。
-
-```text
-請根據我的專案需求，從有免費方案或免費額度的 Cloudflare 工具中，挑出足夠支援第一版的組合。
-
-專案需求：[填寫要做什麼、使用者要完成哪些操作。若已知道預估人數、流量、檔案大小、保存時間或登入對象，也請填上。]
-
-可評估的工具：
-- Pages：發布靜態網站。
-- Workers + Static Assets：執行 API，也能一起提供前端檔案。
-- Cron Triggers：定時執行 Worker。
-- D1：用 SQL 儲存、查詢結構化資料。
-- R2：存放音訊、影片、圖片等檔案。
-- Cloudflare Access（Zero Trust）：控制誰能登入和存取網站。
-- Queues、Workers AI：有背景訊息處理或模型推論需求時再納入。
-
-請用繁體中文回答：
-1. 把需求和建議工具配對，說明每個工具負責什麼，以及哪些工具現階段可以先省略。
-2. 用幾行說明請求會經過哪些服務，資料和檔案各放哪裡。
-3. 依照我的使用情境估算是否能落在免費額度內。列出估算假設、最可能先碰到的限制，以及超出時會計費或停止服務。請附 Cloudflare 官方定價或限制文件連結。
-4. 如果資料不足，先做有明確假設的初步建議，再列出哪些資訊可能改變選擇。
-
-這一輪只做工具選型與用量評估。
-```
