@@ -75,6 +75,9 @@ h1, h2, h3 { color: var(--ink); line-height: 1.35; text-wrap: balance; }
 .crumbs a { display: inline-flex; align-items: center; gap: 5px; color: inherit; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s; }
 .crumbs a:hover { border-color: var(--sun-deep); }
 .crumbs [aria-current] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46ch; }
+/* On a trail of three or more, the last item repeats the page title right below it, so it is
+   hidden from view at every width. Screen readers still get it, and so does the structured data. */
+.crumbs li:last-child:nth-child(n+3) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .meta { display: inline-flex; align-items: center; gap: 6px; }
 .meta .icon { opacity: 0.75; }
 .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 18px; font-size: 14.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
@@ -123,8 +126,6 @@ a.pill.tag:hover { background: var(--sage); color: var(--on-accent); }
   .hero { min-height: calc(var(--sky-tall) - 108px); padding-block: 24px 40px; }
   .crumbs { flex-wrap: nowrap; gap: 6px; padding: 0 8px; margin-bottom: 10px; }
   .crumbs a { min-height: 44px; padding-inline: 4px; }
-  /* The page heading immediately below names the article or listing. */
-  .crumbs li:last-child:nth-child(n+3) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
   .hero h1 { font-size: clamp(32px, 9vw, 44px); }
   .hero p { margin-top: 10px; }
