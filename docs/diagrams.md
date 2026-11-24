@@ -12,7 +12,7 @@
 
 | 積木 | 用途 | 主要屬性 |
 |---|---|---|
-| `Diagram` | 外框。負責標題、給螢幕閱讀器的描述、點擊放大 | `title`、`description`、`height` |
+| `Diagram` | 外框。負責標題、給螢幕閱讀器的描述，以及右上角的放大按鈕（點整張圖也能放大） | `title`、`description`、`height` |
 | `Box` | 有文字的方塊 | `x y w h`、`label`、`code`（等寬字）、`sub`（第二行小字）、`strong`（藍框，用在主角）、`small` |
 | `Arrow` | 帶箭頭的連線，路徑用 SVG 的 `d` | `d`、`dashed`（回覆）、`flow`、`travel` |
 | `Chip` | 線旁的小標籤，會依文字自動算寬度；不要把字直接寫在線上 | `x y`（中心點）、`text`、`code`、`tone` |

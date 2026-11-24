@@ -2,7 +2,7 @@
 // Frame for a hand-drawn SVG diagram. The drawing uses the site's colour variables, so it follows
 // the light and dark themes, needs no library and is there on first paint.
 // Build the drawing from the pieces in ./parts (Box, Arrow, Chip, Step, Room); see the README.
-// Click or press Enter to open it larger (handled with images in src/scripts/interactions.ts).
+// A corner button (or a click anywhere) opens it larger; see src/scripts/zoom-button.ts.
 interface Props {
   /** Short title, read by screen readers and shown under the enlarged view. */
   title: string;
@@ -12,11 +12,12 @@ interface Props {
   width?: number;
   height: number;
 }
+import { zoomButton } from '../../scripts/zoom-button';
 const { title, description, width = 400, height } = Astro.props;
 const id = `dg-${title.replace(/[^\p{L}\p{N}]+/gu, '-')}`;
 ---
 
-<figure class="post-diagram" data-zoom-diagram={title} role="button" tabindex="0" aria-label={`放大圖表：${title}`}>
+<figure class="post-diagram" data-zoom-diagram={title}>
   <svg class="diagram" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-t ${id}-d`}>
     <title id={`${id}-t`}>{title}</title>
     <desc id={`${id}-d`}>{description}</desc>
@@ -30,6 +31,7 @@ const id = `dg-${title.replace(/[^\p{L}\p{N}]+/gu, '-')}`;
       <slot />
     </g>
   </svg>
+  <Fragment set:html={zoomButton(title)} />
 </figure>
 
 <style is:global>

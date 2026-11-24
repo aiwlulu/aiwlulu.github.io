@@ -115,15 +115,12 @@ if (box) {
     const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
     if (img) return openZoom(img);
     const diagram = (e.target as Element).closest?.<HTMLElement>('[data-zoom-diagram]');
-    const svg = diagram?.querySelector('svg');
+    const svg = diagram?.querySelector<SVGSVGElement>(':scope > svg');
     if (diagram && svg) openZoom(svg, diagram.dataset.zoomDiagram);
   });
   document.addEventListener('keydown', (e) => {
     const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
     if (img && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoom(img); }
-    const diagram = (e.target as Element).closest?.<HTMLElement>('[data-zoom-diagram]');
-    const svg = diagram?.querySelector('svg');
-    if (diagram && svg && e.target === diagram && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoom(svg, diagram.dataset.zoomDiagram); }
   });
 }
 function openZoom(source: HTMLImageElement | SVGSVGElement, caption = '') {

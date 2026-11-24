@@ -1,3 +1,5 @@
+import { zoomButton } from './zoom-button';
+
 const sourceSelector = '.prose pre[data-language="mermaid"]';
 const root = document.documentElement;
 const renderedTheme = new WeakMap<HTMLPreElement, string>();
@@ -80,12 +82,10 @@ async function renderDiagrams() {
           : document.createElement('div');
         diagram.className = 'post-diagram';
         diagram.innerHTML = svg;
-        // Click or press Enter to open it larger; the title written in the diagram labels it.
+        // A corner button (or a click anywhere) opens it larger; the diagram's title labels it.
         const title = diagram.querySelector('svg > title')?.textContent ?? '';
         diagram.setAttribute('data-zoom-diagram', title);
-        diagram.setAttribute('role', 'button');
-        diagram.setAttribute('tabindex', '0');
-        diagram.setAttribute('aria-label', `放大圖表${title ? '：' + title : ''}`);
+        diagram.insertAdjacentHTML('beforeend', zoomButton(title));
         if (!diagram.isConnected) source.after(diagram);
         fitFlowchart(diagram);
         source.hidden = true;
