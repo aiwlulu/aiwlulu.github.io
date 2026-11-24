@@ -41,7 +41,7 @@ tags: ['學習']
 
 ## 文章裡可以用的元素
 
-樣式都在 `src/styles/global.css` 的「Article components」一節。
+樣式都在 `src/styles/article.css` 的「Article components」一節（這份樣式只在文章、關於與呼吸頁載入）。
 
 | 寫法 | 呈現 |
 |---|---|

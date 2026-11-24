@@ -3,6 +3,8 @@
 //   2. quotes written entirely in English are marked lang="en" and get an English typeface
 //   3. code blocks get their bar (language, wrap switch, copy) and one block per line
 //   4. tables are put in a frame that can scroll sideways
+//   5. the shared Base stylesheet comes before page stylesheets (article.css), which Astro emits
+//      first; page rules must win ties, as they did when they lived in global.css
 import fs from 'node:fs';
 import path from 'node:path';
 import { codeBar, joinLines } from '../src/scripts/code-block.js';
@@ -37,6 +39,9 @@ for (const file of walk('dist').filter((f) => f.endsWith('.html'))) {
     tables++;
     return `<div class="post-table" role="region" aria-label="表格" tabindex="0">${table}</div>`;
   });
-  if (framed !== html) fs.writeFileSync(file, framed);
+  const links = [...framed.matchAll(/<link rel="stylesheet" href="[^"]*"[^>]*>/g)].map((m) => m[0]);
+  const base = links.find((l) => /\/Base\.[\w-]+\.css"/.test(l));
+  const ordered = base && links[0] !== base ? framed.replace(base, '').replace(links[0], base + links[0]) : framed;
+  if (ordered !== html) fs.writeFileSync(file, ordered);
 }
 console.log(`external links: ${changed} set to open in a new tab; English quotes: ${quotes}; code blocks: ${blocks}; tables: ${tables}`);

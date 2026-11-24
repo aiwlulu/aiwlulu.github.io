@@ -1,0 +1,223 @@
+/* Article and long-form styles. Loaded only by pages with a .prose body (posts, about, breathe),
+   so the home page and lists do not download them. */
+/* ---------- Article ---------- */
+.post-grid { display: grid; grid-template-columns: minmax(0, var(--prose)) 220px; justify-content: center; gap: 44px; align-items: start; }
+.post-main { min-width: 0; }
+/* The post head lines up with the left edge of the text column. */
+.post-head { max-width: calc(var(--prose) + 264px + 48px); }
+.post-head h1, .post-head .lede { max-width: var(--prose); }
+@media (max-width: 1080px) { .post-grid { grid-template-columns: minmax(0, var(--prose)); } .post-head { max-width: calc(var(--prose) + 48px); } }
+
+.toc { position: sticky; top: 28px; order: 2; padding: 18px 18px 18px 20px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+.toc::before { content: ''; position: absolute; top: -11px; left: 50%; width: 76px; height: 22px; translate: -50% 0; rotate: -3deg; background: rgb(255 203 61 / 0.75); border-radius: 2px; }
+.toc h2 { margin: 0 0 8px; font-size: 14px; letter-spacing: 0.08em; color: var(--muted); }
+.toc ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.toc a { display: block; padding: 5px 10px; border-radius: 8px; color: var(--text); font-size: 15.5px; line-height: 1.55; text-decoration: none; border-left: 3px solid transparent; transition: background 0.2s, color 0.2s, border-color 0.2s, padding-left 0.3s var(--ease); }
+.toc a:hover { background: var(--surface-2); color: var(--ink); padding-left: 14px; }
+.toc a.is-active { color: var(--ink); font-weight: 700; border-left-color: var(--sun); background: linear-gradient(90deg, rgb(255 203 61 / 0.28), transparent); }
+@media (max-width: 1080px) { .toc { position: relative; top: 0; order: 0; margin-top: 8px; } }
+
+.note { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 22px; padding: 10px 16px; border-radius: var(--radius-sm); background: var(--surface); font-size: 14.5px; color: var(--text); }
+.note .icon { margin-top: 5px; color: var(--accent); }
+
+/* Long-form reading: roomy lines, short paragraphs sit close like verses, sections breathe. */
+.prose { font-size: 17.5px; line-height: 2; color: var(--text); overflow-wrap: break-word; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: clamp(24px, 5vw, 56px); }
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+.prose p { margin: 0 0 0.7em; }
+.prose h2 { position: relative; isolation: isolate; margin: 2.6em 0 1em; padding-left: 4px; font-size: 26px; letter-spacing: 0.02em; }
+.prose h2::before { content: ''; position: absolute; left: -10px; top: 0.05em; width: 1.25em; height: 1.25em; z-index: -1; background: var(--mark); border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; transition: transform 0.5s var(--ease); }
+.prose h2:hover::before { transform: rotate(40deg) scale(1.15); }
+.prose h3 { display: flex; align-items: baseline; gap: 10px; margin: 2em 0 0.8em; font-size: 20.5px; }
+.prose h3::before { content: ''; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); translate: 0 -1px; }
+/* Section breaks are drawn as three paper dots; one right before a heading would be redundant. */
+.prose hr { border: 0; height: 12px; margin: 2.6em auto; width: 72px; background: radial-gradient(circle, var(--line-2) 4px, transparent 4.5px) 0 0 / 24px 12px; }
+.prose hr:has(+ h2), .prose hr:last-child { display: none; }
+.prose hr + h2 { margin-top: 2.6em; }
+.prose blockquote { position: relative; margin: 1.8em 0; padding: 22px 26px 22px 58px; background: var(--sky-2); border-radius: var(--radius); color: var(--ink); font-size: 17px; line-height: 1.9; transition: transform 0.4s var(--ease); }
+.prose blockquote::before { content: '“'; position: absolute; left: 16px; top: 2px; font-family: Georgia, serif; font-size: 62px; line-height: 1.1; color: var(--brand); }
+.prose blockquote:hover { transform: rotate(-0.5deg) translateY(-2px); }
+.prose blockquote p:last-child { margin-bottom: 0; }
+/* English quotes: a bookish italic serif, which also draws apostrophes at their proper width. */
+.prose blockquote.en { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif; font-style: italic; font-size: 19.5px; line-height: 1.75; letter-spacing: 0.005em; }
+/* Images sit like photos pasted on the page. */
+.prose img { display: block; margin: 2em auto; padding: 10px 10px 12px; background: #fff; border-radius: 4px; box-shadow: var(--shadow-lift); rotate: -1.2deg; transition: rotate 0.5s var(--ease), scale 0.5s var(--ease); }
+.prose p:nth-of-type(even) > img { rotate: 1deg; }
+.prose img:hover { rotate: 0deg; scale: 1.015; }
+.prose img[data-zoom] { cursor: zoom-in; }
+/* Soft shimmer while an image is still loading (the box is already reserved by width/height). */
+.prose img:not(.is-loaded) { background: linear-gradient(100deg, var(--surface-2) 30%, #fff 50%, var(--surface-2) 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
+@keyframes shimmer { to { background-position: -150% 0; } }
+.prose ul, .prose ol { padding-left: 1.4em; margin: 0 0 1em; }
+.prose li { margin: 0.2em 0; padding-left: 4px; }
+.prose li > p { margin: 0; }
+.prose ul > li::marker { color: var(--coral); }
+.prose ol > li::marker { color: var(--accent); font-weight: 900; }
+/* ---------- Article components ----------
+   Rule: controls never use the browser's built-in look (checkbox, select, range, file button).
+   Use the custom ones below, an open-source component, or build one; keep it keyboard-operable
+   and give it the right ARIA role. See README, "元件原則". */
+
+/* Switch: <button class="switch" role="switch" aria-checked="true">…<span class="switch-track"><span class="switch-thumb"></span></span>Label</button> */
+.switch { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 8px; border: 0; border-radius: 999px; background: none; color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s, color 0.2s; }
+.switch:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+.switch-track { position: relative; flex: none; width: 34px; height: 20px; border-radius: 999px; background: var(--line-2); transition: background 0.25s; }
+.switch-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 0.3); transition: transform 0.3s var(--ease); }
+.switch[aria-checked='true'] .switch-track { background: var(--accent); }
+.switch[aria-checked='true'] .switch-thumb { transform: translateX(14px); }
+.switch:active .switch-thumb { width: 19px; }
+
+/* Checkbox: any checkbox that does appear (for example a Markdown task list) is redrawn. */
+.prose input[type='checkbox'], .check { appearance: none; -webkit-appearance: none; display: inline-grid; place-content: center; width: 19px; height: 19px; margin: 0 9px 0 0; border: 2px solid var(--line-2); border-radius: 6px; background: var(--surface); vertical-align: -4px; transition: background 0.2s, border-color 0.2s; }
+.prose input[type='checkbox']::before, .check::before { content: ''; width: 11px; height: 11px; background: #fff; clip-path: polygon(13% 49%, 0 64%, 39% 100%, 100% 22%, 85% 9%, 38% 68%); transform: scale(0); transition: transform 0.25s var(--ease); }
+.prose input[type='checkbox']:checked, .check:checked { background: var(--accent); border-color: var(--accent); }
+.prose input[type='checkbox']:checked::before, .check:checked::before { transform: scale(1); }
+.prose li:has(> input[type='checkbox']), .prose li:has(> p > input[type='checkbox']) { list-style: none; margin-left: -1.4em; }
+
+/* Code. Inline code is a small chip; blocks get a bar with the language, a wrap switch and copy. */
+.prose code { font-family: var(--mono); font-variant-ligatures: none; }
+.prose :not(pre) > code { padding: 0.1em 0.38em; border-radius: 6px; background: var(--surface-2); color: var(--ink); font-size: 0.88em; overflow-wrap: anywhere; }
+.prose pre { margin: 1.6em 0; padding: 14px clamp(12px, 3vw, 18px); border-radius: var(--radius-sm); background: var(--surface-2); overflow-x: auto; font-size: 14.5px; line-height: 1.75; tab-size: 2; white-space: pre-wrap; overflow-wrap: anywhere; }
+.prose .astro-code, .prose .astro-code span { color: var(--shiki-light, var(--ink)); }
+[data-theme='dark'] .prose .astro-code, [data-theme='dark'] .prose .astro-code span { color: var(--shiki-dark, var(--ink)); }
+.post-code { margin: 1.6em 0; border-radius: var(--radius-sm); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.post-code-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 12px; padding: 4px 6px 4px 14px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 60%, var(--surface-2)); }
+.post-code-lang { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; }
+.post-code-actions { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; }
+html:not(.js) .post-code-actions { display: none; }
+.post-code-copy { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px; border: 0; border-radius: 999px; background: none; color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s, color 0.2s, transform 0.3s var(--ease); }
+.post-code-copy:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+.post-code-copy:active { transform: scale(0.94); }
+.post-code-copy .when-idle, .post-code-copy .when-done { display: inline-flex; }
+.post-code-copy .when-done, .post-code-copy.is-done .when-idle { display: none; }
+.post-code-copy.is-done .when-done { display: inline-flex; color: #3c8a4e; }
+[data-theme='dark'] .post-code-copy.is-done .when-done { color: var(--sage); }
+.prose .post-code pre { margin: 0; padding: 12px 0; border-radius: 0; background: none; }
+/* Wrapping: a long line breaks at spaces where it can, and its continuation hangs two
+   characters in, so it is never mistaken for a new line. Switched off, the block scrolls. */
+.post-code .line { display: block; min-height: 1lh; padding: 0 clamp(12px, 3vw, 18px) 0 calc(clamp(12px, 3vw, 18px) + 2ch); text-indent: -2ch; transition: background 0.15s; }
+.post-code .line:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.post-code.no-wrap pre { white-space: pre; overflow-wrap: normal; }
+.post-code.no-wrap .line { width: max-content; min-width: 100%; }
+
+/* Keys, marks and small inline pieces. */
+.prose kbd { display: inline-block; padding: 0.05em 0.45em; border-radius: 6px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2), 0 2px 0 var(--line-2); color: var(--ink); font-family: var(--mono); font-size: 0.82em; line-height: 1.5; white-space: nowrap; }
+.prose mark { background: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%); color: inherit; padding-inline: 2px; }
+/* A term being defined: a quiet green tag. Not blue and not underlined, so it is never taken
+   for a link (links are underlined in yellow) or for emphasis (a yellow marker stroke). */
+.prose dfn { padding: 0.06em 0.36em; border-radius: 6px; background: var(--sage-tint); color: var(--ink); font-style: normal; font-weight: 700; }
+.prose abbr[title] { text-decoration: underline dotted var(--muted); text-underline-offset: 4px; cursor: help; }
+.prose del { color: var(--muted); }
+.prose ins { text-decoration: none; background: var(--sage-tint); border-radius: 3px; padding-inline: 2px; }
+.prose sup, .prose sub { font-size: 0.72em; line-height: 0; }
+.prose h4 { margin: 1.6em 0 0.6em; font-size: 17.5px; color: var(--ink); }
+
+/* Diagrams (Mermaid). The source is hidden behind a shimmer of about the right height until
+   the drawing is ready, so the page does not jump. Click or press Enter to see it larger. */
+.js .prose pre[data-language='mermaid']:not([hidden]) { height: 240px; overflow: hidden; color: transparent; border-radius: var(--radius); background: linear-gradient(100deg, var(--surface-2) 30%, var(--surface) 50%, var(--surface-2) 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
+.js .prose pre[data-language='mermaid']:not([hidden]) * { color: transparent !important; }
+.prose .post-diagram { position: relative; margin: 1.8em 0; padding: clamp(14px, 3vw, 26px); border-radius: var(--radius); background: var(--sky-2); overflow-x: auto; cursor: zoom-in; transition: transform 0.4s var(--ease), box-shadow 0.3s; }
+.prose .post-diagram:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.post-diagram svg { display: block; width: 100%; min-width: min(100%, 300px); height: auto; margin: 0 auto; }
+.post-diagram .node rect, .post-diagram .actor, .post-diagram .note { rx: 12px; ry: 12px; }
+.post-diagram .node.runtime > rect { fill: var(--surface) !important; stroke: var(--accent) !important; stroke-width: 2px !important; }
+.post-diagram .edgeLabel, .post-diagram .messageText { font-weight: 700; }
+/* A sequence diagram needs room; on a phone it scrolls sideways instead of shrinking to dust. */
+.post-diagram svg[aria-roledescription='sequence'] { min-width: 460px; }
+
+/* Figures. */
+.prose .post-figure { margin: 2em auto; text-align: center; }
+.prose .post-figure img { margin: 0 auto 0.85em; }
+.prose figcaption { font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+
+/* Tables. The build step puts each one in a .post-table frame that scrolls sideways when the
+   table is wider than the page. */
+.post-table { margin: 1.8em 0; border-radius: var(--radius-sm); box-shadow: inset 0 0 0 1px var(--line); overflow-x: auto; }
+.prose table { width: 100%; margin: 1.8em 0; border: 1px solid var(--line); border-spacing: 0; border-radius: var(--radius-sm); overflow: hidden; font-size: 0.92em; line-height: 1.65; }
+.prose .post-table table { margin: 0; border: 0; border-radius: 0; }
+.prose table:has(thead tr > :nth-child(3)) { min-width: 520px; }
+.prose th, .prose td { padding: clamp(9px, 2vw, 14px) clamp(10px, 2vw, 16px); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+.prose th { background: var(--sky-2); color: var(--ink); font-weight: 700; white-space: nowrap; border-bottom: 2px solid var(--line-2); }
+.prose tbody tr + tr td { border-top: 1px solid var(--line); }
+.prose tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface-2) 50%, var(--surface)); }
+.prose tbody tr { transition: background 0.15s; }
+.prose tbody tr:hover { background: color-mix(in srgb, var(--sun) 16%, var(--surface)); }
+.prose td:first-child { color: var(--ink); font-weight: 700; }
+/* The first column is already bold; a marker stroke on top of that is noise. */
+.prose td strong { background: none; padding: 0; }
+.prose td > :last-child { margin-bottom: 0; }
+.prose .quota-table th:first-child { width: 25%; }
+.prose .quota-table td:first-child { overflow-wrap: normal; }
+@media (max-width: 520px) {
+  .prose table:has(thead tr > :nth-child(2):last-child) { table-layout: fixed; }
+  .prose table:has(thead tr > :nth-child(2):last-child) th { white-space: normal; }
+  .prose table:has(thead tr > :nth-child(2):last-child) th:first-child { width: var(--table-label-width, 36%); }
+  .quota-table { --table-label-width: 6rem; }
+}
+
+/* Fold-away sections: <details><summary>Title</summary>…</details> */
+.prose details { margin: 1.6em 0; border-radius: var(--radius-sm); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.prose summary { display: flex; align-items: center; gap: 10px; padding: 12px 16px; color: var(--ink); font-weight: 700; cursor: pointer; list-style: none; border-radius: var(--radius-sm); transition: background 0.2s; }
+.prose summary::-webkit-details-marker { display: none; }
+.prose summary::before { content: ''; flex: none; width: 9px; height: 9px; border-right: 2.5px solid var(--accent); border-bottom: 2.5px solid var(--accent); transform: rotate(-45deg); transition: transform 0.3s var(--ease); }
+.prose details[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px); }
+.prose summary:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.prose details > :not(summary) { margin-inline: 16px; }
+.prose details > :last-child { padding-bottom: 14px; margin-bottom: 0; }
+
+/* Callouts: <aside class="callout">, plus .tip, .warn */
+.prose .callout { margin: 1.6em 0; padding: 14px 18px; border-radius: var(--radius-sm); background: var(--sky-2); border-left: 5px solid var(--brand); color: var(--ink); font-size: 0.96em; line-height: 1.85; }
+.prose .callout.tip { background: var(--sage-tint); border-left-color: var(--sage); }
+.prose .callout.warn { background: var(--coral-tint); border-left-color: var(--coral); }
+.prose .callout > :last-child { margin-bottom: 0; }
+
+/* Definition lists and footnotes. */
+.prose dl { margin: 0 0 1em; }
+.prose dt { margin-top: 0.9em; color: var(--ink); font-weight: 700; }
+.prose dd { margin: 0.15em 0 0 0; padding-left: 14px; border-left: 3px solid var(--line-2); }
+.prose .footnotes, .prose section[data-footnotes] { margin-top: 2.6em; padding-top: 1em; border-top: 1px solid var(--line); font-size: 0.9em; color: var(--muted); }
+.prose [data-footnote-ref], .prose .footnote-ref { text-decoration: none; padding: 0 3px; color: var(--link); font-weight: 700; }
+
+/* Embedded media keeps its shape and never overflows. */
+.prose iframe, .prose video { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 16 / 9; margin: 1.8em 0; border: 0; border-radius: var(--radius-sm); }
+
+.prose a { color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-color: var(--sun); text-decoration-thickness: 3px; text-underline-offset: 4px; overflow-wrap: anywhere; border-radius: 3px; transition: background 0.2s, text-decoration-color 0.2s; }
+.prose a:hover { background: var(--sun); color: var(--on-accent); text-decoration-color: var(--sun-deep); }
+/* A small arrow marks links that open in a new tab. */
+.prose a.external::after { content: '↗'; display: inline-block; margin-left: 2px; font-size: 0.8em; font-weight: 900; color: var(--accent); transition: transform 0.25s var(--ease); }
+.prose a.external:hover::after { transform: translate(2px, -2px); }
+.prose .about-line { font-size: 21px; line-height: 1.7; margin-bottom: 1em; }
+.prose strong { color: var(--ink); background: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%); padding-inline: 2px; border-radius: 2px; }
+
+.post-foot { margin-top: 44px; display: grid; gap: 24px; }
+/* End of the post: a small thank-you with a party popper. */
+.finish { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; padding: 20px 24px; background: var(--coral-tint); border-radius: var(--radius); box-shadow: var(--shadow); }
+.finish p { margin: 0; line-height: 1.7; color: var(--ink); }
+.finish strong { color: var(--ink); }
+.finish .btn:hover .icon { animation: wiggle 0.5s ease-in-out infinite; }
+@keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg) scale(1.15); } }
+.author { display: flex; align-items: center; gap: 16px; padding: 18px 22px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+.author img { width: 56px; height: 56px; border-radius: 50%; transition: transform 0.5s var(--ease); }
+.author:hover img { transform: rotate(-14deg) scale(1.08); }
+.author p { margin: 0; line-height: 1.5; }
+.author .btn { margin-left: auto; }
+.comments { padding: 22px 24px 12px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+.comments h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 21px; }
+.comments-hint { margin: 6px 0 4px; font-size: 14.5px; color: var(--muted); }
+/* Space is reserved so the page does not jump when the comment box arrives. */
+.comments-box { min-height: 270px; border-radius: var(--radius-sm); background: linear-gradient(100deg, var(--surface-2) 30%, var(--surface) 50%, var(--surface-2) 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
+.comments-box.is-loaded { background: none; animation: none; }
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pager a { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); text-decoration: none; color: var(--ink); font-weight: 700; line-height: 1.5; transition: transform 0.35s var(--ease), box-shadow 0.25s; }
+.pager a span { min-width: 0; }
+/* Long titles stay on one line and end with an ellipsis; the full title is in the tooltip. */
+.pager b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pager a:hover { box-shadow: var(--shadow-lift); }
+.pager .prev:hover { transform: translateY(-3px) rotate(-0.8deg); }
+.pager .next:hover { transform: translateY(-3px) rotate(0.8deg); }
+.pager small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+.pager .next { text-align: right; grid-column: 2; justify-content: flex-end; }
+.pager .icon { color: var(--accent); transition: transform 0.3s var(--ease); }
+.pager .prev:hover .icon { transform: translateX(-5px); }
+.pager .next:hover .icon { transform: translateX(5px); }
+@media (max-width: 560px) { .pager { grid-template-columns: 1fr; } .pager .next { grid-column: 1; } .author { flex-wrap: wrap; } .author .btn { margin-left: 0; } }

@@ -31,5 +31,7 @@ export default defineConfig({
   redirects,
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   integrations: [mdx(), sitemap({ filter: (page) => !Object.keys(redirects).some((r) => decodeURI(page).endsWith(r + '/')) })],
+  // Small fonts would otherwise be inlined into the render-blocking stylesheet as base64.
+  vite: { build: { assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined) } },
   markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false } },
 });
