@@ -13,9 +13,13 @@ const core = codePoints(fs.readFileSync('src/fonts/core.txt', 'utf8'));
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : path.join(dir, e.name)));
 const written = new Set();
 let pages = 0, total = 0;
-for (const file of walk(DIST).filter((f) => f.endsWith('.html'))) {
+const files = walk(DIST).filter((f) => f.endsWith('.html'));
+const own = (html) => [...codePoints(visibleText(html))].filter((c) => !core.has(c) && c > 0x7f && !/\s/.test(String.fromCodePoint(c)));
+// A page marked data-font-all (search) shows text from any page, so it gets every character.
+const all = new Set(files.flatMap((f) => own(fs.readFileSync(f, 'utf8'))));
+for (const file of files) {
   const html = fs.readFileSync(file, 'utf8');
-  const need = new Set([...codePoints(visibleText(html))].filter((c) => !core.has(c) && c > 0x7f && !/\s/.test(String.fromCodePoint(c))));
+  const need = html.includes('data-font-all') ? all : new Set(own(html));
   if (!need.size) continue;
   const { rules, bytes } = await subset(need, {
     base: '/_astro/',

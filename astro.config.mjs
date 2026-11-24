@@ -16,7 +16,6 @@ const redirects = {
   '/page/1': '/',
   '/page/2': '/',
   '/contact': '/about/',
-  '/search': '/blog/',
   // Tags retired when the tag list was trimmed to topics.
   '/tags/hugo': '/tags/',
   '/tags/github': '/tags/',
@@ -30,7 +29,8 @@ export default defineConfig({
   trailingSlash: 'always',
   redirects,
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
-  integrations: [mdx(), sitemap({ filter: (page) => !Object.keys(redirects).some((r) => decodeURI(page).endsWith(r + '/')) })],
+  // The search page is noindex, so it stays out of the sitemap too.
+  integrations: [mdx(), sitemap({ filter: (page) => !page.endsWith('/search/') && !Object.keys(redirects).some((r) => decodeURI(page).endsWith(r + '/')) })],
   // Small fonts would otherwise be inlined into the render-blocking stylesheet as base64.
   vite: { build: { assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined) } },
   markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false } },

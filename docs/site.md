@@ -40,6 +40,7 @@
 - 圖片有說明文字與寬高；YouTube 影片點了才載入。
 - 換頁用 Astro 的 `<ClientRouter />`，滑鼠移到連結上就預先載入，天空與海跨頁保留。
 - 文章圖片點一下可以放大；外部連結一律另開視窗。
+- 搜尋（`/search/`）：建構後由 Pagefind 只索引文章內文（`data-pagefind-body`），標題、副標、分類、日期用 `data-pagefind-meta` 帶出。搜尋頁要等第一次輸入才載入索引，`npm run dev` 時沒有索引，會顯示無法使用。搜尋頁設為 noindex、不進 sitemap；它的結果可能出現任何文章的字，所以 `page-fonts.mjs` 給它全站用字（`data-font-all`），瀏覽器仍只下載畫面上用到的部分。
 
 ## 英文版
 

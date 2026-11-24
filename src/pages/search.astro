@@ -1,0 +1,151 @@
+---
+// Site search. Pagefind indexes the post bodies after the build (see package.json postbuild) and
+// this page loads its small index files only when someone starts searching.
+// Results show text from any post, so scripts/page-fonts.mjs gives this page (data-font-all)
+// every character on the site; the browser still downloads only the slices it displays.
+import Base from '../layouts/Base.astro';
+import Crumbs from '../components/Crumbs.astro';
+import Icon from '../components/Icon.astro';
+import { breadcrumbs } from '../schema';
+const crumbs = [{ name: '首頁', href: '/' }, { name: '搜尋' }];
+const examples = ['Cloudflare', '學習', 'Agent', '歷史'];
+---
+
+<Base title="搜尋" description="搜尋過鹿人部落格的全部文章內容：輸入關鍵字，就能找到提過它的讀書心得、TED 演講筆記與工具分享，並直接看到文章裡相關的段落。" noindex jsonLd={[breadcrumbs(crumbs)]}>
+  <div class="head wrap">
+    <Crumbs items={crumbs} />
+    <h1>搜尋</h1>
+    <p class="lede">找找看哪篇文章提過你在意的事。</p>
+  </div>
+  <div class="wrap search" data-font-all>
+    <form class="search-box" role="search" action="/search/" method="get" data-search-form>
+      <Icon name="search" size={22} class="search-icon" />
+      <input type="search" name="q" placeholder="輸入關鍵字，例如：Cloudflare" aria-label="搜尋文章" autocomplete="off" enterkeyhint="search" data-search-input />
+      <button class="search-clear" type="button" aria-label="清除搜尋" hidden data-search-clear><Icon name="x" size={18} /></button>
+    </form>
+    <p class="search-status" role="status" aria-live="polite" data-search-status></p>
+    <div class="search-try" data-search-try>
+      <span>試試看：</span>
+      {examples.map((q) => <button class="pill" type="button" data-search-example={q}>{q}</button>)}
+    </div>
+    <ol class="search-results" data-search-results></ol>
+  </div>
+</Base>
+
+<script>
+  type Result = { url: string; excerpt: string; meta: Record<string, string> };
+  type Pagefind = { search: (q: string) => Promise<{ results: { data: () => Promise<Result> }[] }>; options: (o: object) => Promise<void> };
+  let pagefind: Promise<Pagefind> | null = null;
+  // The index exists only after a build; the path is kept out of the bundler's reach.
+  const index = '/pagefind/pagefind.js';
+  const load = () => (pagefind ??= import(/* @vite-ignore */ index).then(async (p: Pagefind) => { await p.options({ excerptLength: 48 }); return p; }));
+
+  function setup() {
+    const form = document.querySelector<HTMLFormElement>('[data-search-form]');
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const input = form.querySelector<HTMLInputElement>('[data-search-input]')!;
+    const clear = form.querySelector<HTMLButtonElement>('[data-search-clear]')!;
+    const status = document.querySelector<HTMLElement>('[data-search-status]')!;
+    const list = document.querySelector<HTMLOListElement>('[data-search-results]')!;
+    const tryBox = document.querySelector<HTMLElement>('[data-search-try]')!;
+    let timer = 0;
+    let latest = 0;
+
+    const render = (results: Result[], q: string) => {
+      list.replaceChildren(...results.map((r, i) => {
+        const li = document.createElement('li');
+        li.className = 'search-hit';
+        li.style.setProperty('--i', String(i));
+        const meta = document.createElement('div');
+        meta.className = 'search-meta';
+        for (const text of [r.meta.category, r.meta.date]) {
+          if (!text) continue;
+          const span = document.createElement('span');
+          span.className = text === r.meta.category ? 'pill' : 'meta';
+          span.textContent = text;
+          meta.append(span);
+        }
+        const h2 = document.createElement('h2');
+        const a = document.createElement('a');
+        a.href = r.url;
+        a.textContent = r.meta.title ?? r.url;
+        h2.append(a);
+        const p = document.createElement('p');
+        p.className = 'search-excerpt';
+        p.innerHTML = r.excerpt; // Pagefind escapes the text and adds only <mark>.
+        li.append(meta, h2);
+        if (r.meta.subtitle) { const s = document.createElement('p'); s.className = 'search-sub'; s.textContent = r.meta.subtitle; li.append(s); }
+        li.append(p);
+        return li;
+      }));
+      status.classList.toggle('is-empty', !results.length);
+      status.textContent = results.length ? `找到 ${results.length} 篇提到「${q}」的文章` : `沒有找到提到「${q}」的文章，換個說法試試看。`;
+    };
+
+    const run = async () => {
+      const q = input.value.trim();
+      clear.hidden = !q;
+      tryBox.hidden = !!q;
+      const url = new URL(location.href);
+      if (q) url.searchParams.set('q', q); else url.searchParams.delete('q');
+      history.replaceState(history.state, '', url);
+      const ticket = ++latest;
+      if (!q) { list.replaceChildren(); status.textContent = ''; return; }
+      status.textContent = '搜尋中…';
+      try {
+        const found = await (await load()).search(q);
+        const results = await Promise.all(found.results.slice(0, 12).map((r) => r.data()));
+        if (ticket === latest) render(results, q);
+      } catch {
+        if (ticket === latest) status.textContent = '搜尋目前無法使用，請稍後再試。';
+      }
+    };
+
+    input.addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(run, 160); });
+    input.addEventListener('focus', () => { load().catch(() => {}); }, { once: true });
+    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(timer); run(); });
+    clear.addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+    tryBox.addEventListener('click', (e) => {
+      const q = (e.target as Element).closest<HTMLElement>('[data-search-example]')?.dataset.searchExample;
+      if (q) { input.value = q; run(); }
+    });
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) { input.value = q; run(); } else input.focus();
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>
+
+<style>
+  .search > * { max-width: 820px; }
+  .search-box { position: relative; display: flex; align-items: center; background: var(--surface); border-radius: 999px; box-shadow: var(--shadow); transition: box-shadow 0.3s, transform 0.3s var(--ease); }
+  .search-box:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+  .search-box:focus-within { box-shadow: var(--shadow-lift), 0 0 0 3px var(--accent); }
+  .search-box :global(.search-icon) { position: absolute; left: 22px; color: var(--accent); pointer-events: none; transition: transform 0.4s var(--ease); }
+  .search-box:focus-within :global(.search-icon) { transform: rotate(-12deg) scale(1.1); }
+  /* A plain text field drawn by the page, not the browser: no native clear button or outline. */
+  .search-box input { flex: 1; min-width: 0; height: 60px; padding: 0 56px 0 58px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); font: inherit; font-size: 18px; font-weight: 700; outline: none; appearance: none; -webkit-appearance: none; }
+  .search-box input::placeholder { color: var(--muted); font-weight: 400; }
+  .search-box input::-webkit-search-cancel-button, .search-box input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+  .search-clear { position: absolute; right: 12px; display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--ink); cursor: pointer; transition: transform 0.3s var(--ease), background 0.2s; }
+  .search-clear:hover { transform: rotate(90deg) scale(1.08); background: var(--sun); }
+  .search-clear[hidden] { display: none; }
+  .search-status { min-height: 1.8em; margin: 18px 4px 0; font-weight: 700; color: var(--ink); }
+  .search-status.is-empty { color: var(--muted); }
+  .search-try { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 4px 0; color: var(--muted); font-size: 14.5px; }
+  .search-try[hidden] { display: none; }
+  .search-try .pill { border: 0; font: inherit; font-size: 14px; cursor: pointer; }
+  .search-results { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 18px; }
+  .search-results :global(.search-hit) { position: relative; padding: 22px 26px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); animation: hit-in 0.4s var(--ease) both; animation-delay: calc(var(--i) * 40ms); transition: transform 0.3s var(--ease), box-shadow 0.3s; }
+  .search-results :global(.search-hit:hover) { transform: translateY(-4px) rotate(-0.4deg); box-shadow: var(--shadow-lift); }
+  @keyframes hit-in { from { opacity: 0; transform: translateY(12px); } }
+  .search-results :global(.search-meta) { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); }
+  .search-results :global(h2) { margin: 10px 0 4px; font-size: 21px; line-height: 1.45; }
+  .search-results :global(h2 a) { color: var(--ink); text-decoration: none; background: linear-gradient(var(--mark), var(--mark)) 0 92% / 0 8px no-repeat; transition: background-size 0.35s ease-out; }
+  .search-results :global(.search-hit:hover h2 a) { background-size: 100% 8px; }
+  /* The whole card opens the post. */
+  .search-results :global(h2 a::after) { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
+  .search-results :global(.search-sub) { margin: 0; font-weight: 700; color: var(--ink); }
+  .search-results :global(.search-excerpt) { margin: 8px 0 0; font-size: 15px; line-height: 1.8; color: var(--text); }
+  .search-results :global(mark) { background: linear-gradient(transparent 55%, var(--mark) 55%, var(--mark) 92%, transparent 92%); color: var(--ink); font-weight: 700; padding-inline: 1px; }
+</style>

@@ -27,7 +27,8 @@
 - [x] 顯示會動的水彩天空與海（WebGL shader），天色隨當地時間變化
 - [x] 在文章裡使用程式碼區塊（自動換行開關、複製按鈕）、提示框、待辦清單、YouTube 影片與可放大的圖片
 - [x] 用手工畫的 SVG 元件或 Mermaid 畫圖表，顏色跟著外觀變化
-- [x] 產生 SEO 需要的 title、description、canonical、Open Graph、結構化資料、sitemap、RSS 與 `llms.txt`
+- [x] 搜尋全部文章內容（`/search/`，Pagefind 建構時建立索引），結果標出關鍵字所在的段落
+- [x] 產生 SEO 需要的 title、description、canonical、Open Graph（每篇文章有自己的分享圖）、結構化資料、sitemap、RSS 與 `llms.txt`
 - [x] 用 GitHub 帳號在文章下方留言（utterances）
 - [x] 跟著會放大縮小的圓圈做 4-7-8 放鬆呼吸（`/breathe/`），可以選 4 輪或 8 輪、開關提示音
 - [x] 部署前自動檢查中文排版與每一頁的 SEO 基本項目

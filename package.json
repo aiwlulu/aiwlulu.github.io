@@ -7,7 +7,7 @@
     "fonts": "node scripts/make-fonts.mjs",
     "predev": "node scripts/make-fonts.mjs",
     "prebuild": "node scripts/make-fonts.mjs --core",
-    "postbuild": "node scripts/polish-html.mjs && node scripts/page-fonts.mjs",
+    "postbuild": "node scripts/polish-html.mjs && node scripts/page-fonts.mjs && pagefind --site dist",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "lucide-static": "^1.77.0",
+    "pagefind": "1.6.0",
     "subset-font": "^2.9.0"
   }
 }
