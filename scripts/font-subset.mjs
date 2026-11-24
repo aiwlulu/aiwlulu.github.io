@@ -53,6 +53,21 @@ export async function subset(chars, { name, base, write }) {
   return { rules, bytes, files };
 }
 
+/**
+ * Static TrueType cuts of the font at one weight, holding only the characters of `text`, for tools
+ * that cannot read woff2 or variable fonts (satori, for the share images). One buffer per source file.
+ */
+export async function staticFonts(text, weight) {
+  const chars = codePoints(text);
+  const out = [];
+  for (const face of faces) {
+    const hit = [...chars].filter((c) => face.ranges.some(([a, b]) => c >= a && c <= b));
+    if (!hit.length) continue;
+    out.push(await subsetFont(fs.readFileSync(`${PKG}/files/${face.file}`), String.fromCodePoint(...hit), { targetFormat: 'truetype', variationAxes: { wght: weight } }));
+  }
+  return out;
+}
+
 const NAMED = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
 const decode = (s) => s.replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (m, e) => {
   if (e[0] !== '#') return NAMED[e.toLowerCase()] ?? m;

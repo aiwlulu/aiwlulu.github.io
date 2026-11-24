@@ -21,10 +21,12 @@ const { title, subtitle, description, pubDate, updatedDate, category, tags } = p
 const { Content, headings } = await render(post);
 const sections = headings.filter((h) => h.depth === 2);
 const crumbs = [{ name: '首頁', href: '/' }, { name: '文章', href: '/blog/' }, { name: title }];
+// Built by src/pages/og/[slug].png.ts.
+const shareImage = `/og/${post.id}.png`;
 const ageYears = new Date().getFullYear() - (updatedDate ?? pubDate).getFullYear();
 ---
 
-<Base title={title} description={description} type="article" published={pubDate} modified={updatedDate} tags={tags} progress jsonLd={[blogPosting(post, '/og.png'), breadcrumbs(crumbs)]}>
+<Base title={title} description={description} type="article" image={shareImage} imageAlt={title} published={pubDate} modified={updatedDate} tags={tags} progress jsonLd={[blogPosting(post, shareImage), breadcrumbs(crumbs)]}>
   <article>
     <header class="head wrap post-head">
       <Crumbs items={crumbs} />

@@ -78,4 +78,5 @@
 | `scripts/polish-html.mjs` | 建構後執行：外部連結另開視窗、英文引言換成英文字體、替程式碼區塊與表格加上外框 |
 | `src/scripts/code-block.js` | 程式碼區塊上方那一列的樣板，建構步驟與頁面共用 |
 | `src/assets/logo.svg` | Logo 原始檔 |
-| `scripts/make-icons.mjs` | 從 logo 產生 favicon、各尺寸圖示與分享圖 `public/og.png`（`npm run icons`） |
+| `scripts/make-icons.mjs` | 從 logo 產生 favicon、各尺寸圖示與全站分享圖 `public/og.png`（`npm run icons`） |
+| `src/pages/og/[slug].png.ts` | 建構時替每篇文章產生 1200×630 的分享圖 `/og/<slug>.png`，標題用網站的圓體；雲和海浪與全站分享圖共用 `scripts/paper-art.mjs` |

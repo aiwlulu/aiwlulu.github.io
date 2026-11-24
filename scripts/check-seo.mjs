@@ -59,6 +59,10 @@ for (const file of pages) {
   const h1 = (html.match(/<h1[\s>]/g) ?? []).length;
   if (h1 !== 1) fail(page, `${h1} <h1> elements, need exactly 1`);
   for (const p of ['og:title', 'og:description', 'og:image', 'og:url']) if (!html.includes(`property="${p}"`)) fail(page, `missing ${p}`);
+  // The share image must be a file this build produced.
+  const ogImage = html.match(/property="og:image" content="([^"]+)"/)?.[1];
+  if (ogImage?.startsWith(SITE) && !fs.existsSync(path.join(DIST, decodeURI(ogImage.slice(SITE.length))))) fail(page, `og:image ${ogImage} is not in the build`);
+  if (page.startsWith('/blog/') && page !== '/blog/' && !ogImage?.includes('/og/')) fail(page, 'post uses the site share image instead of its own');
 
   // Heading levels must not skip (h2 -> h4).
   let last = 1;

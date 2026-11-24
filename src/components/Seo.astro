@@ -6,6 +6,8 @@ interface Props {
   description?: string;
   type?: 'website' | 'article';
   image?: string;
+  /** What the share image shows; defaults to the site name and tagline. */
+  imageAlt?: string;
   published?: Date;
   modified?: Date;
   tags?: string[];
@@ -16,7 +18,7 @@ interface Props {
   /** The same page in other languages: { 'zh-Hant-TW': '/about/', en: '/en/about/' }. */
   alternates?: Record<string, string>;
 }
-const { title, description = SITE.description, type = 'website', image = '/og.png', published, modified, tags = [], noindex = false, jsonLd = [], lang = SITE.lang, alternates } = Astro.props;
+const { title, description = SITE.description, type = 'website', image = '/og.png', imageAlt = `${SITE.name}：${SITE.tagline}`, published, modified, tags = [], noindex = false, jsonLd = [], lang = SITE.lang, alternates } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}｜${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const imageUrl = new URL(image, Astro.site).href;
@@ -36,7 +38,7 @@ const imageUrl = new URL(image, Astro.site).href;
 <meta property="og:image" content={imageUrl} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content={`${SITE.name}：${SITE.tagline}`} />
+<meta property="og:image:alt" content={imageAlt} />
 <meta property="og:locale" content={lang === 'en' ? 'en_US' : 'zh_TW'} />
 {alternates && Object.entries(alternates).map(([code, path]) => <link rel="alternate" hreflang={code} href={new URL(path, Astro.site).href} />)}
 {alternates && <link rel="alternate" hreflang="x-default" href={new URL(alternates[SITE.lang] ?? Object.values(alternates)[0], Astro.site).href} />}
