@@ -6,8 +6,8 @@
   "scripts": {
     "fonts": "node scripts/make-fonts.mjs",
     "predev": "node scripts/make-fonts.mjs",
-    "prebuild": "node scripts/make-fonts.mjs",
-    "postbuild": "node scripts/polish-html.mjs",
+    "prebuild": "node scripts/make-fonts.mjs --core",
+    "postbuild": "node scripts/polish-html.mjs && node scripts/page-fonts.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

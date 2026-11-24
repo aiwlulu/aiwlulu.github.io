@@ -8,10 +8,24 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // ---- once per visit ------------------------------------------------------------------
 
 // Loading bar while the next page is fetched, so a click never feels dead.
-document.addEventListener('astro:before-preparation', () => {
+document.addEventListener('astro:before-preparation', (e) => {
   document.querySelector('.loadbar')?.classList.remove('is-done');
   document.documentElement.classList.add('is-loading');
+  // Each page carries its own small font (scripts/page-fonts.mjs). Load it before the swap so the
+  // new text does not flash in a fallback face; give up after 800ms and let font-display swap.
+  const load = e.loader;
+  e.loader = async () => {
+    await load();
+    for (const face of pageFaces) document.fonts.delete(face);
+    const css = e.newDocument.querySelector('style[data-page-fonts]')?.textContent ?? '';
+    pageFaces = [...css.matchAll(/font-family:'([^']+)'[^}]*?src:url\(([^)]+)\)[^}]*?unicode-range:([^}]+)/g)].map(
+      ([, family, url, range]) => new FontFace(family, `url(${url})`, { weight: '400 900', display: 'swap', unicodeRange: range }),
+    );
+    for (const face of pageFaces) document.fonts.add(face);
+    if (pageFaces.length) await Promise.race([Promise.allSettled(pageFaces.map((f) => f.load())), new Promise((r) => setTimeout(r, 800))]);
+  };
 });
+let pageFaces: FontFace[] = [];
 // Navigation replaces the attributes on <html>, so the sky choice and tone are carried over.
 let carried: { skyMode?: string; theme?: string } = {};
 document.addEventListener('astro:before-swap', () => {

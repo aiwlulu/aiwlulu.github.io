@@ -47,7 +47,7 @@
 
 ## 字型
 
-中文與英文都用開源圓體 [昭源環方 Chiron GoRound TC](https://github.com/chiron-fonts/chiron-go-round-tc)（SIL Open Font License 1.1）。整套字型有 17MB，所以 `scripts/make-fonts.mjs` 會在每次建構前掃過 `src/` 用到的字，只留下那些字（目前約 1,050 字、0.5MB）。新文章用到新的字時，重新建構就會自動補上。
+中文與英文都用開源圓體 [昭源環方 Chiron GoRound TC](https://github.com/chiron-fonts/chiron-go-round-tc)（SIL Open Font License 1.1）。整套字型有 17MB，所以建構時會分兩層裁切：`scripts/make-fonts.mjs --core` 只留下頁首、頁尾、按鈕與腳本用到的字，全站共用、可被快取；`scripts/page-fonts.mjs` 再替每一頁產生只含該頁其餘用字的小字型，寫在該頁 `<head>` 的 `<style data-page-fonts>`。每頁因此只下載自己用到的字。`npm run dev` 則一次載入 `src/` 所有用字，寫作時任何頁面都顯示正確。新文章用到新的字時，重新建構就會自動補上。
 
 ## 留言
 
@@ -73,7 +73,8 @@
 | `astro.config.mjs` | 網站設定與舊網址轉址 |
 | `scripts/check-seo.mjs` | SEO 檢查 |
 | `scripts/typography.mjs` | 中文排版檢查與自動修正 |
-| `scripts/make-fonts.mjs` | 建構前執行：把圓體字型裁成只含網站用到的字 |
+| `scripts/make-fonts.mjs` | 建構前執行：把圓體字型裁成只含網站用到的字（建構時只留共用框架的字） |
+| `scripts/page-fonts.mjs` | 建構後執行：替每一頁補上只含該頁用字的小字型 |
 | `scripts/polish-html.mjs` | 建構後執行：外部連結另開視窗、英文引言換成英文字體、替程式碼區塊與表格加上外框 |
 | `src/scripts/code-block.js` | 程式碼區塊上方那一列的樣板，建構步驟與頁面共用 |
 | `src/assets/logo.svg` | Logo 原始檔 |
