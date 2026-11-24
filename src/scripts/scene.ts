@@ -14,7 +14,23 @@ export interface SceneOptions {
   uniforms?: () => Record<string, number | number[]>;
 }
 
-export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1.5, scale = 1, fps = 60, uniforms }: SceneOptions = {}) {
+// Compiling shaders and the first frames cost real main-thread time on slow phones, so scenes
+// start only after the page has painted and the browser is idle. The CSS gradient shows until then.
+export function mountScene(canvas: HTMLCanvasElement, frag: string, opts: SceneOptions = {}) {
+  const start = () => startScene(canvas, frag, opts);
+  const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 2500 }) : setTimeout(start, 200));
+  if (document.readyState === 'complete') idle();
+  else addEventListener('load', idle, { once: true });
+}
+
+// Without a GPU the browser renders WebGL on the CPU, and a full-screen shader then blocks the page.
+const isSoftware = (gl: WebGLRenderingContext) => {
+  const ext = gl.getExtension('WEBGL_debug_renderer_info');
+  const name = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
+  return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
+};
+
+function startScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1.5, scale = 1, fps = 60, uniforms }: SceneOptions) {
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
   if (!gl) return;
 
@@ -58,7 +74,8 @@ export function mountScene(canvas: HTMLCanvasElement, frag: string, { maxDpr = 1
   ready = setup();
   if (!ready) return;
 
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Reduced motion and CPU rendering both get one still frame, redrawn only on resize or theme change.
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches || isSoftware(gl);
   const mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
   let visible = false;
   let raf = 0;

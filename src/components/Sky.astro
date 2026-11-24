@@ -6,6 +6,7 @@ interface Props { tall?: boolean }
 const { tall = false } = Astro.props;
 ---
 
+<div class="sky-base" aria-hidden="true"></div>
 <canvas class="sky-canvas" transition:persist="sky-canvas" aria-hidden="true"></canvas>
 <div class="veil" aria-hidden="true"></div>
 
@@ -26,7 +27,11 @@ const { tall = false } = Astro.props;
 </script>
 
 <style>
-  .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -3; background: linear-gradient(to bottom, var(--sky-top), var(--sky-2) 55%, var(--page)); }
+  /* The gradient shows first; the live sky starts once the page is idle and fades in over it. */
+  .sky-base, .sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -3; }
+  .sky-base { background: linear-gradient(to bottom, var(--sky-top), var(--sky-2) 55%, var(--page)); }
+  .sky-canvas { opacity: 0; transition: opacity 1.2s ease; }
+  .sky-canvas:global(.is-live) { opacity: 1; }
   .veil { position: absolute; inset: 0; z-index: -2; pointer-events: none; background: var(--grain), linear-gradient(to bottom, transparent calc(var(--veil-top) - 170px), var(--veil) var(--veil-top)); }
 
 </style>
