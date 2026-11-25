@@ -1,0 +1,37 @@
+---
+import Diagram from './Diagram.astro';
+import Arrow from './parts/Arrow.astro';
+import Box from './parts/Box.astro';
+---
+
+<Diagram
+  title="自架服務的請求先由 Access 審查，再走 Tunnel"
+  description="瀏覽器先向 Cloudflare Access 送出請求。登入時與身分提供者交換資料。Access 放行後，請求經 Tunnel 送到自架環境的 cloudflared。連接器從自架環境向外建立通道，驗證 Access 權杖後把請求交給應用程式。應用程式管理站內權限。"
+  height={484}
+>
+  <Box x={24} y={16} w={190} h={46} label="瀏覽器" />
+  <Arrow d="M119 62V108" />
+  <text class="dg-label dg-start" x="132" y="85">開啟網站</text>
+  <Arrow d="M214 39H320V108" dashed />
+  <text class="dg-label" x="264" y="25">需要登入時</text>
+
+  <Box x={24} y={110} w={190} h={54} label="Cloudflare Access" sub="依身分與政策放行" strong />
+  <Box x={264} y={110} w={112} h={54} label="身分提供者" sub="確認身分" />
+  <Arrow d="M264 137H216" dashed />
+  <text class="dg-label" x="239" y="123">回傳</text>
+
+  <Arrow d="M119 164V214" />
+  <text class="dg-label dg-start" x="132" y="189">已放行的請求帶 Access JWT</text>
+  <Box x={24} y={216} w={190} h={48} label="Cloudflare Tunnel" />
+
+  <Arrow d="M119 264V307" />
+  <text class="dg-label dg-start" x="132" y="285">經通道轉送</text>
+  <Arrow d="M214 336H254V240H216" dashed />
+  <text class="dg-label dg-start" x="266" y="271">連接器向外</text>
+  <text class="dg-label dg-start" x="266" y="290">建立通道</text>
+
+  <Box x={24} y={309} w={190} h={54} label="cloudflared" sub="驗證 Access JWT" />
+  <Arrow d="M119 363V413" />
+  <text class="dg-label dg-start" x="132" y="388">驗證通過後轉送</text>
+  <Box x={24} y={415} w={190} h={54} label="自架應用程式" sub="執行站內權限" />
+</Diagram>

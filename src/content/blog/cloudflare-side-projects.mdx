@@ -3,6 +3,7 @@ title: 'Cloudflare 小專案實戰：從音訊工具到內部審閱站'
 subtitle: 'Workers、D1、R2 怎麼分工？用 Pages 與 Zero Trust 幫審閱站加上登入'
 description: '用音訊工具和內部審閱站兩個案例，圖解 Cloudflare Workers、D1、R2、Pages 與 Zero Trust Access 的分工，整理各項免費額度和部署時容易漏掉的設定。'
 pubDate: 2026-11-23
+updatedDate: 2026-11-26
 category: '工具'
 tags: ['Cloudflare', '部署', '資安']
 ---
@@ -10,6 +11,7 @@ tags: ['Cloudflare', '部署', '資安']
 import Diagram from '../../components/diagrams/Diagram.astro';
 import Box from '../../components/diagrams/parts/Box.astro';
 import Arrow from '../../components/diagrams/parts/Arrow.astro';
+import IdentityGatedEdge from '../../components/diagrams/IdentityGatedEdge.astro';
 
 我用 Cloudflare 做了兩個用途很不一樣的小專案。一個可以上傳音檔、看逐字稿，還會在背景處理匯入和轉錄。另一個是給指定成員看的審閱站，部署好之後，能用 Cloudflare Access 控制誰可以進去。
 
@@ -131,6 +133,16 @@ NIST 把這件事拆成三個邏輯角色。**政策引擎**（Policy Engine）�
 應用程式權杖到期時，若全域登入工作階段仍有效，且身分仍符合政策，Access 可以重新簽發權杖。全域工作階段也到期時，才會提示重新登入。檢查頻率也依條件而異，例如電子郵件是登入時取得的身分資訊，來源 IP 則可在工作階段中隨新請求重新評估。[工作階段管理](https://developers.cloudflare.com/cloudflare-one/access-controls/access-settings/session-management/) · [Access 政策條件](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/#cloudflare-access-selectors)
 
 執行點必須涵蓋所有能讀到資料的入口。以 Pages 來說，就是讓正式、預覽和自訂網域都套用相應政策。若改成有自架後端的應用，可以限制後端只接受經過授權入口的流量，並在後端驗證 Access 轉送的 JWT 簽章、發行者、適用的應用程式和有效期限。[Pages 的 Access 設定](https://developers.cloudflare.com/pages/platform/known-issues/#enable-access-on-your-pagesdev-domain) · [Cloudflare JWT 驗證文件](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/)
+
+### 如果把審閱站改成自架服務
+
+原本的範例由 Pages 提供檔案。如果改成自架服務，可以用 **Cloudflare Tunnel** 把後端接到 Cloudflare，並關閉公網直接連到後端的入口。連接器 `cloudflared` 從自架環境向外建立通道。訪客請求先經 Access 審查，放行後才經 Tunnel 送到後端。[Cloudflare 身分驗證架構](https://developers.cloudflare.com/reference-architecture/architectures/identity-gated-edge/)
+
+<IdentityGatedEdge />
+
+**實線** 跟著網站請求走，**虛線** 表示登入交換或建立通道。在圖中的配置，`cloudflared` 會驗證 Access 轉送的 JWT，通過再交給應用程式。應用程式仍負責站內權限，例如同樣能登入的兩個人，可以分別只讀與編輯。[Cloudflare 信任邊界說明](https://developers.cloudflare.com/reference-architecture/architectures/identity-gated-edge/#trust-boundaries)
+
+驗收時，可以把問題拆開。用未授權帳號確認受保護入口拒絕存取，再核對自己管理的後端只允許從預期路徑連入。若應用程式另有角色權限，也用不同角色確認各自能做的操作。[Cloudflare 部署驗收建議](https://developers.cloudflare.com/reference-architecture/architectures/identity-gated-edge/#four-design-requirements)
 
 ## 免費額度怎麼看？
 
