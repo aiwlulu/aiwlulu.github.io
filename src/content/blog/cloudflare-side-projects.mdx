@@ -25,6 +25,8 @@ import IdentityGatedEdge from '../../components/diagrams/IdentityGatedEdge.astro
 - **要存放、上傳或播放音檔與影片** → **R2**。
 - **網站只開放給指定成員** → **Cloudflare Access**。例如在靜態審閱站前加上登入與成員存取規則。
 
+![需求與 Cloudflare 工具對照表：發布靜態網站用 Pages，執行 API 或定時跑程式用 Workers，查詢紀錄用 D1，存放影音檔用 R2，只開放給指定成員用 Cloudflare Access；音訊工具用了 Workers、D1 與 R2，內部審閱站用了 Pages 與 Access](../../assets/posts/cloudflare-tool-chooser.png)
+
 所以音訊工具用了 **Workers + D1 + R2**，另加排程處理背景工作。審閱站則用了 **Pages + Access**。兩個專案都透過 Wrangler 部署。[Wrangler 官方文件](https://developers.cloudflare.com/workers/wrangler/)
 
 ## 可複製的 AI 提示詞：幫我挑 Cloudflare 工具
