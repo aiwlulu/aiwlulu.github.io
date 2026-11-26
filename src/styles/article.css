@@ -38,8 +38,9 @@
 .prose blockquote::before { content: '“'; position: absolute; left: 16px; top: 2px; font-family: Georgia, serif; font-size: 62px; line-height: 1.1; color: var(--brand); }
 .prose blockquote:hover { transform: rotate(-0.5deg) translateY(-2px); }
 .prose blockquote p:last-child { margin-bottom: 0; }
-/* English quotes: a bookish italic serif, which also draws apostrophes at their proper width. */
-.prose blockquote.en { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif; font-style: italic; font-size: 19.5px; line-height: 1.75; letter-spacing: 0.005em; }
+/* English quotes: a bookish serif, which also draws apostrophes at their proper width. Upright, since
+   several lines of italic are hard to read. */
+.prose blockquote.en { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif; font-size: 19px; line-height: 1.75; }
 /* Images sit like photos pasted on the page. */
 .prose img { display: block; margin: 2em auto; padding: 10px 10px 12px; background: #fff; border-radius: 4px; box-shadow: var(--shadow-lift); rotate: -1.2deg; transition: rotate 0.5s var(--ease), scale 0.5s var(--ease); }
 .prose p:nth-of-type(even) > img { rotate: 1deg; }
