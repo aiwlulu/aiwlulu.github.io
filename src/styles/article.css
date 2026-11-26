@@ -38,6 +38,10 @@
 .prose blockquote::before { content: '“'; position: absolute; left: 16px; top: 2px; font-family: Georgia, serif; font-size: 62px; line-height: 1.1; color: var(--brand); }
 .prose blockquote:hover { transform: rotate(-0.5deg) translateY(-2px); }
 .prose blockquote p:last-child { margin-bottom: 0; }
+/* Who said it: its own line under the quote, set by the build from a closing "—— name". */
+.prose blockquote .quote-by { display: block; margin-top: 8px; text-align: right; font-family: var(--font); font-size: 15px; font-style: normal; line-height: 1.6; color: var(--muted); }
+.prose blockquote .quote-by::before { content: '—— '; }
+.prose blockquote p:has(+ .quote-by) { margin-bottom: 0; }
 /* English quotes: a bookish serif, which also draws apostrophes at their proper width. Upright, since
    several lines of italic are hard to read. */
 .prose blockquote.en { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif; font-size: 19px; line-height: 1.75; }
