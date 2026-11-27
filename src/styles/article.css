@@ -147,7 +147,7 @@ html:not(.js) .post-code-actions { display: none; }
 .prose table { width: 100%; margin: 1.8em 0; border: 1px solid var(--line); border-spacing: 0; border-radius: var(--radius-sm); overflow: hidden; font-size: 0.92em; line-height: 1.65; }
 .prose .post-table table { margin: 0; border: 0; border-radius: 0; }
 .prose table:has(thead tr > :nth-child(3)) { min-width: 520px; }
-.prose th, .prose td { padding: clamp(9px, 2vw, 14px) clamp(10px, 2vw, 16px); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+.prose th, .prose td { padding: clamp(9px, 2vw, 14px) clamp(10px, 2vw, 16px); vertical-align: top; text-align: left; overflow-wrap: break-word; }
 .prose th { background: var(--sky-2); color: var(--ink); font-weight: 700; white-space: nowrap; border-bottom: 2px solid var(--line-2); }
 .prose tbody tr + tr td { border-top: 1px solid var(--line); }
 .prose tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface-2) 50%, var(--surface)); }
