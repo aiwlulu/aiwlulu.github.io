@@ -109,26 +109,35 @@ const box = document.querySelector<HTMLDialogElement>('dialog.lightbox');
 if (box) {
   box.addEventListener('click', (e) => {
     if (e.target instanceof Node && box.querySelector('figcaption')?.contains(e.target)) return;
+    // Clicks on the enlarged video work its controls instead of closing the box.
+    if (e.target instanceof HTMLVideoElement) return;
     box.close();
   });
   document.addEventListener('click', (e) => {
-    const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
+    const img = (e.target as Element).closest?.<HTMLImageElement | HTMLVideoElement>('img[data-zoom], video[data-zoom]');
     if (img) return openZoom(img);
     const diagram = (e.target as Element).closest?.<HTMLElement>('[data-zoom-diagram]');
     const svg = diagram?.querySelector<SVGSVGElement>(':scope > svg');
     if (diagram && svg) openZoom(svg, diagram.dataset.zoomDiagram);
   });
   document.addEventListener('keydown', (e) => {
-    const img = (e.target as Element).closest?.<HTMLImageElement>('img[data-zoom]');
+    const img = (e.target as Element).closest?.<HTMLImageElement | HTMLVideoElement>('img[data-zoom], video[data-zoom]');
     if (img && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoom(img); }
   });
 }
-function openZoom(source: HTMLImageElement | SVGSVGElement, caption = '') {
+function openZoom(source: HTMLImageElement | HTMLVideoElement | SVGSVGElement, caption = '') {
   if (!box) return;
   const figure = box.querySelector('figure')!;
-  figure.querySelectorAll('img, svg').forEach((el) => el.remove());
+  figure.querySelectorAll('img, svg, video').forEach((el) => el.remove());
   let media: Element;
-  if (source instanceof HTMLImageElement) {
+  if (source instanceof HTMLVideoElement) {
+    // Larger, from the start, with controls so the reader can pause and scrub.
+    const big = document.createElement('video');
+    Object.assign(big, { src: source.currentSrc || source.src, poster: source.poster, muted: true, loop: true, playsInline: true, controls: true, autoplay: true });
+    caption ||= source.dataset.caption ?? '';
+    big.setAttribute('aria-label', caption);
+    media = big;
+  } else if (source instanceof HTMLImageElement) {
     const big = new Image();
     big.src = source.currentSrc || source.src;
     big.alt = source.alt;
@@ -142,6 +151,7 @@ function openZoom(source: HTMLImageElement | SVGSVGElement, caption = '') {
   figure.prepend(media);
   box.querySelector('figcaption')!.textContent = caption;
   box.showModal();
+  box.addEventListener('close', () => box.querySelector('video')?.pause(), { once: true });
 }
 
 // Code blocks: the wrap switch and the copy button.
@@ -202,6 +212,16 @@ function setupPage() {
     const done = () => img.classList.add('is-loaded');
     if (img.complete) done();
     else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
+  });
+
+  // Videos open larger, with controls, the same way.
+  document.querySelectorAll<HTMLVideoElement>('.prose video').forEach((video) => {
+    if (video.dataset.zoom !== undefined) return;
+    video.dataset.caption = video.getAttribute('aria-label') ?? '';
+    video.dataset.zoom = '';
+    video.tabIndex = 0;
+    video.setAttribute('role', 'button');
+    video.setAttribute('aria-label', `放大影片：${video.dataset.caption}`);
   });
 
   // Table of contents: highlight the section being read.
