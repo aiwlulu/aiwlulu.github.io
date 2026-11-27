@@ -45,6 +45,8 @@ import pause from 'lucide-static/icons/pause.svg?raw';
 import rotateCcw from 'lucide-static/icons/rotate-ccw.svg?raw';
 import search from 'lucide-static/icons/search.svg?raw';
 import searchX from 'lucide-static/icons/search-x.svg?raw';
+import copy from 'lucide-static/icons/copy.svg?raw';
+import messageSquareText from 'lucide-static/icons/message-square-text.svg?raw';
 
 const body = (svg: string) => svg.replace(/<!--[\s\S]*?-->/, '').replace(/<svg[^>]*>/, '').replace('</svg>', '').replace(/\s*\n\s*/g, '');
 // Lucide no longer ships brand icons; this is its former GitHub mark.
@@ -52,7 +54,7 @@ const github = '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27
 const icons = {
   'arrow-right': body(arrowRight), 'arrow-up': body(arrowUp), 'book-open': body(bookOpen), calendar: body(calendar), check: body(check),
   'chevron-left': body(chevronLeft), 'chevron-right': body(chevronRight), clock: body(clock), folder: body(folder), house: body(house),
-  info: body(info), link: body(link), play: body(play), rss: body(rss), tag: body(tag), tags: body(tags), 'user-round': body(userRound), 'sunrise': body(sunrise), 'sunset': body(sunset), 'sun': body(sun), 'moon': body(moon), 'sun-moon': body(sunMoon), 'languages': body(languages), 'calculator': body(calculator), 'database': body(database), 'code-xml': body(codeXml), 'blocks': body(blocks), 'notebook-pen': body(notebookPen), 'wrench': body(wrench), 'graduation-cap': body(graduationCap), 'book-heart': body(bookHeart), 'landmark': body(landmark), 'brain': body(brain), 'mic': body(mic), 'zap': body(zap), 'external-link': body(externalLink), 'message-circle': body(messageCircle), 'party-popper': body(partyPopper), x: body(x), 'zoom-in': body(zoomIn), wind: body(wind), pause: body(pause), 'rotate-ccw': body(rotateCcw), search: body(search), 'search-x': body(searchX), github,
+  info: body(info), link: body(link), play: body(play), rss: body(rss), tag: body(tag), tags: body(tags), 'user-round': body(userRound), 'sunrise': body(sunrise), 'sunset': body(sunset), 'sun': body(sun), 'moon': body(moon), 'sun-moon': body(sunMoon), 'languages': body(languages), 'calculator': body(calculator), 'database': body(database), 'code-xml': body(codeXml), 'blocks': body(blocks), 'notebook-pen': body(notebookPen), 'wrench': body(wrench), 'graduation-cap': body(graduationCap), 'book-heart': body(bookHeart), 'landmark': body(landmark), 'brain': body(brain), 'mic': body(mic), 'zap': body(zap), 'external-link': body(externalLink), 'message-circle': body(messageCircle), 'party-popper': body(partyPopper), x: body(x), 'zoom-in': body(zoomIn), wind: body(wind), pause: body(pause), 'rotate-ccw': body(rotateCcw), search: body(search), 'search-x': body(searchX), copy: body(copy), 'message-square-text': body(messageSquareText), github,
 };
 export type IconName = keyof typeof icons;
 interface Props { name: IconName; size?: number; filled?: boolean; class?: string }

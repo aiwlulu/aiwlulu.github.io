@@ -1,0 +1,151 @@
+---
+// Prompt card for posts: a prompt template with blanks the reader fills in, then copies as one
+// finished prompt. Blanks are written {{名稱}} or {{名稱|提示}}; see docs/writing.md.
+// The hint lives in a `placeholder` attribute because scripts/page-fonts.mjs reads that attribute
+// when it picks the characters each page needs; CSS shows it while the blank is empty.
+import Icon from './Icon.astro';
+import { parseTemplate } from '../scripts/prompt-template.js';
+interface Props { template: string; title?: string }
+const { template, title = 'Prompt 範本' } = Astro.props;
+const parts = parseTemplate(template);
+// A block blank breaks the line by itself, so the line breaks around it are not drawn twice.
+// The copied text is built from `parts`, which keeps them.
+const view = parts.map((p, i) => {
+  if (!('text' in p)) return p;
+  let text = p.text;
+  if (parts[i - 1]?.block && text.startsWith('\n')) text = text.slice(1);
+  if (parts[i + 1]?.block && text.endsWith('\n')) text = text.slice(0, -1);
+  return { text };
+});
+const IDLE = '填好畫線的空格，再按複製。沒填的格子會保留提示文字。';
+---
+
+<div class="prompt-card" role="group" aria-label={title} data-parts={JSON.stringify(parts)}>
+  <div class="prompt-bar"><Icon name="message-square-text" size={14} />{title}</div>
+  <div class="prompt-text">{view.map((p) => ('text' in p ? p.text : <span class:list={['prompt-blank', { 'is-block': p.block }]} contenteditable="true" role="textbox" aria-multiline="true" aria-label={p.name} aria-placeholder={p.hint || p.name} placeholder={p.hint || p.name} spellcheck="false" data-name={p.name} data-empty />))}</div>
+  <div class="prompt-foot">
+    <span class="prompt-status" aria-live="polite" data-prompt-status data-idle={IDLE}>{IDLE}</span>
+    <button type="button" class="btn small" data-prompt-copy><Icon name="copy" size={16} class="when-idle" /><Icon name="check" size={16} class="when-done" /><span data-copy-label>複製 prompt</span></button>
+  </div>
+</div>
+
+<script>
+  import { fillTemplate } from '../scripts/prompt-template.js';
+
+  const timers = new WeakMap<Element, ReturnType<typeof setTimeout>>();
+  const blankOf = (e: Event) => (e.target as Element).closest?.<HTMLElement>('.prompt-blank');
+  const blanksOf = (card: Element) => [...card.querySelectorAll<HTMLElement>('.prompt-blank')];
+  // Editing can leave a trailing line break that is only there to hold the caret.
+  const valueOf = (blank: HTMLElement) => blank.innerText.replace(/\n+$/, '');
+
+  // Plain-text editing where the browser supports it, so pasted rich text stays plain.
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('.prompt-blank[contenteditable="true"]').forEach((b) => {
+      try { b.contentEditable = 'plaintext-only'; } catch { /* older Firefox: the paste handler below covers it */ }
+    });
+  });
+
+  const update = (blank: HTMLElement) => {
+    const value = valueOf(blank);
+    const empty = !value.trim();
+    blank.toggleAttribute('data-empty', empty);
+    blank.toggleAttribute('data-lines', value.includes('\n'));
+    if (empty && blank.innerHTML) blank.innerHTML = '';
+    if (!empty) blank.classList.remove('is-missing');
+  };
+
+  document.addEventListener('input', (e) => {
+    const blank = blankOf(e);
+    if (!blank) return;
+    update(blank);
+    // The same blank can appear more than once; keep every copy in step.
+    for (const other of blanksOf(blank.closest('.prompt-card')!)) {
+      if (other === blank || other.dataset.name !== blank.dataset.name) continue;
+      other.textContent = valueOf(blank);
+      update(other);
+    }
+  });
+
+  document.addEventListener('focusout', (e) => {
+    const blank = blankOf(e);
+    if (blank && blank.innerText !== valueOf(blank)) { blank.textContent = valueOf(blank); update(blank); }
+  });
+
+  document.addEventListener('paste', (e) => {
+    const blank = blankOf(e);
+    if (!blank || blank.contentEditable === 'plaintext-only') return;
+    e.preventDefault();
+    document.execCommand('insertText', false, e.clipboardData?.getData('text/plain') ?? '');
+  });
+
+  // In a one-line blank, Enter moves on to the next blank not yet seen (repeats fill themselves),
+  // then to the copy button, and Shift+Enter starts a new line. In a block blank Enter is a new line.
+  document.addEventListener('keydown', (e) => {
+    const blank = blankOf(e);
+    if (!blank || e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+    if (blank.classList.contains('is-block') && !(e.metaKey || e.ctrlKey)) return;
+    e.preventDefault();
+    const card = blank.closest('.prompt-card')!;
+    const blanks = blanksOf(card);
+    const firsts = blanks.filter((b, i) => blanks.findIndex((o) => o.dataset.name === b.dataset.name) === i);
+    const here = firsts.findIndex((b) => b.dataset.name === blank.dataset.name);
+    (firsts[here + 1] ?? card.querySelector<HTMLElement>('[data-prompt-copy]'))?.focus();
+  });
+
+  document.addEventListener('click', async (e) => {
+    const button = (e.target as Element).closest?.<HTMLButtonElement>('[data-prompt-copy]');
+    if (!button) return;
+    const card = button.closest<HTMLElement>('.prompt-card')!;
+    const status = card.querySelector<HTMLElement>('[data-prompt-status]')!;
+    const label = button.querySelector<HTMLElement>('[data-copy-label]')!;
+    const values: Record<string, string> = {};
+    for (const b of blanksOf(card)) values[b.dataset.name!] ??= valueOf(b);
+    const parts = JSON.parse(card.dataset.parts!);
+    const { text, missing } = fillTemplate(parts, values);
+    // Name the blanks left empty, and quote the 【】 text the reader should replace after pasting.
+    const marker = (name: string) => `【${parts.find((p: { name?: string; hint?: string }) => p.name === name)?.hint || name}】`;
+    try {
+      await navigator.clipboard.writeText(text);
+      button.classList.add('is-done');
+      label.textContent = '已複製';
+      status.textContent = missing.length === 1
+        ? `已複製。「${missing[0]}」還沒填，貼上後把${marker(missing[0])}換成你的內容。`
+        : missing.length
+          ? `已複製。還有 ${missing.length} 格沒填（${missing.join('、')}），貼上後把【】裡的提示換成你的內容。`
+          : '已複製，貼到 AI 的對話框就能用。';
+      for (const b of blanksOf(card)) b.classList.toggle('is-missing', b.hasAttribute('data-empty'));
+    } catch {
+      label.textContent = '無法複製';
+      status.textContent = '瀏覽器擋下了複製，請手動選取上面的文字。';
+    }
+    clearTimeout(timers.get(card));
+    timers.set(card, setTimeout(() => {
+      button.classList.remove('is-done');
+      label.textContent = '複製 prompt';
+      status.textContent = status.dataset.idle!;
+    }, 4000));
+  });
+</script>
+
+<style>
+  /* Same paper as the code blocks: surface-2 with a thin inset line and a bar on top. */
+  .prompt-card { margin: 1.8em 0; border-radius: var(--radius-sm); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+  .prompt-bar { display: flex; align-items: center; gap: 7px; min-height: 42px; padding: 4px 14px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 60%, var(--surface-2)); color: var(--muted); font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; }
+  .prompt-text { padding: 16px clamp(12px, 3vw, 18px); color: var(--ink); font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+  /* Blanks are paper slips laid on the card: dashed while empty, marked with the site's yellow
+     marker (--mark, softened in dark) once filled. */
+  .prompt-blank { padding: 0.12em 0.4em; border: 1.5px solid transparent; border-radius: 6px; background: var(--surface); box-shadow: inset 0 -0.55em 0 var(--mark); color: var(--ink); -webkit-box-decoration-break: clone; box-decoration-break: clone; cursor: text; transition: border-color 0.2s, box-shadow 0.2s; }
+  .prompt-blank[data-lines], .prompt-blank.is-block { display: inline-block; max-width: 100%; line-height: 1.75; vertical-align: top; box-shadow: inset 4px 0 0 var(--sun-deep), 0 2px 0 var(--line-2); }
+  .prompt-blank.is-block { display: block; min-height: calc(3lh + 0.8em); margin: 0.3em 0; padding: 0.4em 0.8em; }
+  .prompt-blank[data-empty] { display: inline-block; min-width: 5.5em; line-height: 1.6; vertical-align: 0.05em; border: 1.5px dashed var(--sun-deep); box-shadow: 0 2px 0 var(--line-2); }
+  .prompt-blank.is-block[data-empty] { display: block; line-height: 1.75; }
+  .prompt-blank[data-empty]::before { content: attr(placeholder); color: var(--muted); pointer-events: none; }
+  .prompt-blank:hover { border-color: var(--sun-deep); }
+  .prompt-blank:focus { outline: none; border-style: solid; border-color: var(--accent); }
+  .prompt-blank.is-missing { border-color: var(--coral); background: var(--coral-tint); }
+
+  .prompt-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 10px 14px 14px; border-top: 1px dashed var(--line-2); }
+  .prompt-status { flex: 1 1 16em; color: var(--muted); font-size: 13.5px; line-height: 1.6; }
+  html:not(.js) .prompt-foot { display: none; }
+</style>
