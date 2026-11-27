@@ -3,6 +3,7 @@ title: 'Herdr：關掉視窗，AI Agent 繼續工作'
 subtitle: '從背景執行、跨 Session 交接，到 tmux、Zellij 和 cmux 怎麼選'
 description: 'Herdr 能讓 Codex、Claude Code 等工具在關掉視窗後繼續執行。這篇整理 App 與 TUI 的差異、跨 Session 交接方法，以及 tmux、Zellij 和 cmux 的取捨。'
 pubDate: 2026-11-23
+updatedDate: 2026-11-27
 category: '工具'
 tags: ['效率', 'AI']
 ---
@@ -24,7 +25,7 @@ Herdr 讓我關掉視窗後，還能回到原本的工作。
 ## TL;DR
 
 - **關掉視窗可以繼續跑。** 只要執行工作的電腦和背景服務還在運作，重新開啟視窗就能接回去。
-- **Agent 可以直接交接。** 一個助手把審查需求送給另一個，對方看完再把結果送回來。
+- **Agent 可以跨帳號、跨工具交接。** Claude Code 可以把任務交給另一個帳號的 Claude Code，也可以交給 Codex。
 - **可以先看誰需要你。** 側欄和 Inbox（待處理清單）會顯示支援回報狀態的 Agent。工作放在另一台電腦時，也能用手機連回去查看或回覆。
 - **看你習慣在哪裡操作。** 喜歡桌面或手機介面，可以先看 App。習慣用文字指令操作，可以先看 TUI。
 
@@ -61,13 +62,23 @@ App 和 TUI 各有自己的背景服務，**兩邊的工作階段互不相通**�
 
 <HerdrHandoff />
 
-就像請同事校稿時要附上檔案或文件連結，**收到訊息的 Agent 也要讀得到要審查的檔案**。我會在訊息裡指定 <dfn>commit</dfn>（某一次保存下來的程式改動）、檔案範圍，以及希望對方回報的格式。需要另開助手時，`hc run --bg` 能在背景開一個終端。原本的終端可收到助手退出或需要輸入的通知，審查結論則可以透過 `hc send` 明確送回來。[herdr-core 官方介紹](https://herdr.dev/core/) · [Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md)
+`hc send <t> <text>` 會把文字貼進對方終端的輸入框，再按 Enter，就像你坐到另一個視窗前替它打字。只要收件者在 Herdr 管理的終端裡，同一套 Herdr 就能混用不同帳號的 Claude Code、Codex 或 Copilot。[Core 的 `hc send` 指令](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-send)
 
-下面的 `t7` 請換成 `hc ls` 查到的審查終端。目標應該是已經開啟、準備收提示的 agent。
+收件者把這段文字當成使用者輸入，用自己的帳號、權限和設定執行。它看不到你原本的對話。就像請同事校稿時要附上草稿，交接時也要把背景、要做的事和限制寫清楚，並附上對方讀得到的檔案路徑或連結。送到另一個帳號或另一家 AI 服務時，訊息也會進到對方的帳號和服務。送出前先確認客戶資料或密鑰能不能交給對方。
+
+如果目前的 Agent 能操作 Herdr，你可以直接用一句話請它找終端、整理交接訊息並送出。假設 `blog` 是開著 Codex 的終端，在 Claude Code 裡可以這樣說。
+
+```text
+用 Herdr 交接給 blog：新版改用一行指令安裝，請依 docs/install-notes.md 更新 docs/quickstart.md 的安裝步驟。只改快速入門，完成後用 Herdr 回傳 [TASK-QUICKSTART]、改了哪幾步，以及還有哪一步需要確認。
+```
+
+回覆需要另外取回。你可以用 `hc read` 看對方的終端畫面，請它把結果寫到你讀得到的檔案，或像範例一樣請它用 `hc send` 傳回。帶上任務 ID，回頭看畫面時就能對到是哪一件事。Claude Code 在工作中會把新訊息排到下一輪。其他工具忙碌時，先確認它會怎麼處理新輸入再送。[Core 的 `hc read` 指令](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-read) · [Claude Code 的訊息佇列](https://code.claude.com/docs/en/interactive-mode#queue-messages-while-claude-works)
+
+想自己下指令，可以把下面的 `t7` 換成 `hc ls` 查到的審查終端。目標應該是已經開啟、準備接收訊息的 Agent。需要另開助手時，可以用 `hc run --bg` 開一個背景終端。[Core 的 `hc run` 指令](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-run)
 
 ```bash
 hc ls
-hc send t7 '請審查最新一個 commit 的 diff，列出需要補的測試。完成後請用 hc send 將結果回報給 t1。'
+hc send t7 '[TASK-REVIEW] 請審查最新一次程式改動的 diff，列出需要補的測試。完成後請用 hc send 將任務 ID 和結果回報給 t1。'
 hc read t7
 ```
 
