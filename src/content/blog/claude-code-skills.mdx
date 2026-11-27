@@ -1,0 +1,365 @@
+---
+title: '裝了 Skills 的 Claude Code 差在哪？三個任務、14 次實測'
+subtitle: '寫程式、做圖、做短片各跑幾次，附上全部產出，以及可以直接貼上的檢查 prompt'
+description: '用 Claude Code 把寫程式、做配圖、做短片三個任務各跑多次，比較有沒有 Agent Skills 的過程、產出與花費，並附上可複製的 prompt，幫你找出適合目前專案的 Skills。'
+pubDate: 2026-11-27
+category: '工具'
+tags: ['AI', '效率']
+---
+
+import { Image } from 'astro:assets';
+import SkillsLoading from '../../components/diagrams/SkillsLoading.astro';
+import diagramA1 from '../../assets/posts/claude-code-skills/diagram-a1.png';
+import diagramA2 from '../../assets/posts/claude-code-skills/diagram-a2.png';
+import diagramB1 from '../../assets/posts/claude-code-skills/diagram-b1-overview.png';
+import diagramB2 from '../../assets/posts/claude-code-skills/diagram-b2-overview.png';
+import hero from '../../assets/posts/claude-code-skills/hero.png';
+import cardA1 from '../../assets/posts/claude-code-skills/card-a1.png';
+import cardA2 from '../../assets/posts/claude-code-skills/card-a2.png';
+import cardB1 from '../../assets/posts/claude-code-skills/card-b1.png';
+import cardB2 from '../../assets/posts/claude-code-skills/card-b2.png';
+import cardC1 from '../../assets/posts/claude-code-skills/card-c1.png';
+import cardC2 from '../../assets/posts/claude-code-skills/card-c2.png';
+
+Skills 常被形容成給 AI 的 SOP。就像新同事到職時拿到一份手冊，什麼時候要先問、做完要檢查什麼、團隊的風格長怎樣，都寫在裡面。
+
+我好奇的是：**給了 SOP，結果真的會不一樣嗎？** 所以我挑了三個任務：寫程式、做配圖、做短片，每個都用 Claude Code 跑好幾次，有的不裝 Skills，有的裝了，再把過程、產出和花費全部攤開來比。結果跟我原本猜的不太一樣。
+
+<figure class="post-figure">
+  <Image src={hero} alt="同一個任務，指名用 Skills 才多做一件事。沒裝，或裝了 4 個 Skill 卻一個也沒用的情況，流程是讀需求、寫測試和程式、自己驗證、說完成。指名使用時，在讀需求之後多了釐清需求、寫設計，再先寫測試、實作、自己驗證、說完成。差在動手前先對齊需求；代價是花費約多 5 成，時間差不多。" />
+  <figcaption>案例一的結果：Skills 要真的被用上，才有差別</figcaption>
+</figure>
+
+## TL;DR
+
+- **裝了不等於會用上。** 寫程式的案例裡，4 個流程類 Skill 都裝好了，Claude 一次也沒叫用，結果跟沒裝差不多。這不代表 Skill 不好，比較可能是它們的說明寫得很廣，跟我的任務描述對不上，Claude 就沒聯想到。在 prompt 裡指名之後，四個都用上了。
+- **工具類 Skill 會自己啟動。** 做配圖和做短片時，我沒有指名，Claude 也每次都自己叫用了 `visual-explainer` 和 `hyperframes`。我推測是它們的說明和任務用詞直接對得上，不過這次只試了兩個，還不能當成通則。
+- **差別多半不在「做不做得出來」。** 沒裝 Skills 的 Claude 也會寫測試、開瀏覽器驗證，圖和影片也都有水準。Skills 帶來的是先對齊需求、交代取捨、多給幾個版本選，以及一套固定的做法。
+- **代價是錢和時間。** 寫程式的花費多約 5 成；做配圖的花費約 2.5 倍、時間 4 到 5 倍；做短片的花費約 1.7 倍。
+- **裝之前先讀 `SKILL.md`。** Skill 會改變 AI 實際執行的指令，例如這次的影片 Skill 會在算完影片後送出使用回饋。
+
+## 可複製的 prompt：我現在有適合的 Skills 嗎？
+
+在卡片最後一格填上你手上的任務，按「複製 prompt」，再貼進 Claude Code，或 Codex、Cursor 這類支援 Agent Skills 的 AI 工具。任務描述不清楚時它會先問你；接著列出你已經能用的 Skills，再從公開來源找最多 3 個值得試的。整段只讀不改，裝不裝由你決定。
+
+<Prompt title="檢查有沒有適合的 Skills" template={`
+請幫我檢查目前的工作環境，判斷有沒有適合這個任務的 Agent Skills。
+1. 先讀完我最後寫的任務。如果描述不夠清楚，或少了會影響推薦的資訊（例如用途、要產出什麼、用什麼工具），先問我最多 3 個問題，等我回答再繼續。
+2. 列出你目前已經可以使用的 skills（名稱＋一句用途），並標出哪些跟我的任務有關。
+3. 快速看一下目前資料夾的專案類型、技術棧和測試方式；沒有專案就以我的任務描述為準。
+4. 從這些公開來源找最多 3 個值得裝的 skill，每個附上原始網址、適合原因、在你這個工具裡的安裝方式，以及一個 10 分鐘內能試的小任務：
+   https://github.com/anthropics/skills
+   https://github.com/obra/superpowers
+   https://github.com/mattpocock/skills
+   https://github.com/addyosmani/agent-skills
+5. 推薦前先打開它的 SKILL.md 和附帶的腳本，告訴我它會執行哪些指令、讀寫哪些檔案。
+6. 這一輪只讀不改，不要安裝任何東西，等我確認。
+我的任務是：{{任務|一句話描述你手上的任務}}
+`} />
+
+我試跑過一次，約 2 分鐘、US$0.62，推薦了 3 個 Skill，還點出它們的腳本會執行哪些指令。在 Claude Code 裡，可以先按 <kbd>Shift</kbd>＋<kbd>Tab</kbd> 切到 plan 模式再貼上，確保它只讀不改。
+
+prompt 裡的四個來源，各自擅長的方向不太一樣：
+
+| 來源 | 擅長 | 代表 Skills |
+| --- | --- | --- |
+| [Anthropic 官方](https://github.com/anthropics/skills) | 處理 Word、Excel、簡報、PDF 等文件，前端設計，以及幫你寫新的 Skill | `docx`、`pdf`、`frontend-design`、`skill-creator` |
+| [Superpowers](https://github.com/obra/superpowers) | 一整套開發流程：釐清需求、規劃、測試、除錯、驗證到 Code Review | `brainstorming`、`test-driven-development`、`systematic-debugging` |
+| [Matt Pocock](https://github.com/mattpocock/skills) | 小而好組合，從追問需求、寫規格、拆工作到實作與審查 | `grill-with-docs`、`to-spec`、`tdd`、`diagnosing-bugs` |
+| [Addy Osmani](https://github.com/addyosmani/agent-skills) | 照軟體開發的各階段分類，涵蓋規格、前端、無障礙、效能、資安與上線 | `spec-driven-development`、`accessibility-engineering` |
+
+## Skills 是什麼？
+
+一個 Skill 就是一個資料夾。裡面一定有一份 `SKILL.md`，寫著這件事該怎麼做；需要的話，再附上腳本、範本或參考資料。
+
+就像書架上的書：平常你只看得到書背上的書名，需要時才把那本書抽出來翻。Claude 也一樣，平常只看每個 Skill 的名稱和一句說明，任務跟說明對得上時，才把整份 `SKILL.md` 讀進來；步驟裡提到某個腳本，才去讀或執行它。所以裝了很多 Skills，也不會一開始就把 context 塞滿。
+
+<SkillsLoading />
+
+<aside class="callout tip">
+
+**不用 Claude 也能用嗎？** 可以。Skills 已經是開放標準 [Agent Skills](https://agentskills.io/specification)，Codex、Cursor、Gemini CLI 等工具也支援（[完整名單](https://agentskills.io/clients)）。`SKILL.md` 的內容通用，只有放的資料夾和安裝指令因工具而異。
+
+</aside>
+
+## 實測怎麼做
+
+三個任務都在我的部落格專案裡跑，用 Claude Code 搭配 Claude Opus 5.5，每次都從同一個起點開始。
+
+- **A 組，沒裝：** 關掉所有 Skills。
+- **B 組，裝了：** 放好這個案例要用的 Skills，prompt 和 A 組一字不差。
+- **C 組，指名：** 只有案例一有，prompt 開頭多一句「請用這四個 Skill 來完成」。
+
+每組跑 2 次。Claude 中途或做完發問時，我一律送同一份事先寫好的需求細節，避免我的臨場回答影響結果。14 次合計花費約 US$41。
+
+這不是嚴謹的實驗：每組只跑 2 次，而且我的個人設定在每一組都有作用，其中一條寫著「不要停下來問」，可能讓靠發問的 Skill 比較吃虧。
+
+## 案例一：寫程式，做一個 Prompt 卡片元件
+
+第一個任務是幫部落格做一個「Prompt 卡片」元件：作者寫好 prompt 範本並留空格，讀者填完按複製，就拿到完整的 prompt。B、C 兩組都裝了 4 個 Skill：Superpowers 的 `brainstorming`（先釐清需求）、`test-driven-development`（先寫測試）、`verification-before-completion`（有驗證證據才說完成），以及 Anthropic 的 `frontend-design`（介面設計）。
+
+<details>
+<summary>給 Claude 的 prompt 和固定回答</summary>
+
+A、B 組的 prompt：
+
+```text
+幫這個部落格做一個可以放在 MDX 文章裡的「Prompt 卡片」元件：作者寫好一段 prompt 範本，裡面留空格讓讀者填（例如「我的任務是：＿＿」），讀者填完按複製，就拿到組好的完整 prompt。我下一篇文章會用它。
+```
+
+C 組在最前面多一行：
+
+```text
+請用 brainstorming、frontend-design、test-driven-development、verification-before-completion 這四個 skill 來完成以下任務：
+```
+
+固定回答：
+
+```text
+回答你的問題（沒問到的也先告訴你）：
+- 空格在範本裡怎麼標由你決定，但作者要能一眼看懂；一張卡片可以有多個空格，空格內容可能是多行文字。
+- 讀者留空就複製：保留空格原本的提示文字，讓貼上的人知道那裡要補什麼。
+- 不需要記住讀者填過的內容。
+- 外觀要跟網站現有的程式碼區塊、紙片拼貼風格一致，淺色和深色都要好看。
+- `astro dev` 和 build 後的頁面都要能用，鍵盤也要能操作。
+- 請另外寫一頁示範或在文件裡說明用法，不要改動既有文章。
+其他細節你判斷就好。
+```
+
+</details>
+
+| 實測 | 用了 Skill | 動手前 | 分鐘 | 美元 |
+| --- | --- | --- | --- | --- |
+| A-1 沒裝 | 0 個 | 直接做 | 14 | 3.30 |
+| A-2 沒裝 | 0 個 | 直接做 | 19 | 3.49 |
+| B-1 裝了 | 0 個 | 直接做 | 17 | 3.98 |
+| B-2 裝了 | 0 個 | 直接做 | 19 | 3.58 |
+| C-1 指名 | 4 個 | 先問我，寫設計 | 14 | 4.67 |
+| C-2 指名 | 4 個 | 寫設計，沒問 | 15 | 5.89 |
+
+最意外的是 B 組：4 個 Skill 都在清單上，`brainstorming` 的說明甚至寫著「做任何新功能前 **一定要** 用」，但兩次都沒被叫用。我的推測是，這些 Skill 的說明是原作者為通用情境寫的，跟「做一個卡片元件」這種具體任務的用詞對不上；加上 A、B 組本來就會先寫測試、開瀏覽器驗證，Claude 判斷不需要再叫用。
+
+指名之後最明顯的差別，是 **動手前先對齊需求**。C-1 在寫任何程式之前先停下來，整理它對需求的理解，提醒我一個我沒想到的限制，再讓我選做法：
+
+> 有一個你可能沒想到的限制：字型是每頁只裁出用得到的字。讀者在空格裡打的字，很多不在裁好的字型裡，會退回系統字型，跟周圍的字長得不一樣。
+>
+> 最會影響做法的一件事：讀者在哪裡填空？A. 直接在句子裡填……B. 表單加預覽……我會選 A，再讓某個空格可以標成「多行」。
+
+這一步省下了重做。其他組都是先做完，拿到需求細節後再改一輪，平均多花 US$2 左右；C-1 一開始就拿到需求，只做一次。
+
+文章開頭那張可以填空的卡片，就是 B-1 做的。六個版本裡它的回饋最清楚，所以我直接收進部落格，可以 [回到開頭](#可複製的-prompt我現在有適合的-skills-嗎) 試試看。
+
+<details>
+<summary>六個版本的截圖</summary>
+
+為了放在一起比，我在每一張卡片裡放進同一段範本，填了「任務」、留空「背景」，再按複製。點開可以放大。
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px 20px', margin: '2em 0' }}>
+  <figure class="post-figure" style={{ margin: 0 }}><Image src={cardA1} alt="A-1 沒裝 Skills 做的卡片：空格嵌在句子裡，任務已填、背景空格用珊瑚色框標出，下方提示貼上後記得補上" /><figcaption>A-1：沒裝</figcaption></figure>
+  <figure class="post-figure" style={{ margin: 0 }}><Image src={cardA2} alt="A-2 沒裝 Skills 做的卡片：空格是黃色螢光筆底色，右下有黃色的複製按鈕" /><figcaption>A-2：沒裝</figcaption></figure>
+  <figure class="post-figure" style={{ margin: 0 }}><Image src={cardB1} alt="B-1 裝了但沒用 Skill 做的卡片：填好的字有黃色底線，沒填的空格用珊瑚色虛線框標出" /><figcaption>B-1：裝了，沒用上</figcaption></figure>
+  <figure class="post-figure" style={{ margin: 0 }}><Image src={cardB2} alt="B-2 裝了但沒用 Skill 做的卡片：上方是貼著紙膠帶的表單，下方即時顯示組好的 prompt" /><figcaption>B-2：裝了，沒用上</figcaption></figure>
+  <figure class="post-figure" style={{ margin: 0 }}><Image src={cardC1} alt="C-1 指名使用 Skills 做的卡片：空格是綠色和灰色底線，右上角顯示已複製" /><figcaption>C-1：指名使用</figcaption></figure>
+  <figure class="post-figure" style={{ margin: 0 }}><Image src={cardC2} alt="C-2 指名使用 Skills 做的卡片：填好的字畫上黃色麥克筆，底部顯示還有 1 格沒填" /><figcaption>C-2：指名使用</figcaption></figure>
+</div>
+
+</details>
+
+六張都能用，但論設計感，指名的 C 組反而最樸素，沒填的空格只有一條淡灰底線，很容易漏看。C 組明明叫用了 `frontend-design`，力氣卻花在和網站既有樣式保持一致。Skill 給的是做事方法，不保證每個面向都更好。
+
+## 案例二：做圖，幫這篇文章畫配圖
+
+第二個任務是幫這篇文章畫配圖。B 組多了我自己寫的 `visual-explainer`：先定受眾和這張圖要回答的問題，再選圖型、排版、產圖和自我檢查。
+
+<details>
+<summary>給 Claude 的 prompt</summary>
+
+四次都一樣，只有這段 prompt：
+
+```text
+幫我的下一篇部落格文章做一張配圖，放在開頭，讓讀者一眼看懂「Claude Code 有裝 Skills 和沒裝 Skills 的差別」。文章重點如下：
+
+- 讀者已經會用 Claude Code。
+- Skills 是一個資料夾，裡面有 SKILL.md（做事的 SOP）和需要的腳本；平常 Claude 只看每個 Skill 的一句說明，任務相關時才載入完整內容。
+- 實測同一個任務（做一個 Prompt 卡片元件）：沒裝 Skills 時，Claude 讀完需求就直接開始寫；裝了 Skills 之後，會先問清楚需求、先寫會失敗的測試再實作、做完拿出跑過的驗證證據才說完成，UI 也更貼近網站風格。
+- 代價是花更多時間和 token，小任務不一定需要。
+
+輸出成 PNG 檔，放在 out/ 資料夾。
+```
+
+</details>
+
+prompt 沒有指名，B 組兩次都 **自己叫用了** `visual-explainer`。它的說明寫著「幫文章配圖」時使用，剛好對上這次的需求。
+
+| 實測 | 分鐘 | 美元 | 交付了什麼 |
+| --- | --- | --- | --- |
+| A-1 沒裝 | 2 | 0.57 | 1 張圖 |
+| A-2 沒裝 | 2 | 0.51 | 1 張圖 |
+| B-1 裝了 | 8 | 1.32 | 3 個版本、總覽圖、設計簡報、逐條自查 |
+| B-2 裝了 | 8 | 1.31 | 3 個版本、總覽圖、設計簡報、逐條自查 |
+
+先說公道話：A 組的圖並不差，配色、字級和留白都在水準以上，而且不到兩分鐘就做完。差別在圖以外的地方：
+
+- **有得挑。** B 組每次給 3 個圖型或版面不同的版本，放在同一張總覽圖上。
+- **只用原文。** A-2 在圖上寫了「UI 是通用樣式」，這句是它自己推的，我沒有這樣說過。B 組兩次都只用原文。
+- **交代取捨。** 會寫出「沒有放進圖的內容與理由」，以及逐條自查結果。
+
+<figure class="post-figure">
+  <Image src={diagramA1} alt="A-1 沒用 Skill 畫的配圖：左右兩欄對照沒裝和裝了 Skills 的步驟，下方一條代價說明" />
+  <figcaption>A-1：沒用 Skill，約 2 分鐘</figcaption>
+</figure>
+
+<figure class="post-figure">
+  <Image src={diagramA2} alt="A-2 沒用 Skill 畫的配圖：左右兩欄，左欄中間用虛線框列出沒有做的三件事，結果寫著 UI 是通用樣式" />
+  <figcaption>A-2：沒用 Skill，圖上那句「UI 是通用樣式」是它自己推的</figcaption>
+</figure>
+
+<figure class="post-figure">
+  <Image src={diagramB1} width={2400} alt="B-1 用 visual-explainer 交付的總覽圖：A 是兩條橫向泳道的流程、B 是三列對照表、C 是直式流程" />
+  <figcaption>B-1：用 visual-explainer，一次給 3 版</figcaption>
+</figure>
+
+<figure class="post-figure">
+  <Image src={diagramB2} width={2400} alt="B-2 用 visual-explainer 交付的總覽圖：A 是對齊的橫向流程並用虛線空格標出跳過的步驟、B 是逐項對照表、C 是直式步驟清單" />
+  <figcaption>B-2：用 visual-explainer，同樣 3 版，切入角度不同</figcaption>
+</figure>
+
+這 4 張圖的內容來自我實測前寫的大綱，所以圖上「沒裝就直接開始寫」這類說法，和案例一的實測結果不同。代價是時間 4 到 5 倍、花費 2.5 倍。
+
+## 案例三：做短片，15 秒介紹 Skills
+
+第三個任務是做一支 15 秒的短片，介紹 Skills 是什麼。B 組多了 HeyGen 的 HyperFrames，讓 Claude 用 HTML 和動畫排畫面，再算成影片。
+
+<details>
+<summary>給 Claude 的 prompt 和固定回答</summary>
+
+prompt：
+
+```text
+幫我做一支 15 秒左右的短片，放在部落格文章裡，介紹「Claude Code 的 Skills 是什麼」：Skills 是一個資料夾，裡面有 SKILL.md（做事的 SOP）和需要的腳本；平常 Claude 只看每個 Skill 的一句說明，任務相關時才載入完整內容，所以裝很多也不會塞爆 context。輸出成 MP4，放在 out/ 資料夾。
+```
+
+固定回答：
+
+```text
+回答你的問題（沒問到的也先告訴你）：
+- 1920x1080 橫式、MP4，不需要配音與背景音樂，用畫面和繁體中文字卡說明。
+- 觀眾已經會用 Claude Code，不用解釋 Claude Code 本身。
+- 風格跟部落格一致：淡藍、可愛的紙片拼貼感。
+- 做完請自己檢查畫面，告訴我 MP4 的檔案路徑。
+其他細節你判斷就好。
+```
+
+</details>
+
+同樣沒有指名，B 組兩次都 **自己叫用了** `hyperframes`。A 組沒有影片工具，就自己寫腳本逐格產生畫面，再用 FFmpeg 合成。
+
+| 實測 | 分鐘 | 美元 | 做法 |
+| --- | --- | --- | --- |
+| A-1 沒裝 | 14 | 2.77 | 自己寫腳本產生畫面，再用 FFmpeg 合成 |
+| A-2 沒裝 | 16 | 2.01 | 沿用網站產生分享圖的工具產生畫面，再用 FFmpeg 合成 |
+| B-1 裝了 | 15 | 4.21 | HTML 加動畫排畫面，跑檢查、抽格看過再算成影片 |
+| B-2 裝了 | 13 | 3.73 | 同上，從算好的影片抽 7 格逐一檢查 |
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', margin: '2em 0' }}>
+  <figure class="post-figure" style={{ margin: 0 }}>
+    <video src="/videos/claude-code-skills/video-A-1.mp4" poster="/videos/claude-code-skills/video-A-1.jpg" autoplay muted loop playsinline preload="metadata" width="1280" height="720" style={{ width: '100%', height: 'auto', borderRadius: '12px' }} aria-label="A-1 沒用 Skill 做的短片：天空與海的背景上，依序出現資料夾、Skill 清單和 context 用量條"></video>
+    <figcaption>A-1：沒用 Skill</figcaption>
+  </figure>
+  <figure class="post-figure" style={{ margin: 0 }}>
+    <video src="/videos/claude-code-skills/video-A-2.mp4" poster="/videos/claude-code-skills/video-A-2.jpg" autoplay muted loop playsinline preload="metadata" width="1280" height="720" style={{ width: '100%', height: 'auto', borderRadius: '12px' }} aria-label="A-2 沒用 Skill 做的短片：淡藍背景配太陽和海浪，介紹 Skill 資料夾和 context 用量"></video>
+    <figcaption>A-2：沒用 Skill</figcaption>
+  </figure>
+  <figure class="post-figure" style={{ margin: 0 }}>
+    <video src="/videos/claude-code-skills/video-B-1.mp4" poster="/videos/claude-code-skills/video-B-1.jpg" autoplay muted loop playsinline preload="metadata" width="1280" height="720" style={{ width: '100%', height: 'auto', borderRadius: '12px' }} aria-label="B-1 用 HyperFrames 做的短片：貼著紙膠帶的資料夾和紙片，SKILL.md 展開後步驟逐一打勾"></video>
+    <figcaption>B-1：用 HyperFrames</figcaption>
+  </figure>
+  <figure class="post-figure" style={{ margin: 0 }}>
+    <video src="/videos/claude-code-skills/video-B-2.mp4" poster="/videos/claude-code-skills/video-B-2.jpg" autoplay muted loop playsinline preload="metadata" width="1280" height="720" style={{ width: '100%', height: 'auto', borderRadius: '12px' }} aria-label="B-2 用 HyperFrames 做的短片：黃色資料夾、Skill 清單，以及隨任務長高的 context 用量條"></video>
+    <figcaption>B-2：用 HyperFrames</figcaption>
+  </figure>
+</div>
+
+四支都及格，B 組的動畫層次和紙片質感比較好，還留下一套可以接著改的影片專案。代價是花費約 1.7 倍。
+
+另外，HyperFrames 的 `SKILL.md` 寫著影片算好後要送出一筆使用回饋，B-1 就照做了。**Skill 會改變 AI 實際執行的指令**，安裝前值得花幾分鐘讀 `SKILL.md`。
+
+## 什麼時候不需要 Skills？
+
+三個案例看下來，我會這樣判斷：
+
+- **Claude 本來就做得好的事，不用再加 Skill。** 寫測試、開瀏覽器驗證，Opus 在這次實測裡本來就會做。再裝同性質的 Skill，主要是多花錢。
+- **小任務、一次性的任務，不值得。** 改一行字、修個小錯，先寫設計文件反而拖慢速度。
+- **需求還很模糊時，值得。** 這時最貴的是做錯方向再重做。`brainstorming` 這類先對齊需求的 Skill，省下的正是那一輪重做。
+- **有固定做法或專門工具的事，值得。** 做圖、做影片、處理 PDF 這類任務，Skill 帶著腳本和檢查步驟。
+- **有你的個人偏好時，最值得。** 例如 `visual-explainer` 會照我的規則給 3 個版本、不放日期，這只能自己寫。
+
+流程類的 Skill 如果每次都希望用上，最可靠的做法是在 prompt 裡直接指名，或寫進專案的 `CLAUDE.md`，例如「新功能先用 brainstorming 對齊需求」。
+
+## 自己寫一個 Skill
+
+案例二的 `visual-explainer` 是我自己寫的。起因很單純：請 Claude 做圖時，我一直在重複交代同樣的事。寫成 Skill 之後，這些話只要說一次。
+
+最小的 Skill 只要一個資料夾、一份 `SKILL.md`：開頭兩個欄位，加上做事步驟。下面這份在 Claude Code 存成 `~/.claude/skills/explain-with-image/SKILL.md` 就能用，其他工具放進它讀取 Skills 的資料夾即可：
+
+```markdown
+---
+name: explain-with-image
+description: 把文章、筆記或複雜資訊轉成一張說明圖，例如文章配圖、流程圖、比較表。使用者說「幫文章配圖」「圖解這段」「做一張資訊圖表」時使用，即使沒有提到 skill 名稱。
+---
+
+# explain-with-image
+
+1. 先寫下這張圖給誰看，以及它要回答的一個問題。推斷不出來時再問我。
+2. 依讀者要看懂的關係選圖型：比較用並排或表格，先後順序用流程圖，組成用分組或樹狀圖，數量變化用長條圖或折線圖。
+3. 一張圖最多 3 個重點。放不下就拆成多張，並告訴我捨棄了什麼。
+4. 做 2 到 3 個圖型或版面不同的版本。只換顏色不算一個版本。
+5. 每版寫成一個 HTML 檔，CSS 和 SVG 都寫在檔案裡，再用瀏覽器的無頭模式截成 PNG。
+6. 截完一定要自己看圖：文字被裁切、重疊或太小就修正後重截。
+7. 圖上的數字、名稱和說法只能來自原文，原文沒有的不要補。圖上不放日期。
+```
+
+寫的時候我最在意三件事：
+
+- **description 決定它會不會被叫用。** 這是 AI 平常唯一看得到的部分，要寫「做什麼」和「什麼時候用」，最好附上你實際會怎麼說。
+- **`SKILL.md` 保持短。** 判斷依據變多就拆到 `references/`，等步驟用到時再讀。
+- **重複的操作寫成腳本。** 放進 `scripts/`，每次做法一致，也比較省 token。
+
+不想從零開始，可以裝 Anthropic 的 `skill-creator`，它會訪談你、起草 `SKILL.md`，還能測試和調整 description。
+
+也可以在完成一次滿意的工作後，直接請 AI 幫你整理：
+
+```text
+我想把這次對話裡的做法整理成一個 Agent Skill（SKILL.md 格式），之後同類任務可以直接沿用。有不確定的地方，例如哪些規則只適用這次、哪些要長期沿用，先問我，確認後再寫。
+1. 先列出這次我反覆交代、或你做錯後被我糾正的事，這些是 Skill 要寫進去的規則。
+2. 提議 Skill 的名稱和 description。description 要寫做什麼、什麼時候用，並附上我實際會怎麼說。
+3. 把流程寫成 SKILL.md 草稿；判斷依據太長就拆到 references/，每次都一樣的操作寫成 scripts/。
+4. 給我兩個應該觸發、一個不該觸發的測試 prompt。
+5. 告訴我在你這個工具裡，Skill 要放在哪個資料夾。先在對話裡給我看，等我確認再寫檔。
+```
+
+## 這次用到的 Skills 怎麼裝
+
+以下是 Claude Code 的安裝方式。斜線開頭的指令在 Claude Code 裡輸入，其餘在終端機執行。
+
+**Superpowers**（brainstorming、test-driven-development、verification-before-completion 等）。[安裝說明](https://github.com/obra/superpowers#installation)
+
+```text
+/plugin install superpowers@claude-plugins-official
+```
+
+**Anthropic 官方 Skills**（frontend-design、skill-creator 都在 `example-skills` 裡）。[安裝說明](https://github.com/anthropics/skills#claude-code)
+
+```text
+/plugin marketplace add anthropics/skills
+/plugin install example-skills@anthropic-agent-skills
+```
+
+**HyperFrames**（HeyGen 的影片 Skills，需要 Node.js 22 以上和 FFmpeg）。[安裝說明](https://github.com/heygen-com/hyperframes#claude-code-plugin)
+
+```bash
+claude plugin marketplace add heygen-com/hyperframes
+claude plugin install hyperframes@hyperframes
+```
+
+想看目前裝了哪些，直接問 Claude `What skills are available?`，或在 Claude Code 輸入 `/plugin` 打開外掛管理。[Skills 官方文件](https://code.claude.com/docs/en/skills)

@@ -1,0 +1,31 @@
+---
+// How a skill is loaded in three steps: the one-line description is always there,
+// SKILL.md is read when the task matches, and bundled files only when a step needs them.
+import Diagram from './Diagram.astro';
+import Box from './parts/Box.astro';
+import Room from './parts/Room.astro';
+import Arrow from './parts/Arrow.astro';
+import Chip from './parts/Chip.astro';
+---
+
+<Diagram
+  title="Skill 分三層載入"
+  description="第一層一直放在 Claude 的 context：每個 Skill 只有名稱和一句說明，例如 brainstorming 是動手前先問清楚，frontend-design 是介面設計，visual-explainer 是做圖。任務和說明相關時，才進到第二層，讀進完整的 SKILL.md 做事步驟。步驟用到時，才進到第三層，讀取或執行資料夾裡的腳本與參考資料。"
+  height={340}
+>
+  <Room x={14} y={30} w={372} h={96} plate="一直都在：名稱＋一句說明" />
+  <Box x={22} y={54} w={116} h={56} label="" code="brainstorming" sub="動手前先問" small />
+  <Box x={142} y={54} w={116} h={56} label="" code="frontend-design" sub="介面設計" small />
+  <Box x={262} y={54} w={116} h={56} label="" code="visual-explainer" sub="做圖" small />
+
+  <Arrow d="M200 126 V 176" travel={{ at: 0.2, cycle: 6 }} />
+  <Chip x={200} y={151} text="任務相關才翻開" tone="sun" />
+
+  <Box x={92} y={178} w={216} h={56} label="讀進" code="SKILL.md" sub="完整的做事步驟" strong />
+
+  <Arrow d="M200 234 V 274" travel={{ at: 2.2, cycle: 6 }} />
+  <Chip x={200} y={254} text="步驟用到才讀" tone="sun" />
+
+  <Box x={44} y={276} w={150} h={50} label="腳本" code="scripts/" small />
+  <Box x={206} y={276} w={150} h={50} label="參考資料" code="references/" small />
+</Diagram>
