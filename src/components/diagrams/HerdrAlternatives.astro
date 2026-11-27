@@ -7,12 +7,12 @@ import cmux from '../../assets/posts/herdr-tools/cmux.png';
 // Official marks from herdr.dev/live/icons/herdr.png, tmux/tmux's logo directory,
 // zellij.dev/img/logo.png and cmux.com/logo.png.
 const rows = [
-  { name: 'Herdr App／Core', mark: herdr, interface: '桌面', windows: 'Windows 原生', platforms: 'macOS、Linux', mobile: 'iPhone、iPad、Android', use: '跨裝置查看多台主機，並用 hc send 交接。', href: 'https://herdr.dev/download/', featured: true },
-  { name: 'Herdr TUI', mark: herdr, interface: '終端', windows: 'Windows 原生', platforms: 'macOS、Linux', use: '離開終端後繼續跑，也能看 Agent 狀態和送指令。', href: 'https://herdr.dev/tui/docs/install/', featured: true },
-  { name: 'tmux', mark: tmux, interface: '終端', windows: 'Windows 透過 WSL', platforms: 'macOS、Linux', use: '沿用既有的工作階段、腳本與按鍵。', href: 'https://github.com/tmux/tmux/wiki/Getting-Started', wordmark: true },
-  { name: 'Zellij', mark: zellij, interface: '終端、桌面', windows: 'Windows 原生', platforms: 'macOS、Linux', use: '有操作提示，可還原佈局。桌面版也能集中看通知。', href: 'https://zellij.dev/documentation/installation' },
+  { name: 'Herdr App／Core', mark: herdr, interface: '桌面', platforms: 'macOS、Linux、Windows', mobile: 'iPhone、iPad、Android', use: '跨裝置查看多台主機，並用 hc send 交接。', href: 'https://herdr.dev/download/', featured: true },
+  { name: 'Herdr TUI', mark: herdr, interface: '終端', platforms: 'macOS、Linux、Windows', use: '離開終端後繼續跑，也能看 Agent 狀態和送指令。', href: 'https://herdr.dev/tui/docs/install/', featured: true },
+  { name: 'tmux', mark: tmux, interface: '終端', platforms: 'macOS、Linux、Windows（透過 WSL）', use: '沿用既有的工作階段、腳本與按鍵。', href: 'https://github.com/tmux/tmux/wiki/Getting-Started', wordmark: true },
+  { name: 'Zellij', mark: zellij, interface: '終端、桌面', platforms: 'macOS、Linux、Windows', use: '有操作提示，可還原佈局。桌面版也能集中看通知。', href: 'https://zellij.dev/documentation/installation' },
   { name: 'cmux 桌面版', mark: cmux, interface: '桌面', platforms: 'macOS', use: '同一視窗看瀏覽器、終端和通知。', href: 'https://cmux.com/docs' },
-  { name: 'cmux TUI', mark: cmux, interface: '終端', windows: 'Windows 原生', platforms: 'macOS、Linux', use: '在終端切換工作區、分頁和窗格。', href: 'https://cmux.com/docs/tui' },
+  { name: 'cmux TUI', mark: cmux, interface: '終端', platforms: 'macOS、Linux、Windows', use: '在終端切換工作區、分頁和窗格。', href: 'https://cmux.com/docs/tui' },
 ];
 ---
 
@@ -33,7 +33,6 @@ const rows = [
           </th>
           <td>
             <b>{row.interface}</b>
-            {row.windows && <strong>{row.windows}</strong>}
             <span>{row.platforms}</span>
             {row.mobile && <span>行動端 {row.mobile}</span>}
           </td>
@@ -42,7 +41,7 @@ const rows = [
       ))}
     </tbody>
   </table>
-  <p class="platform-note"><a href="https://learn.microsoft.com/zh-tw/windows/wsl/about">WSL</a> 是 Windows 的 Linux 子系統。表中的 Windows 原生版本為 x64。Herdr App 的 macOS 版支援 Apple 晶片。</p>
+  <p class="platform-note"><a href="https://learn.microsoft.com/zh-tw/windows/wsl/about">WSL</a> 是 Windows 的 Linux 子系統。Herdr App 的 macOS 版支援 Apple 晶片。</p>
 </div>
 
 <style>
@@ -59,8 +58,7 @@ const rows = [
   .comparison .tool-brand.external::after { display: none; }
   .comparison .tool-mark { display: block; width: 1.55em; height: 1.55em; object-fit: contain; margin: 0; padding: 0; border-radius: 0; background: none; box-shadow: none; rotate: none; animation: none; }
   .comparison .wordmark { width: 4em; }
-  .comparison td:nth-child(2) > :is(b, span, strong) { display: block; }
-  .comparison td:nth-child(2) strong { color: var(--link); }
+  .comparison td:nth-child(2) > :is(b, span) { display: block; }
   .comparison .platform-note { margin: 0.6em 0 0; font-size: 0.84em; color: var(--muted); }
 
   @media (max-width: 520px) {
