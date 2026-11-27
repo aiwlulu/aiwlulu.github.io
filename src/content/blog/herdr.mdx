@@ -106,14 +106,6 @@ Herdr 的優點是把背景終端、agent 狀態和交接放在同一套操作�
 
 <HerdrAlternatives />
 
-| 工具 | 適合的工作方式 |
-| --- | --- |
-| **Herdr App／Core** | 希望在桌面或手機查看多台主機上的 agent，並用 `hc send` 直接交接。[Core 文件](https://herdr.dev/core/) |
-| **Herdr TUI** | 主要在終端或 SSH 裡工作，想同時使用 detach、agent 狀態與 `herdr agent` 指令。[TUI 文件](https://herdr.dev/tui/docs/) |
-| **tmux** | 已有 session、腳本和按鍵習慣。它本來就能 detach 後繼續跑，也能用指令控制窗格。[tmux 官方指南](https://github.com/tmux/tmux/wiki/Getting-Started) |
-| **Zellij** | 想要有導覽提示的終端工作區、可還原的佈局，以及新版桌面終端在同機 sessions 間匯集 agent 通知。[Zellij Inbox](https://zellij.dev/news/terminal-inbox-session-previews/) · [Session Resurrection](https://zellij.dev/documentation/session-resurrection) |
-| **cmux（macOS App）** | 習慣垂直分頁，想把瀏覽器、終端和 agent 通知放在同一個桌面介面。官方也有支援的 agent 對話還原和遠端 tmux 功能。[cmux 文件](https://cmux.com/docs) · [Session Restore](https://cmux.com/docs/session-restore) · [Remote tmux](https://cmux.com/docs/remote-tmux) |
-
 ## 第一次試，可以從一個長任務開始
 
 1. 想用桌面或手機管理，先看 [Herdr App 下載頁](https://herdr.dev/download/)。想留在終端，依 [TUI 安裝說明](https://herdr.dev/tui/docs/install/) 安裝後，在專案目錄開 `herdr`。
