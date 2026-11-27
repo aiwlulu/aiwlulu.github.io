@@ -56,31 +56,19 @@ App 和 TUI 各有自己的背景服務，**兩邊的工作階段互不相通**�
 
 ## 跨 Session 交接，可以少做哪些事？
 
-就像用通訊軟體請同事校稿。你送出「幫我看這段，改完回我」，對方就在自己的對話視窗裡收到。Herdr 也可以把一句話直接送到另一個 Agent 的終端。`t1` 和 `t7` 是兩個終端的編號，`hc send` 則是送出訊息的指令。
+就像請同事幫忙看一下草稿。假設你在終端 `t1` 用 Claude Code 寫文章，想請另一個終端 `blog` 裡的 Codex 給點意見。只要 Claude Code 能操作 Herdr，你就可以直接對它說這句話。
 
-圖裡，Codex 在 `t1` 改功能，Claude Code 在 `t7` 檢查 <dfn>diff</dfn>（像文件的修訂標記，列出哪些內容有變動）。審查完再把結果送回 `t1`。想自己查看回覆，可用 `hc read`。如果審查助手在另一台已設定的電腦，可以用 `lab/t7` 指定那台電腦上的終端。[Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-send) · [遠端機器文件](https://github.com/herdrdev/herdr-core/blob/master/docs/machines.md#what-runs-where)
+```text
+用 Herdr 交接給 blog：請讀 draft.md 的開頭，用 Herdr 回傳一句修改建議。
+```
 
 <HerdrHandoff />
 
-`hc send <t> <text>` 會把文字貼進對方終端的輸入框，再按 Enter，就像你坐到另一個視窗前替它打字。只要收件者在 Herdr 管理的終端裡，同一套 Herdr 就能混用不同帳號的 Claude Code、Codex 或 Copilot。[Core 的 `hc send` 指令](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-send)
+圖裡的 `hc send` 就像替你切到另一個視窗，把訊息貼進輸入框，再按 Enter。只要收件端由 Herdr 管理，就能用同樣的方式交給另一個帳號的 Claude Code、Codex 或 Copilot。收件端會用自己的帳號、權限和設定處理，因此訊息要帶上必要背景和對方讀得到的路徑或連結。跨帳號或服務傳送時，先確認客戶資料或密鑰能不能交給對方。[Core 的 `hc send` 指令](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-send)
 
-收件者把這段文字當成使用者輸入，用自己的帳號、權限和設定執行。它看不到你原本的對話。就像請同事校稿時要附上草稿，交接時也要把背景、要做的事和限制寫清楚，並附上對方讀得到的檔案路徑或連結。送到另一個帳號或另一家 AI 服務時，訊息也會進到對方的帳號和服務。送出前先確認客戶資料或密鑰能不能交給對方。
+想自己查終端，可以用 `hc ls`。如果對方在另一台已設定的電腦，可以用 `lab/t7` 指定那台電腦上的終端。需要取回結果時，也可以用 `hc read` 看畫面，或請對方把結果寫進雙方都讀得到的檔案。同時交接多件事時，加上任務 ID 方便對照。[Core 指令參考](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md) · [遠端機器文件](https://github.com/herdrdev/herdr-core/blob/master/docs/machines.md#what-runs-where)
 
-如果目前的 Agent 能操作 Herdr，你可以直接用一句話請它找終端、整理交接訊息並送出。假設 `blog` 是開著 Codex 的終端，在 Claude Code 裡可以這樣說。
-
-```text
-用 Herdr 交接給 blog：新版改用一行指令安裝，請依 docs/install-notes.md 更新 docs/quickstart.md 的安裝步驟。只改快速入門，完成後用 Herdr 回傳 [TASK-QUICKSTART]、改了哪幾步，以及還有哪一步需要確認。
-```
-
-回覆需要另外取回。你可以用 `hc read` 看對方的終端畫面，請它把結果寫到你讀得到的檔案，或像範例一樣請它用 `hc send` 傳回。帶上任務 ID，回頭看畫面時就能對到是哪一件事。Claude Code 在工作中會把新訊息排到下一輪。其他工具忙碌時，先確認它會怎麼處理新輸入再送。[Core 的 `hc read` 指令](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-read) · [Claude Code 的訊息佇列](https://code.claude.com/docs/en/interactive-mode#queue-messages-while-claude-works)
-
-想自己下指令，可以把下面的 `t7` 換成 `hc ls` 查到的審查終端。目標應該是已經開啟、準備接收訊息的 Agent。需要另開助手時，可以用 `hc run --bg` 開一個背景終端。[Core 的 `hc run` 指令](https://github.com/herdrdev/herdr-core/blob/master/docs/commands.md#hc-run)
-
-```bash
-hc ls
-hc send t7 '[TASK-REVIEW] 請審查最新一次程式改動的 diff，列出需要補的測試。完成後請用 hc send 將任務 ID 和結果回報給 t1。'
-hc read t7
-```
+如果收件端的 Claude Code 正在工作，新訊息會排到下一輪。送給其他忙碌中的 Agent 前，先確認它怎麼處理新輸入。[Claude Code 的訊息佇列](https://code.claude.com/docs/en/interactive-mode#queue-messages-while-claude-works)
 
 在 **Herdr TUI** 裡，<dfn>具名工作階段</dfn>（named session）像是各自掛了門牌的工作室。每個房間有自己的終端和背景服務，送訊息時要先填對門牌。假設 `review` 工作階段已在執行，裡面有個叫 `reviewer` 的 Agent，可以從另一個工作階段這樣送訊息：
 
